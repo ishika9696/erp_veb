@@ -12,14 +12,10 @@ import {
   Smartphone,
   CreditCard,
   Settings,
-  ShieldCheck,
   ChevronLeft,
   ChevronRight,
-  Layers,
   Building2,
-  X,
-  Building,
-  Shield
+  X
 } from 'lucide-react';
 
 const Sidebar = () => {
@@ -82,6 +78,7 @@ const Sidebar = () => {
     <>
       {/* DESKTOP SIDEBAR (hidden on mobile <768px) */}
       <aside
+        aria-label="Sidebar Navigation"
         className={`hidden md:flex relative flex-col border-r border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-900 transition-all duration-300 z-30 ${
           sidebarCollapsed ? 'w-20' : 'w-64'
         }`}
@@ -89,10 +86,11 @@ const Sidebar = () => {
         {/* Collapse / Expand Button */}
         <button
           onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
-          className="absolute -right-3.5 top-7 z-40 flex h-7 w-7 items-center justify-center rounded-full border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-500 shadow-md hover:text-slate-900 dark:hover:text-white transition-all"
+          aria-label={sidebarCollapsed ? "Expand navigation sidebar" : "Collapse navigation sidebar"}
+          className="absolute -right-3.5 top-7 z-40 flex h-7 w-7 items-center justify-center rounded-full border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-500 shadow-md hover:text-slate-900 dark:hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 transition-all cursor-pointer"
           title={sidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}
         >
-          {sidebarCollapsed ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
+          {sidebarCollapsed ? <ChevronRight className="h-4 w-4" aria-hidden="true" /> : <ChevronLeft className="h-4 w-4" aria-hidden="true" />}
         </button>
 
         {/* Brand / Logo */}
@@ -106,7 +104,7 @@ const Sidebar = () => {
                 <span className="font-heading text-lg font-bold tracking-tight text-slate-900 dark:text-white leading-none">
                   ERP
                 </span>
-                <span className="text-[9px] font-semibold text-slate-400 uppercase tracking-widest mt-0.5">
+                <span className="text-[9px] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-widest mt-0.5">
                   {tenantMode === 'superadmin' ? 'Super Admin' : 'Unified Enterprise'}
                 </span>
               </div>
@@ -118,21 +116,21 @@ const Sidebar = () => {
         {!sidebarCollapsed && tenantMode === 'tenant' && (
           <div className="p-3 mx-3 my-2.5 rounded-xl bg-slate-50 dark:bg-slate-950/60 border border-slate-200/60 dark:border-slate-800/60 flex items-center gap-2.5">
             <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-indigo-100 dark:bg-indigo-950 text-indigo-600 dark:text-indigo-400 font-bold text-xs shrink-0">
-              <Building2 className="h-4 w-4" />
+              <Building2 className="h-4 w-4" aria-hidden="true" />
             </div>
             <div className="flex flex-col min-w-0">
               <span className="text-xs font-bold text-slate-900 dark:text-white truncate">{currentOrg.name}</span>
-              <span className="text-[10px] text-emerald-600 dark:text-emerald-400 font-medium">{currentOrg.plan}</span>
+              <span className="text-[10px] text-emerald-700 dark:text-emerald-400 font-semibold">{currentOrg.plan}</span>
             </div>
           </div>
         )}
 
         {/* Navigation Groups */}
-        <div className="flex-1 overflow-y-auto px-3 py-3 space-y-4">
+        <nav aria-label="Main module navigation" className="flex-1 overflow-y-auto px-3 py-3 space-y-4">
           {navGroups.map((grp, gIdx) => (
             <div key={gIdx} className="space-y-1">
               {!sidebarCollapsed && (
-                <div className="px-3 pb-1 text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">
+                <div className="px-3 pb-1 text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
                   {grp.group}
                 </div>
               )}
@@ -144,14 +142,15 @@ const Sidebar = () => {
                   <button
                     key={item.id}
                     onClick={() => setActiveModule(item.id)}
-                    className={`w-full flex items-center gap-3 px-3 py-2 rounded-xl text-xs font-medium transition-all group relative ${
+                    aria-label={`Navigate to ${item.label}`}
+                    className={`w-full flex items-center gap-3 px-3 py-2 rounded-xl text-xs font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 transition-all group relative ${
                       isActive
                         ? 'bg-indigo-600 text-white shadow-md shadow-indigo-600/25 font-semibold'
-                        : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800/60 hover:text-slate-900 dark:hover:text-white'
+                        : 'text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800/60 hover:text-slate-900 dark:hover:text-white'
                     }`}
                     title={sidebarCollapsed ? item.label : undefined}
                   >
-                    <Icon className={`h-4 w-4 shrink-0 transition-transform group-hover:scale-110 ${isActive ? 'text-white' : 'text-slate-500 dark:text-slate-400 group-hover:text-indigo-600 dark:group-hover:text-indigo-400'}`} />
+                    <Icon className={`h-4 w-4 shrink-0 transition-transform group-hover:scale-110 ${isActive ? 'text-white' : 'text-slate-500 dark:text-slate-400 group-hover:text-indigo-600 dark:group-hover:text-indigo-400'}`} aria-hidden="true" />
                     
                     {!sidebarCollapsed && (
                       <span className="truncate flex-1 text-left">{item.label}</span>
@@ -162,7 +161,7 @@ const Sidebar = () => {
                         className={`text-[9px] font-bold px-2 py-0.5 rounded-full ${
                           isActive
                             ? 'bg-white/20 text-white'
-                            : 'bg-indigo-50 dark:bg-indigo-950 text-indigo-600 dark:text-indigo-400'
+                            : 'bg-indigo-50 dark:bg-indigo-950 text-indigo-700 dark:text-indigo-300'
                         }`}
                       >
                         {item.badge}
@@ -179,12 +178,12 @@ const Sidebar = () => {
               })}
             </div>
           ))}
-        </div>
+        </nav>
 
         {/* Footer Tagline */}
         {!sidebarCollapsed && (
           <div className="p-3 border-t border-slate-200/80 dark:border-slate-800 text-center">
-            <p className="text-[10px] text-slate-400 font-medium italic">"One Platform. Every Operation."</p>
+            <p className="text-[10px] text-slate-500 dark:text-slate-400 font-medium italic">"One Platform. Every Operation."</p>
           </div>
         )}
       </aside>
@@ -210,9 +209,10 @@ const Sidebar = () => {
               </div>
               <button
                 onClick={() => setMobileMenuOpen(false)}
-                className="p-1.5 rounded-xl text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800"
+                aria-label="Close mobile navigation menu"
+                className="p-1.5 rounded-xl text-slate-500 hover:text-slate-900 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
               >
-                <X className="h-5 w-5" />
+                <X className="h-5 w-5" aria-hidden="true" />
               </button>
             </div>
 
@@ -221,20 +221,20 @@ const Sidebar = () => {
               <div className="flex items-center rounded-xl bg-slate-100 dark:bg-slate-950 p-1 border border-slate-200 dark:border-slate-800 text-xs font-semibold">
                 <button
                   onClick={() => switchTenantMode('tenant')}
-                  className={`flex-1 py-1.5 text-center rounded-lg transition-colors ${
+                  className={`flex-1 py-1.5 text-center rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 transition-colors ${
                     tenantMode === 'tenant'
                       ? 'bg-white dark:bg-slate-800 text-indigo-600 dark:text-indigo-400 font-bold shadow-xs'
-                      : 'text-slate-500'
+                      : 'text-slate-600 dark:text-slate-400'
                   }`}
                 >
                   Company ERP
                 </button>
                 <button
                   onClick={() => switchTenantMode('superadmin')}
-                  className={`flex-1 py-1.5 text-center rounded-lg transition-colors ${
+                  className={`flex-1 py-1.5 text-center rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 transition-colors ${
                     tenantMode === 'superadmin'
                       ? 'bg-indigo-600 text-white font-bold shadow-xs'
-                      : 'text-slate-500'
+                      : 'text-slate-600 dark:text-slate-400'
                   }`}
                 >
                   Server Admin
@@ -246,7 +246,7 @@ const Sidebar = () => {
             <div className="flex-1 space-y-4">
               {navGroups.map((grp, gIdx) => (
                 <div key={gIdx} className="space-y-1">
-                  <div className="px-2 pb-1 text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                  <div className="px-2 pb-1 text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
                     {grp.group}
                   </div>
                   {grp.items.map((item) => {
@@ -259,20 +259,21 @@ const Sidebar = () => {
                           setActiveModule(item.id);
                           setMobileMenuOpen(false);
                         }}
-                        className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-medium transition-all ${
+                        aria-label={`Navigate to ${item.label}`}
+                        className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 transition-all ${
                           isActive
                             ? 'bg-indigo-600 text-white font-semibold shadow-md'
-                            : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'
+                            : 'text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800'
                         }`}
                       >
-                        <Icon className="h-4 w-4 shrink-0" />
+                        <Icon className="h-4 w-4 shrink-0" aria-hidden="true" />
                         <span className="truncate flex-1 text-left">{item.label}</span>
                         {item.badge && (
                           <span
                             className={`text-[9px] font-bold px-2 py-0.5 rounded-full ${
                               isActive
                                 ? 'bg-white/20 text-white'
-                                : 'bg-indigo-50 dark:bg-indigo-950 text-indigo-600 dark:text-indigo-400'
+                                : 'bg-indigo-50 dark:bg-indigo-950 text-indigo-700 dark:text-indigo-300'
                             }`}
                           >
                             {item.badge}
@@ -287,7 +288,7 @@ const Sidebar = () => {
 
             {/* Tagline Footer */}
             <div className="mt-4 pt-3 border-t border-slate-200 dark:border-slate-800 text-center">
-              <p className="text-[10px] text-slate-400 font-medium italic">"One Platform. Every Operation."</p>
+              <p className="text-[10px] text-slate-500 dark:text-slate-400 font-medium italic">"One Platform. Every Operation."</p>
             </div>
           </div>
         </div>

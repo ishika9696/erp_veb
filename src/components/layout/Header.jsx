@@ -23,20 +23,20 @@ const Header = () => {
 
   return (
     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
-      {/* Breadcrumb & Title */}
+      {/* Breadcrumb & Sequential H1 Title */}
       <div>
-        <nav className="flex items-center gap-1.5 text-xs text-slate-400 mb-1.5">
-          <span className="flex items-center gap-1 hover:text-slate-600 dark:hover:text-slate-200">
+        <nav aria-label="Breadcrumb" className="flex items-center gap-1.5 text-xs text-slate-600 dark:text-slate-400 mb-1.5">
+          <span className="flex items-center gap-1 hover:text-slate-900 dark:hover:text-slate-200">
             <Home className="h-3.5 w-3.5" />
             VEB ERP
           </span>
-          <ChevronRight className="h-3 w-3" />
+          <ChevronRight className="h-3 w-3 text-slate-400" />
           <span className="font-semibold text-indigo-600 dark:text-indigo-400 capitalize">{activeModule}</span>
         </nav>
-        <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white font-heading">
+        <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-slate-900 dark:text-white font-heading">
           {info.title}
         </h1>
-        <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">{info.sub}</p>
+        <p className="text-xs text-slate-600 dark:text-slate-400 mt-0.5 font-medium">{info.sub}</p>
       </div>
 
       {/* Quick Action Toolbar */}
@@ -48,9 +48,10 @@ const Header = () => {
 
         <button
           onClick={() => addToast("Refreshed real-time telemetry", "success")}
-          className="flex items-center gap-1.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 px-3 py-1.5 text-xs font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors shadow-2xs"
+          aria-label="Refresh real-time telemetry"
+          className="flex items-center gap-1.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 px-3 py-1.5 text-xs font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 transition-colors shadow-2xs"
         >
-          <RefreshCw className="h-3.5 w-3.5 text-slate-400" />
+          <RefreshCw className="h-3.5 w-3.5 text-slate-500" />
           Refresh
         </button>
       </div>
