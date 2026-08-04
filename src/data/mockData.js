@@ -313,17 +313,34 @@ export const CRM_CLIENT_PROJECTS = [
 
 // 6. HRM MODULE DATA
 export const INITIAL_EMPLOYEES = [
-  { id: "EMP-001", name: "Sarah Jenkins", role: "VP of Operations", department: "Executive", status: "Active", salary: "$145,000", email: "s.jenkins@acme.com", phone: "+1 555-0192", avatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150" },
-  { id: "EMP-002", name: "Alex Rivera", role: "Lead Sales Director", department: "Sales", status: "Active", salary: "$120,000", email: "a.rivera@acme.com", phone: "+1 555-0143", avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150" },
-  { id: "EMP-003", name: "Elena Rostova", role: "HR Business Partner", department: "Human Resources", status: "On Leave", salary: "$95,000", email: "e.rostova@acme.com", phone: "+1 555-0188", avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150" },
-  { id: "EMP-004", name: "David Chen", role: "Senior Financial Analyst", department: "Accounting", status: "Active", salary: "$110,000", email: "d.chen@acme.com", phone: "+1 555-0167", avatar: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150" },
-  { id: "EMP-005", name: "Priya Sharma", role: "Product Lead", department: "Manufacturing", status: "Remote", salary: "$130,000", email: "p.sharma@acme.com", phone: "+1 555-0122", avatar: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=150" },
-  { id: "EMP-006", name: "Marcus Vance", role: "Plant Operations Lead", department: "Manufacturing", status: "Active", salary: "$125,000", email: "m.vance@acme.com", phone: "+1 555-0177", avatar: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150" }
+  { id: "EMP-001", name: "Sarah Jenkins", role: "VP of Operations", department: "Executive", status: "Active", salary: "$145,000", email: "s.jenkins@acme.com", phone: "+1 555-0192", avatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150", isOnline: true },
+  { id: "EMP-002", name: "Alex Rivera", role: "Lead Sales Director", department: "Sales", status: "Active", salary: "$120,000", email: "a.rivera@acme.com", phone: "+1 555-0143", avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150", isOnline: true },
+  { id: "EMP-003", name: "Elena Rostova", role: "HR Business Partner", department: "Human Resources", status: "On Leave", salary: "$95,000", email: "e.rostova@acme.com", phone: "+1 555-0188", avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150", isOnline: false },
+  { id: "EMP-004", name: "David Chen", role: "Senior Financial Analyst", department: "Finance", status: "Active", salary: "$110,000", email: "d.chen@acme.com", phone: "+1 555-0167", avatar: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150", isOnline: true },
+  { id: "EMP-005", name: "Priya Sharma", role: "Product Lead", department: "Manufacturing", status: "Remote", salary: "$130,000", email: "p.sharma@acme.com", phone: "+1 555-0122", avatar: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=150", isOnline: true },
+  { id: "EMP-006", name: "Marcus Vance", role: "Plant Operations Lead", department: "Manufacturing", status: "Active", salary: "$125,000", email: "m.vance@acme.com", phone: "+1 555-0177", avatar: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150", isOnline: false }
+];
+
+export const HRM_LEAVE_TYPES = [
+  { id: "LT-01", name: "Annual Leave", quota: 18, paid: true, autoApprove: false, description: "Standard paid vacation allowance per calendar year." },
+  { id: "LT-02", name: "Sick Leave", quota: 10, paid: true, autoApprove: true, description: "Medical leave for health recovery and doctor visits." },
+  { id: "LT-03", name: "Casual Leave", quota: 7, paid: true, autoApprove: false, description: "Short-notice personal emergency leave." },
+  { id: "LT-04", name: "Unpaid Leave", quota: 30, paid: false, autoApprove: false, description: "Extended leave without pay subject to executive review." }
 ];
 
 export const HRM_LEAVE_REQUESTS = [
-  { id: "LR-101", employee: "David Chen", type: "Annual Leave", dates: "Aug 10 - Aug 12, 2026", days: 3, status: "Approved", reason: "Family Vacation", balanceLeft: 12 },
-  { id: "LR-102", employee: "Priya Sharma", type: "Sick Leave", dates: "Aug 05 - Aug 06, 2026", days: 2, status: "Pending", reason: "Dental Surgery", balanceLeft: 8 }
+  { id: "LR-101", employee: "David Chen", avatar: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150", type: "Annual Leave", dates: "Aug 10 - Aug 12, 2026", days: 3, status: "Approved", reason: "Family Vacation", balanceLeft: 12 },
+  { id: "LR-102", employee: "Priya Sharma", avatar: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=150", type: "Sick Leave", dates: "Aug 05 - Aug 06, 2026", days: 2, status: "Pending", reason: "Dental Surgery", balanceLeft: 8 },
+  { id: "LR-103", employee: "Elena Rostova", avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150", type: "Casual Leave", dates: "Aug 18 - Aug 19, 2026", days: 2, status: "Pending", reason: "Personal Relocation", balanceLeft: 5 },
+  { id: "LR-104", employee: "Marcus Vance", avatar: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150", type: "Annual Leave", dates: "Jul 20 - Jul 24, 2026", days: 5, status: "Rejected", reason: "Overlapping Plant Shift Schedule", balanceLeft: 14 }
+];
+
+export const HRM_ATTENDANCE_LOGS = [
+  { id: "ATT-001", employee: "Sarah Jenkins", avatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150", department: "Executive", clockIn: "08:45 AM", clockOut: "05:30 PM", status: "Present", workHours: "8h 45m", date: "2026-08-04" },
+  { id: "ATT-002", employee: "Alex Rivera", avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150", department: "Sales", clockIn: "09:05 AM", clockOut: "06:00 PM", status: "Late", workHours: "8h 55m", date: "2026-08-04" },
+  { id: "ATT-003", employee: "David Chen", avatar: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150", department: "Finance", clockIn: "08:50 AM", clockOut: "05:15 PM", status: "Present", workHours: "8h 25m", date: "2026-08-04" },
+  { id: "ATT-004", employee: "Elena Rostova", avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150", department: "Human Resources", clockIn: "--:--", clockOut: "--:--", status: "Absent", workHours: "0h 00m", date: "2026-08-04" },
+  { id: "ATT-005", employee: "Marcus Vance", avatar: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150", department: "Manufacturing", clockIn: "08:30 AM", clockOut: "05:00 PM", status: "Present", workHours: "8h 30m", date: "2026-08-04" }
 ];
 
 export const HRM_TIME_TRACKING = [
@@ -332,16 +349,71 @@ export const HRM_TIME_TRACKING = [
 ];
 
 export const HRM_DEPARTMENTS = [
-  { id: "DEP-1", name: "Executive & Management", head: "Sarah Jenkins", headcount: 4, budget: "$480,000" },
-  { id: "DEP-2", name: "Manufacturing & Plant", head: "Marcus Vance", headcount: 24, budget: "$1,250,000" },
-  { id: "DEP-3", name: "Sales & Client Success", head: "Alex Rivera", headcount: 12, budget: "$650,000" },
-  { id: "DEP-4", name: "Finance & Accounting", head: "David Chen", headcount: 6, budget: "$380,000" }
+  { id: "DEP-1", name: "Executive & Management", code: "EXEC", head: "Sarah Jenkins", headcount: 4, budget: "$480,000", description: "Strategic leadership, corporate governance, and operational direction." },
+  { id: "DEP-2", name: "Manufacturing & Plant", code: "MFG", head: "Marcus Vance", headcount: 24, budget: "$1,250,000", description: "BOM production lines, assembly, quality control, and shop-floor machinery." },
+  { id: "DEP-3", name: "Sales & Client Success", code: "SLS", head: "Alex Rivera", headcount: 12, budget: "$650,000", description: "Enterprise sales pipeline, account management, and customer relations." },
+  { id: "DEP-4", name: "Finance & Accounting", code: "FIN", head: "David Chen", headcount: 6, budget: "$380,000", description: "Financial reporting, invoicing, audit reconciliation, and payroll processing." }
+];
+
+export const HRM_DESIGNATIONS = [
+  { id: "DSG-01", title: "VP of Operations", department: "Executive & Management", level: "Executive Level", headcount: 1, minSalary: "$130,000", maxSalary: "$160,000" },
+  { id: "DSG-02", title: "Lead Sales Director", department: "Sales & Client Success", level: "Senior Director", headcount: 2, minSalary: "$110,000", maxSalary: "$140,000" },
+  { id: "DSG-03", title: "HR Business Partner", department: "Executive & Management", level: "Mid-Senior Level", headcount: 2, minSalary: "$85,000", maxSalary: "$105,000" },
+  { id: "DSG-04", title: "Senior Financial Analyst", department: "Finance & Accounting", level: "Senior Level", headcount: 3, minSalary: "$95,000", maxSalary: "$120,000" },
+  { id: "DSG-05", title: "Plant Operations Lead", department: "Manufacturing & Plant", level: "Manager Level", headcount: 4, minSalary: "$100,000", maxSalary: "$135,000" }
 ];
 
 export const HRM_PAYROLL_SUMMARY = [
-  { id: "PAY-2026-07", month: "July 2026", totalEmployees: 46, grossPayroll: "$385,000.00", netPaid: "$298,400.00", status: "Completed", datePaid: "Jul 31, 2026" },
-  { id: "PAY-2026-08", month: "August 2026", totalEmployees: 46, grossPayroll: "$385,000.00", netPaid: "Pending", status: "Processing", datePaid: "Due Aug 31" }
+  { id: "PAY-2026-07", month: "July 2026", totalEmployees: 46, grossPayroll: "$385,000.00", netPaid: "$298,400.00", deductions: "$86,600.00", status: "Completed", datePaid: "Jul 31, 2026" },
+  { id: "PAY-2026-08", month: "August 2026", totalEmployees: 46, grossPayroll: "$385,000.00", netPaid: "$298,400.00", deductions: "$86,600.00", status: "Processing", datePaid: "Due Aug 31, 2026" }
 ];
+
+export const HRM_SALES_TARGETS = [
+  { id: "ST-01", employee: "Alex Rivera", avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150", role: "Sales Director", lastMonth: "$125,000", thisMonth: "$142,000", target: "$150,000", commissionRate: "4.5%", achievedPct: 94.6, status: "On Track" },
+  { id: "ST-02", employee: "Sarah Jenkins", avatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150", role: "VP Operations / Enterprise Accounts", lastMonth: "$85,000", thisMonth: "$98,000", target: "$100,000", commissionRate: "3.0%", achievedPct: 98.0, status: "On Track" },
+  { id: "ST-03", employee: "Priya Sharma", avatar: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=150", role: "Product Solutions Specialist", lastMonth: "$42,000", thisMonth: "$35,000", target: "$60,000", commissionRate: "2.5%", achievedPct: 58.3, status: "Needs Attention" }
+];
+
+export const HRM_SALES_TARGET_CHART = [
+  { month: "Mar", target: 280000, achieved: 265000 },
+  { month: "Apr", target: 290000, achieved: 288000 },
+  { month: "May", target: 300000, achieved: 312000 },
+  { month: "Jun", target: 310000, achieved: 305000 },
+  { month: "Jul", target: 310000, achieved: 322000 },
+  { month: "Aug", target: 325000, achieved: 275000 }
+];
+
+export const HRM_BIRTHDAYS = [
+  { id: "BD-01", name: "Priya Sharma", role: "Product Lead", department: "Manufacturing", avatar: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=150", date: "Today, Aug 05", isToday: true },
+  { id: "BD-02", name: "David Chen", role: "Senior Financial Analyst", department: "Finance", avatar: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150", date: "Aug 12 (in 7 days)", isToday: false },
+  { id: "BD-03", name: "Alex Rivera", role: "Lead Sales Director", department: "Sales", avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150", date: "Aug 24 (in 19 days)", isToday: false }
+];
+
+export const HRM_HOLIDAYS = [
+  { id: "HOL-01", name: "Independence & Freedom Day", date: "Aug 15, 2026", day: "Saturday", status: "Upcoming", recurring: true, type: "National Holiday" },
+  { id: "HOL-02", name: "Labor & Workers Day", date: "Sep 07, 2026", day: "Monday", status: "Upcoming", recurring: true, type: "Public Holiday" },
+  { id: "HOL-03", name: "Annual Corporate Retreat Day", date: "Oct 16, 2026", day: "Friday", status: "Upcoming", recurring: false, type: "Company Holiday" }
+];
+
+export const HRM_SETTINGS_DATA = {
+  leavePolicy: {
+    workingDaysPerWeek: 5,
+    carryForwardLimit: 5,
+    autoApproveSickLeave: true,
+    requireMedicalDocDays: 3
+  },
+  payrollCycle: {
+    frequency: "Monthly",
+    payDay: 28,
+    currency: "USD ($)",
+    taxDeductionRate: "18.5%"
+  },
+  notifications: {
+    emailOnLeaveRequest: true,
+    slackAttendanceAlerts: true,
+    notifyPayrollDisbursement: true
+  }
+};
 
 // 7. FINANCE & ACCOUNTING MODULE DATA
 export const INITIAL_INVOICES = [
