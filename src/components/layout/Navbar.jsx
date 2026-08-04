@@ -66,14 +66,14 @@ const Navbar = () => {
     { label: "Accounting & Invoices", module: "accounting", icon: Receipt }
   ];
 
-  // Reusable Navbar Icon Button Styling Tokens
+  // Reusable Navbar Icon Button Styling Tokens (Single 40x40px rounded-xl shape)
   const navIconBtnClass = "h-10 w-10 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors flex items-center justify-center shrink-0 cursor-pointer";
   const navPrimaryBtnClass = "h-10 w-10 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white shadow-2xs transition-colors flex items-center justify-center shrink-0 cursor-pointer";
 
   return (
     <header className="sticky top-0 z-30 flex h-16 w-full items-center justify-between border-b border-slate-200/80 dark:border-slate-800 bg-white/80 dark:bg-slate-900/80 px-4 sm:px-6 backdrop-blur-md transition-colors">
       
-      {/* Left Section: Mobile Hamburger + Brand (mobile) / Search Input */}
+      {/* Left Section: Mobile Hamburger + Brand + Mobile Search Icon / Desktop Search Bar */}
       <div className="flex items-center gap-3 flex-1 min-w-0 max-w-xl">
         {/* Mobile Hamburger Button (<768px) */}
         <button
@@ -84,7 +84,7 @@ const Navbar = () => {
           <Menu className="h-5 w-5" />
         </button>
 
-        {/* Mobile Brand Wordmark (<768px) with gap-3 separation from Hamburger */}
+        {/* Mobile Brand Wordmark (<768px) */}
         <div className="md:hidden flex items-center gap-2 shrink-0">
           <div className="flex h-7 items-center px-2 rounded-lg bg-gradient-to-tr from-indigo-600 to-emerald-500 text-white font-heading font-extrabold text-xs shadow-xs">
             VEB
@@ -92,8 +92,20 @@ const Navbar = () => {
           <span className="font-heading text-sm font-bold text-slate-900 dark:text-white">ERP</span>
         </div>
 
-        {/* Search Input Container */}
-        <div className="relative flex-1 min-w-0 max-w-md">
+        {/* Mobile Search Icon Button (<640px) - Clean single 40x40px rounded-xl icon button */}
+        <div className="relative sm:hidden">
+          <button
+            onClick={() => setShowSearchDropdown(!showSearchDropdown)}
+            className={navIconBtnClass}
+            aria-label="Search modules"
+            title="Search modules"
+          >
+            <Search className="h-5 w-5" />
+          </button>
+        </div>
+
+        {/* Desktop Search Input Container (≥640px) */}
+        <div className="hidden sm:block relative flex-1 min-w-0 max-w-md">
           <button
             onClick={() => setShowSearchDropdown(!showSearchDropdown)}
             className="flex items-center gap-2.5 w-full h-10 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-950/70 px-3.5 text-xs text-slate-400 hover:border-slate-300 dark:hover:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-900 transition-all text-left group"
@@ -104,13 +116,25 @@ const Navbar = () => {
               ⌘K
             </kbd>
           </button>
+        </div>
 
-          {/* Anchored Quick Search Dropdown */}
-          {showSearchDropdown && (
-            <div className="absolute left-0 top-full mt-2 w-full min-w-[260px] rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-2 shadow-2xl z-50 animate-in fade-in zoom-in-95">
-              <div className="flex items-center justify-between px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider text-slate-400 border-b border-slate-100 dark:border-slate-800 mb-1">
+        {/* Anchored Quick Search Dropdown (Viewport constrained on mobile 360-414px) */}
+        {showSearchDropdown && (
+          <>
+            <div
+              className="fixed inset-0 z-40 bg-slate-900/10 dark:bg-slate-950/20 backdrop-blur-2xs"
+              onClick={() => setShowSearchDropdown(false)}
+            />
+            <div className="fixed top-16 left-4 right-4 sm:absolute sm:top-full sm:left-0 sm:right-auto sm:mt-2 sm:w-full sm:min-w-[280px] sm:max-w-md z-50 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-2 shadow-2xl overflow-x-hidden animate-in fade-in zoom-in-95">
+              <div className="flex items-center justify-between px-3 py-2 text-[10px] font-bold uppercase tracking-wider text-slate-400 border-b border-slate-100 dark:border-slate-800 mb-1">
                 <span>Quick Module Jump</span>
-                <button onClick={() => setCommandPaletteOpen(true)} className="text-indigo-600 dark:text-indigo-400 hover:underline">
+                <button
+                  onClick={() => {
+                    setShowSearchDropdown(false);
+                    setCommandPaletteOpen(true);
+                  }}
+                  className="text-indigo-600 dark:text-indigo-400 hover:underline"
+                >
                   Open ⌘K
                 </button>
               </div>
@@ -125,17 +149,17 @@ const Navbar = () => {
                         setShowSearchDropdown(false);
                         addToast(`Jumped to ${item.label}`, "info");
                       }}
-                      className="w-full flex items-center gap-3 px-3 py-2 rounded-xl text-left text-xs font-medium text-slate-700 dark:text-slate-200 hover:bg-indigo-50 dark:hover:bg-indigo-950/60 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors"
+                      className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-left text-xs font-medium text-slate-700 dark:text-slate-200 hover:bg-indigo-50 dark:hover:bg-indigo-950/60 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors min-w-0"
                     >
                       <Icon className="h-4 w-4 text-slate-400 shrink-0" />
-                      <span className="truncate">{item.label}</span>
+                      <span className="truncate flex-1 min-w-0">{item.label}</span>
                     </button>
                   );
                 })}
               </div>
             </div>
-          )}
-        </div>
+          </>
+        )}
       </div>
 
       {/* Right Controls Section - Uniform gap-2 flex row */}
