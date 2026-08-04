@@ -66,6 +66,10 @@ const Navbar = () => {
     { label: "Accounting & Invoices", module: "accounting", icon: Receipt }
   ];
 
+  // Reusable Navbar Icon Button Styling Tokens
+  const navIconBtnClass = "h-10 w-10 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors flex items-center justify-center shrink-0 cursor-pointer";
+  const navPrimaryBtnClass = "h-10 w-10 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white shadow-2xs transition-colors flex items-center justify-center shrink-0 cursor-pointer";
+
   return (
     <header className="sticky top-0 z-30 flex h-16 w-full items-center justify-between border-b border-slate-200/80 dark:border-slate-800 bg-white/80 dark:bg-slate-900/80 px-4 sm:px-6 backdrop-blur-md transition-colors">
       
@@ -74,15 +78,15 @@ const Navbar = () => {
         {/* Mobile Hamburger Button (<768px) */}
         <button
           onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-          className="md:hidden p-2 rounded-xl border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 shrink-0"
+          className={`md:hidden ${navIconBtnClass}`}
           aria-label="Open mobile menu"
         >
           <Menu className="h-5 w-5" />
         </button>
 
-        {/* Mobile Brand Wordmark (<768px) */}
+        {/* Mobile Brand Wordmark (<768px) with gap-3 separation from Hamburger */}
         <div className="md:hidden flex items-center gap-2 shrink-0">
-          <div className="flex h-7 items-center px-2 rounded-lg bg-gradient-to-tr from-indigo-600 to-emerald-500 text-white font-heading font-extrabold text-xs">
+          <div className="flex h-7 items-center px-2 rounded-lg bg-gradient-to-tr from-indigo-600 to-emerald-500 text-white font-heading font-extrabold text-xs shadow-xs">
             VEB
           </div>
           <span className="font-heading text-sm font-bold text-slate-900 dark:text-white">ERP</span>
@@ -92,7 +96,7 @@ const Navbar = () => {
         <div className="relative flex-1 min-w-0 max-w-md">
           <button
             onClick={() => setShowSearchDropdown(!showSearchDropdown)}
-            className="flex items-center gap-2 sm:gap-3 w-full rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-950/70 px-3 py-1.5 sm:py-2 text-xs text-slate-400 hover:border-slate-300 dark:hover:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-900 transition-all text-left group"
+            className="flex items-center gap-2.5 w-full h-10 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-950/70 px-3.5 text-xs text-slate-400 hover:border-slate-300 dark:hover:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-900 transition-all text-left group"
           >
             <Search className="h-4 w-4 text-slate-400 group-hover:text-indigo-500 transition-colors shrink-0" />
             <span className="flex-1 truncate text-xs">Search BOMs, orders, invoices...</span>
@@ -134,13 +138,13 @@ const Navbar = () => {
         </div>
       </div>
 
-      {/* Right Controls Section */}
-      <div className="flex items-center gap-1.5 sm:gap-3 shrink-0">
+      {/* Right Controls Section - Uniform gap-2 flex row */}
+      <div className="flex items-center gap-2 shrink-0">
         {/* Multi-Tenant Switcher Toggle Pill (Desktop md+) */}
-        <div className="hidden md:flex items-center rounded-xl bg-slate-100 dark:bg-slate-950 p-1 border border-slate-200/80 dark:border-slate-800">
+        <div className="hidden md:flex items-center h-10 rounded-xl bg-slate-100 dark:bg-slate-950 p-1 border border-slate-200/80 dark:border-slate-800">
           <button
             onClick={() => switchTenantMode('tenant')}
-            className={`flex items-center gap-1.5 px-3 py-1 text-xs font-semibold rounded-lg transition-all ${
+            className={`flex items-center gap-1.5 h-8 px-3 text-xs font-semibold rounded-lg transition-all ${
               tenantMode === 'tenant'
                 ? 'bg-white dark:bg-slate-800 text-indigo-600 dark:text-indigo-400 shadow-xs'
                 : 'text-slate-500 hover:text-slate-900 dark:hover:text-white'
@@ -152,7 +156,7 @@ const Navbar = () => {
 
           <button
             onClick={() => switchTenantMode('superadmin')}
-            className={`flex items-center gap-1.5 px-3 py-1 text-xs font-semibold rounded-lg transition-all ${
+            className={`flex items-center gap-1.5 h-8 px-3 text-xs font-semibold rounded-lg transition-all ${
               tenantMode === 'superadmin'
                 ? 'bg-gradient-to-r from-indigo-600 to-indigo-500 text-white shadow-xs'
                 : 'text-slate-500 hover:text-slate-900 dark:hover:text-white'
@@ -166,7 +170,7 @@ const Navbar = () => {
         {/* Companion Mobile App View Button (Desktop md+) */}
         <button
           onClick={() => setActiveModule('mobileapp')}
-          className="hidden md:flex items-center gap-1.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 px-3 py-1.5 text-xs font-semibold text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors shadow-2xs"
+          className="hidden md:flex items-center gap-1.5 h-10 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 px-3 text-xs font-semibold text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors shadow-2xs"
           title="Open Mobile Companion App UI Simulator"
         >
           <Smartphone className="h-3.5 w-3.5 text-emerald-500" />
@@ -178,7 +182,7 @@ const Navbar = () => {
           <div className="relative hidden sm:block">
             <button
               onClick={() => setShowOrgMenu(!showOrgMenu)}
-              className="flex items-center gap-2 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 px-3 py-1.5 text-xs font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
+              className="flex items-center gap-2 h-10 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 px-3 text-xs font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
             >
               <Building className="h-3.5 w-3.5 text-indigo-600 dark:text-indigo-400 shrink-0" />
               <span className="font-semibold truncate max-w-[110px]">{currentOrg.name}</span>
@@ -213,35 +217,36 @@ const Navbar = () => {
           </div>
         )}
 
-        {/* Quick Create Button */}
+        {/* Quick Create Button - Identical 40x40px rounded-xl shape as siblings */}
         <button
           onClick={() => setQuickCreateOpen(true)}
-          className="flex items-center gap-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white px-2.5 sm:px-3.5 py-1.5 text-xs font-semibold shadow-2xs shadow-indigo-500/20 transition-all shrink-0"
+          className={navPrimaryBtnClass}
+          title="Quick Create"
         >
-          <Plus className="h-4 w-4" />
-          <span className="hidden sm:inline">Create</span>
+          <Plus className="h-5 w-5" />
         </button>
 
-        {/* Dark Mode Toggle */}
+        {/* Dark Mode Toggle - Identical 40x40px rounded-xl shape */}
         <button
           onClick={toggleTheme}
-          className="p-2 rounded-xl border border-slate-200 dark:border-slate-800 text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors shrink-0"
+          className={navIconBtnClass}
           title={`Switch to ${theme === 'light' ? 'Dark' : 'Light'} Mode`}
         >
-          {theme === 'light' ? <Moon className="h-4 w-4" /> : <Sun className="h-4 w-4" />}
+          {theme === 'light' ? <Moon className="h-5 w-5" /> : <Sun className="h-5 w-5" />}
         </button>
 
-        {/* Notifications Bell */}
+        {/* Notifications Bell - Identical 40x40px rounded-xl shape */}
         <div className="relative flex items-center shrink-0">
           <button
             onClick={() => setShowNotifications(!showNotifications)}
-            className="relative p-2 rounded-xl border border-slate-200 dark:border-slate-800 text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+            className={`relative ${navIconBtnClass}`}
+            title="Notifications"
           >
-            <Bell className="h-4 w-4" />
+            <Bell className="h-5 w-5" />
             {unreadCount > 0 && (
-              <span className="absolute top-1.5 right-1.5 flex h-2 w-2">
+              <span className="absolute top-1.5 right-1.5 flex h-2.5 w-2.5">
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-400 opacity-75"></span>
-                <span className="relative inline-flex rounded-full h-2 w-2 bg-rose-500"></span>
+                <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-rose-500 ring-2 ring-white dark:ring-slate-900"></span>
               </span>
             )}
           </button>
@@ -285,16 +290,16 @@ const Navbar = () => {
           )}
         </div>
 
-        {/* User Profile Avatar */}
+        {/* User Profile Avatar - Identical 40x40px rounded-xl shape */}
         <div className="relative flex items-center shrink-0">
           <button
             onClick={() => setShowProfileMenu(!showProfileMenu)}
-            className="flex items-center gap-2 rounded-xl p-1 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+            className="flex items-center gap-2 rounded-xl p-0.5 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
           >
             <img
               src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150"
               alt="Sarah Jenkins"
-              className="h-8 w-8 rounded-xl object-cover ring-2 ring-indigo-500/30 shrink-0"
+              className="h-10 w-10 rounded-xl object-cover ring-2 ring-indigo-500/30 shrink-0"
             />
             <div className="hidden xl:block text-left">
               <span className="block text-xs font-bold text-slate-900 dark:text-white leading-tight">Sarah Jenkins</span>
