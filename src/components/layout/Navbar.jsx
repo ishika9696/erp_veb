@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useApp } from '../../context/AppContext';
 import {
   Menu,
@@ -17,7 +17,8 @@ import {
   LayoutDashboard,
   Factory,
   Package,
-  Receipt
+  Receipt,
+  X
 } from 'lucide-react';
 
 const Navbar = () => {
@@ -41,12 +42,46 @@ const Navbar = () => {
   const [showOrgMenu, setShowOrgMenu] = useState(false);
   const [showSearchDropdown, setShowSearchDropdown] = useState(false);
 
+  const notificationPanelRef = useRef(null);
+  const bellButtonRef = useRef(null);
+
   const unreadCount = notifications.filter((n) => !n.read).length;
 
   const markAllRead = () => {
     setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
     addToast("All notifications marked as read", "info");
   };
+
+  // Close notification panel on Outside Click or Escape Key press
+  useEffect(() => {
+    if (!showNotifications) return;
+
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape') {
+        setShowNotifications(false);
+        bellButtonRef.current?.focus();
+      }
+    };
+
+    const handlePointerDown = (e) => {
+      if (
+        notificationPanelRef.current &&
+        !notificationPanelRef.current.contains(e.target) &&
+        bellButtonRef.current &&
+        !bellButtonRef.current.contains(e.target)
+      ) {
+        setShowNotifications(false);
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+    document.addEventListener('pointerdown', handlePointerDown);
+
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown);
+      document.removeEventListener('pointerdown', handlePointerDown);
+    };
+  }, [showNotifications]);
 
   const organizations = [
     { id: "org-1", name: "Acme Manufacturing & Corp", plan: "Manufacturing Enterprise" },
@@ -244,14 +279,17 @@ const Navbar = () => {
         {/* Notifications Bell */}
         <div className="relative flex items-center shrink-0">
           <button
+            ref={bellButtonRef}
             onClick={() => {
-              setShowNotifications(!showNotifications);
+              setShowNotifications((prev) => !prev);
               setShowProfileMenu(false);
               setShowOrgMenu(false);
               setShowSearchDropdown(false);
             }}
             className={`relative ${navIconBtnClass}`}
             aria-label={`View notifications (${unreadCount} unread)`}
+            aria-expanded={showNotifications}
+            aria-haspopup="true"
             title="Notifications"
           >
             <Bell className="h-5 w-5" aria-hidden="true" />
@@ -265,23 +303,50 @@ const Navbar = () => {
 
           {showNotifications && (
             <>
+              {/* Tap-outside backdrop for mobile/touch devices */}
               <div
-                className="fixed inset-0 z-40"
+                className="fixed inset-0 z-40 bg-slate-900/10 dark:bg-slate-950/20 sm:hidden"
                 onClick={() => setShowNotifications(false)}
+                aria-hidden="true"
               />
-              <div className="absolute right-0 top-full mt-2 w-72 sm:w-80 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-2xl z-50 overflow-hidden animate-in fade-in zoom-in-95">
+
+              <div
+                ref={notificationPanelRef}
+                onClick={(e) => e.stopPropagation()}
+                className="fixed top-16 right-4 left-4 sm:absolute sm:top-full sm:right-0 sm:left-auto sm:mt-2 w-auto sm:w-80 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-2xl z-50 overflow-hidden animate-in fade-in zoom-in-95"
+              >
+                {/* Header */}
                 <div className="flex items-center justify-between p-4 border-b border-slate-200/80 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-950/50">
-                  <h2 className="text-sm font-bold text-slate-900 dark:text-white font-heading">Notifications</h2>
-                  {unreadCount > 0 && (
+                  <div className="flex items-center gap-2">
+                    <h2 className="text-sm font-bold text-slate-900 dark:text-white font-heading">Notifications</h2>
+                    {unreadCount > 0 && (
+                      <span className="px-2 py-0.5 rounded-full bg-indigo-50 dark:bg-indigo-950 text-indigo-600 dark:text-indigo-400 font-bold text-[10px]">
+                        {unreadCount} new
+                      </span>
+                    )}
+                  </div>
+
+                  <div className="flex items-center gap-2">
+                    {unreadCount > 0 && (
+                      <button
+                        onClick={markAllRead}
+                        className="text-[11px] font-semibold text-indigo-600 dark:text-indigo-400 hover:underline focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-indigo-500 cursor-pointer"
+                      >
+                        Mark all read
+                      </button>
+                    )}
+                    {/* Explicit Mobile Close (X) Button */}
                     <button
-                      onClick={markAllRead}
-                      className="text-[11px] font-semibold text-indigo-600 dark:text-indigo-400 hover:underline focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-indigo-500 cursor-pointer"
+                      onClick={() => setShowNotifications(false)}
+                      className="p-1 rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer"
+                      aria-label="Close notifications panel"
                     >
-                      Mark all read
+                      <X className="h-4 w-4" aria-hidden="true" />
                     </button>
-                  )}
+                  </div>
                 </div>
 
+                {/* Items List */}
                 <div className="max-h-72 overflow-y-auto divide-y divide-slate-100 dark:divide-slate-800/60">
                   {notifications.length === 0 ? (
                     <div className="p-6 text-center text-xs text-slate-500 dark:text-slate-400">
@@ -293,8 +358,15 @@ const Navbar = () => {
                     notifications.map((n) => (
                       <div
                         key={n.id}
-                        className={`p-3.5 flex items-start gap-3 transition-colors ${
-                          !n.read ? 'bg-indigo-50/40 dark:bg-indigo-950/20' : 'hover:bg-slate-50 dark:hover:bg-slate-800/40'
+                        onClick={() => {
+                          setNotifications((prev) =>
+                            prev.map((item) => (item.id === n.id ? { ...item, read: true } : item))
+                          );
+                          setShowNotifications(false);
+                          addToast(`Opened notification: ${n.title}`, "info");
+                        }}
+                        className={`p-3.5 flex items-start gap-3 transition-colors cursor-pointer ${
+                          !n.read ? 'bg-indigo-50/40 dark:bg-indigo-950/20 hover:bg-indigo-50/70 dark:hover:bg-indigo-950/40' : 'hover:bg-slate-50 dark:hover:bg-slate-800/40'
                         }`}
                       >
                         <div className="p-2 rounded-lg bg-indigo-100 dark:bg-indigo-950 text-indigo-600 dark:text-indigo-400 shrink-0">
@@ -303,7 +375,10 @@ const Navbar = () => {
                           {n.icon === 'AlertTriangle' && <AlertTriangle className="h-4 w-4" aria-hidden="true" />}
                         </div>
                         <div className="flex-1 min-w-0">
-                          <h3 className="text-xs font-semibold text-slate-900 dark:text-white truncate">{n.title}</h3>
+                          <div className="flex items-center justify-between gap-1">
+                            <h3 className="text-xs font-semibold text-slate-900 dark:text-white truncate">{n.title}</h3>
+                            {!n.read && <span className="h-1.5 w-1.5 rounded-full bg-indigo-600 shrink-0" />}
+                          </div>
                           <p className="text-[11px] text-slate-600 dark:text-slate-400 mt-0.5">{n.message}</p>
                           <span className="text-[10px] text-slate-500 mt-1 block">{n.time}</span>
                         </div>
