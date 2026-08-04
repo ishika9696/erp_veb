@@ -416,10 +416,256 @@ export const HRM_SETTINGS_DATA = {
 };
 
 // 7. FINANCE & ACCOUNTING MODULE DATA
+export const FINANCE_ESTIMATES = [
+  {
+    id: "EST-2026-001",
+    client: "Stark Industries",
+    project: "Global Supply Chain Module",
+    date: "2026-08-01",
+    validUntil: "2026-08-30",
+    amount: "$115,000.00",
+    numericAmount: 115000,
+    status: "Accepted",
+    terms: "Standard 30-day proposal validity. 50% upfront deposit required upon acceptance.",
+    items: [
+      { desc: "Supply Chain AI Module License", qty: 1, rate: 85000, tax: 10, amount: 93500 },
+      { desc: "Integration & Setup Services", qty: 40, rate: 500, tax: 0, amount: 20000 }
+    ]
+  },
+  {
+    id: "EST-2026-002",
+    client: "CyberDyne Systems",
+    project: "Cloud Scale Migration",
+    date: "2026-08-02",
+    validUntil: "2026-08-31",
+    amount: "$48,500.00",
+    numericAmount: 48500,
+    status: "Sent",
+    terms: "Valid for 30 days. Includes 3 months post-migration support.",
+    items: [
+      { desc: "Database Migration & Schema Audit", qty: 1, rate: 35000, tax: 0, amount: 35000 },
+      { desc: "High Availability Server Config", qty: 1, rate: 13500, tax: 0, amount: 13500 }
+    ]
+  },
+  {
+    id: "EST-2026-003",
+    client: "Wayne Enterprises",
+    project: "ERP License Renewal",
+    date: "2026-08-03",
+    validUntil: "2026-09-02",
+    amount: "$32,000.00",
+    numericAmount: 32000,
+    status: "Draft",
+    terms: "Annual subscription renewal proposal.",
+    items: [
+      { desc: "Enterprise Annual License 2026-2027", qty: 1, rate: 32000, tax: 0, amount: 32000 }
+    ]
+  },
+  {
+    id: "EST-2026-004",
+    client: "Acme Logistics",
+    project: "Fleet Tracking Sync",
+    date: "2026-07-25",
+    validUntil: "2026-08-25",
+    amount: "$15,000.00",
+    numericAmount: 15000,
+    status: "Declined",
+    terms: "Custom GPS API integration proposal.",
+    items: [
+      { desc: "Telematics API Integration", qty: 1, rate: 15000, tax: 0, amount: 15000 }
+    ]
+  },
+  {
+    id: "EST-2026-005",
+    client: "Nexus Tech Solutions",
+    project: "CRM Data Migration",
+    date: "2026-07-10",
+    validUntil: "2026-08-01",
+    amount: "$22,500.00",
+    numericAmount: 22500,
+    status: "Expired",
+    terms: "Legacy database import proposal.",
+    items: [
+      { desc: "Data Cleanup & ETL Pipeline", qty: 1, rate: 22500, tax: 0, amount: 22500 }
+    ]
+  }
+];
+
 export const INITIAL_INVOICES = [
-  { id: "INV-2026-089", client: "Stark Industries", date: "2026-08-01", dueDate: "2026-08-15", amount: "$95,000.00", status: "Paid", items: [{ desc: "Global ERP Module", qty: 1, rate: 95000 }] },
-  { id: "INV-2026-090", client: "CyberDyne Systems", date: "2026-08-02", dueDate: "2026-08-16", amount: "$45,000.00", status: "Pending", items: [{ desc: "Cloud Scale Migration", qty: 1, rate: 45000 }] },
-  { id: "INV-2026-091", client: "Wayne Enterprises", date: "2026-07-20", dueDate: "2026-08-03", amount: "$28,000.00", status: "Overdue", items: [{ desc: "ERP License Renewal", qty: 1, rate: 28000 }] }
+  {
+    id: "INV-2026-089",
+    client: "Stark Industries",
+    project: "Global Supply Chain Module",
+    date: "2026-08-01",
+    dueDate: "2026-08-15",
+    amount: "$95,000.00",
+    numericAmount: 95000,
+    amountDue: "$0.00",
+    numericAmountDue: 0,
+    status: "Paid",
+    estimateRef: "EST-2026-001",
+    items: [{ desc: "Global ERP Module Implementation", qty: 1, rate: 95000, tax: 0, amount: 95000 }]
+  },
+  {
+    id: "INV-2026-090",
+    client: "CyberDyne Systems",
+    project: "Cloud Scale Migration",
+    date: "2026-08-02",
+    dueDate: "2026-08-16",
+    amount: "$45,000.00",
+    numericAmount: 45000,
+    amountDue: "$22,500.00",
+    numericAmountDue: 22500,
+    status: "Partially Paid",
+    estimateRef: "EST-2026-002",
+    items: [{ desc: "Cloud Scale Migration Milestone 1", qty: 1, rate: 45000, tax: 0, amount: 45000 }]
+  },
+  {
+    id: "INV-2026-091",
+    client: "Wayne Enterprises",
+    project: "ERP License Renewal",
+    date: "2026-07-20",
+    dueDate: "2026-08-03",
+    amount: "$28,000.00",
+    numericAmount: 28000,
+    amountDue: "$28,000.00",
+    numericAmountDue: 28000,
+    status: "Overdue",
+    estimateRef: null,
+    items: [{ desc: "ERP License Renewal Annual", qty: 1, rate: 28000, tax: 0, amount: 28000 }]
+  },
+  {
+    id: "INV-2026-092",
+    client: "Acme Logistics",
+    project: "Fleet Tracking Sync",
+    date: "2026-08-03",
+    dueDate: "2026-08-18",
+    amount: "$68,000.00",
+    numericAmount: 68000,
+    amountDue: "$68,000.00",
+    numericAmountDue: 68000,
+    status: "Sent",
+    estimateRef: null,
+    items: [{ desc: "Fleet Telematics Module & Hardware", qty: 1, rate: 68000, tax: 0, amount: 68000 }]
+  },
+  {
+    id: "INV-2026-093",
+    client: "Nexus Tech Solutions",
+    project: "CRM Data Migration",
+    date: "2026-07-15",
+    dueDate: "2026-07-30",
+    amount: "$18,500.00",
+    numericAmount: 18500,
+    amountDue: "$0.00",
+    numericAmountDue: 0,
+    status: "Draft",
+    estimateRef: null,
+    items: [{ desc: "CRM Onboarding & Training Batch", qty: 1, rate: 18500, tax: 0, amount: 18500 }]
+  }
+];
+
+export const FINANCE_PAYMENTS = [
+  {
+    id: "PAY-901",
+    client: "Stark Industries",
+    invoiceId: "INV-2026-089",
+    date: "2026-08-03",
+    method: "Bank Wire Transfer",
+    txnId: "TXN-884920194",
+    amount: "$95,000.00",
+    numericAmount: 95000,
+    status: "Completed",
+    auditTrail: [
+      { step: "Invoice Issued", by: "Sarah Jenkins", time: "2026-08-01 10:00 AM" },
+      { step: "Wire Payment Received", by: "Stark Financial Portal", time: "2026-08-03 09:30 AM" },
+      { step: "Bank Reconciliation Matched", by: "David Chen (Finance)", time: "2026-08-03 09:35 AM" }
+    ]
+  },
+  {
+    id: "PAY-902",
+    client: "CyberDyne Systems",
+    invoiceId: "INV-2026-090",
+    date: "2026-08-04",
+    method: "Credit Card (Stripe)",
+    txnId: "TXN-993012847",
+    amount: "$22,500.00",
+    numericAmount: 22500,
+    status: "Completed",
+    auditTrail: [
+      { step: "Invoice Issued", by: "David Chen", time: "2026-08-02 02:15 PM" },
+      { step: "Card Charge Processed", by: "Stripe Payment Gateway", time: "2026-08-04 11:20 AM" },
+      { step: "Partial Settlement Applied", by: "System Auto-Sync", time: "2026-08-04 11:21 AM" }
+    ]
+  },
+  {
+    id: "PAY-903",
+    client: "Nexus Tech Solutions",
+    invoiceId: "INV-2026-093",
+    date: "2026-07-28",
+    method: "ACH Electronic Check",
+    txnId: "TXN-102938475",
+    amount: "$18,500.00",
+    numericAmount: 18500,
+    status: "Completed",
+    auditTrail: [
+      { step: "Invoice Issued", by: "Elena Rostova", time: "2026-07-15 04:00 PM" },
+      { step: "ACH Transfer Received", by: "Chase Checking Account", time: "2026-07-28 08:45 AM" }
+    ]
+  },
+  {
+    id: "PAY-904",
+    client: "Acme Logistics",
+    invoiceId: "INV-2026-092",
+    date: "2026-08-04",
+    method: "Direct Deposit",
+    txnId: "TXN-554920112",
+    amount: "$12,750.00",
+    numericAmount: 12750,
+    status: "Pending Settlement",
+    auditTrail: [
+      { step: "Deposit Submitted", by: "Acme Accounts Payable", time: "2026-08-04 03:10 PM" },
+      { step: "Clearing Pending", by: "SVB Treasury", time: "2026-08-04 03:11 PM" }
+    ]
+  }
+];
+
+export const FINANCE_CREDIT_NOTES = [
+  {
+    id: "CN-2026-01",
+    client: "Wayne Enterprises",
+    originalInvoice: "INV-2026-091",
+    issueDate: "2026-08-04",
+    creditAmount: "$5,000.00",
+    numericCreditAmount: 5000,
+    remainingBalance: "$5,000.00",
+    numericRemainingBalance: 5000,
+    status: "Unused",
+    reason: "BOM Quantity Adjustment Refund"
+  },
+  {
+    id: "CN-2026-02",
+    client: "CyberDyne Systems",
+    originalInvoice: "INV-2026-090",
+    issueDate: "2026-08-03",
+    creditAmount: "$3,500.00",
+    numericCreditAmount: 3500,
+    remainingBalance: "$1,500.00",
+    numericRemainingBalance: 1500,
+    status: "Partially Redeemed",
+    reason: "SLA Downtime Penalty Credit"
+  },
+  {
+    id: "CN-2026-03",
+    client: "Stark Industries",
+    originalInvoice: "INV-2026-089",
+    issueDate: "2026-08-02",
+    creditAmount: "$10,000.00",
+    numericCreditAmount: 10000,
+    remainingBalance: "$0.00",
+    numericRemainingBalance: 0,
+    status: "Fully Redeemed",
+    reason: "Early Payment Rebate Credit"
+  }
 ];
 
 export const FINANCE_PURCHASE_BILLS = [
