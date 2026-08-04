@@ -4,7 +4,6 @@ import {
   LayoutDashboard,
   Factory,
   Package,
-  ShoppingBag,
   Users,
   UserCheck,
   Receipt,
@@ -36,23 +35,22 @@ const Sidebar = () => {
       group: "Core Operations",
       items: [
         { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard, badge: null },
-        { id: 'manufacturing', label: 'Manufacturing (BOM)', icon: Factory, badge: 'Live BOM' },
-        { id: 'inventory', label: 'Inventory & Stock', icon: Package, badge: '3 Low' },
-        { id: 'pos', label: 'POS Terminal', icon: ShoppingBag, badge: null }
+        { id: 'manufacturing', label: 'Manufacturing & QC', icon: Factory, badge: 'BOM & QC' },
+        { id: 'inventory', label: 'Warehouse & Stock', icon: Package, badge: 'Stock-In' }
       ]
     },
     {
       group: "Business Management",
       items: [
-        { id: 'crm', label: 'CRM & Sales', icon: Users, badge: null },
-        { id: 'hrm', label: 'HRM & Team', icon: UserCheck, badge: null },
-        { id: 'accounting', label: 'Accounting', icon: Receipt, badge: '2 Overdue' }
+        { id: 'crm', label: 'CRM & Client Pipeline', icon: Users, badge: 'Worksuite' },
+        { id: 'hrm', label: 'HRM, Timesheets & Payroll', icon: UserCheck, badge: 'Payroll' },
+        { id: 'accounting', label: 'Finance & Bank Rec', icon: Receipt, badge: 'Reconcile' }
       ]
     },
     {
       group: "Platform & Systems",
       items: [
-        { id: 'serveradmin', label: 'Server & System Panel', icon: Server, badge: 'Worksuite' },
+        { id: 'serveradmin', label: 'Server & System Panel', icon: Server, badge: 'Infrastructure' },
         { id: 'mobileapp', label: 'Mobile Companion App', icon: Smartphone, badge: 'App View' },
         { id: 'billing', label: 'Billing & Subscriptions', icon: CreditCard, badge: null },
         { id: 'settings', label: 'Settings & Roles', icon: Settings, badge: null }

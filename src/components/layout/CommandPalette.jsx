@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useApp } from '../../context/AppContext';
-import { Search, LayoutDashboard, Users, UserCheck, Receipt, FolderKanban, ShoppingBag, CreditCard, Settings, X } from 'lucide-react';
+import { Search, LayoutDashboard, Factory, Package, Users, UserCheck, Receipt, CreditCard, Settings, X } from 'lucide-react';
 
 const CommandPalette = () => {
   const { commandPaletteOpen, setCommandPaletteOpen, setActiveModule, addToast } = useApp();
@@ -14,12 +14,12 @@ const CommandPalette = () => {
 
   const options = [
     { label: "Executive Dashboard", category: "Navigation", module: "dashboard", icon: LayoutDashboard },
-    { label: "CRM & Leads Kanban", category: "Navigation", module: "crm", icon: Users },
-    { label: "Employee Directory & Attendance", category: "Navigation", module: "hrm", icon: UserCheck },
-    { label: "Invoices & Payments", category: "Navigation", module: "accounting", icon: Receipt },
-    { label: "Projects & Gantt Timeline", category: "Navigation", module: "projects", icon: FolderKanban },
-    { label: "POS Terminal & Cart", category: "Navigation", module: "pos", icon: ShoppingBag },
-    { label: "Subscription Plans", category: "Navigation", module: "billing", icon: CreditCard },
+    { label: "Manufacturing, POs & QC Testing", category: "Navigation", module: "manufacturing", icon: Factory },
+    { label: "Warehouse Stock-In & Audits", category: "Navigation", module: "inventory", icon: Package },
+    { label: "CRM Accounts & Sales Deals", category: "Navigation", module: "crm", icon: Users },
+    { label: "HRM, Attendance & Payroll", category: "Navigation", module: "hrm", icon: UserCheck },
+    { label: "Accounting & Bank Reconciliation", category: "Navigation", module: "accounting", icon: Receipt },
+    { label: "Subscription Plans & Billing", category: "Navigation", module: "billing", icon: CreditCard },
     { label: "Role Permission Matrix", category: "Settings", module: "settings", icon: Settings },
   ];
 

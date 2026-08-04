@@ -1,422 +1,537 @@
 import React, { useState } from 'react';
-import { BOM_LIST, WORK_ORDERS_KANBAN, RAW_MATERIALS_INVENTORY, PRODUCTION_TREND_DATA } from '../../../data/mockData';
-import Modal from '../../ui/Modal';
-import Drawer from '../../ui/Drawer';
-import Badge from '../../ui/Badge';
 import { useApp } from '../../../context/AppContext';
-import { Factory, Layers, Plus, ArrowRight, Calculator, CheckCircle2, AlertTriangle, FileText, ChevronRight, Play, Wrench, BarChart2 } from 'lucide-react';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import {
+  BOM_LIST,
+  WORK_ORDERS_KANBAN,
+  RAW_MATERIALS_INVENTORY,
+  MANUFACTURING_PURCHASE_ORDERS,
+  QUALITY_CONTROL_TESTS,
+  MATERIAL_USAGE_REPORTS,
+  MACHINE_RESOURCE_ALLOCATION,
+  SUPPLIER_DIRECTORY
+} from '../../../data/mockData';
+import {
+  Factory,
+  Plus,
+  Search,
+  CheckCircle,
+  Clock,
+  AlertTriangle,
+  FileText,
+  Layers,
+  ChevronRight,
+  ShieldCheck,
+  Calendar,
+  Cpu,
+  Truck,
+  DollarSign,
+  TrendingUp,
+  XCircle,
+  FileCheck
+} from 'lucide-react';
 
 const ManufacturingView = () => {
   const { addToast } = useApp();
-  const [boms, setBoms] = useState(BOM_LIST);
+  const [activeTab, setActiveTab] = useState('bom_orders');
+  const [searchQuery, setSearchQuery] = useState('');
   const [workOrders, setWorkOrders] = useState(WORK_ORDERS_KANBAN);
-  const [activeTab, setActiveTab] = useState('kanban'); // 'kanban' | 'bom' | 'calculator' | 'reports'
+  const [purchaseOrders, setPurchaseOrders] = useState(MANUFACTURING_PURCHASE_ORDERS);
+  const [qcTests, setQcTests] = useState(QUALITY_CONTROL_TESTS);
 
-  // Modal for new BOM
-  const [isBomModalOpen, setIsBomModalOpen] = useState(false);
-  const [newBom, setNewBom] = useState({
-    finishedProduct: '',
-    category: 'Hardware Electronics',
-    outputQty: 1,
-    overheadCost: 50,
-    laborHours: 2.0,
-    materials: [
-      { name: '15.6 Inch IPS Touch Display Panel', qty: 1, unit: 'Pcs', unitCost: 180, wastagePct: 1 },
-      { name: 'Aluminium CNC Terminal Casing', qty: 1, unit: 'Pcs', unitCost: 85, wastagePct: 2 }
-    ]
-  });
+  // New Work Order Modal
+  const [showWoModal, setShowWoModal] = useState(false);
+  const [newWoProduct, setNewWoProduct] = useState('POS Touchscreen Terminal X1');
+  const [newWoQty, setNewWoQty] = useState(50);
 
-  // Drawer for BOM Detail
-  const [selectedBom, setSelectedBom] = useState(null);
-  const [isBomDrawerOpen, setIsBomDrawerOpen] = useState(false);
+  // New PO Modal
+  const [showPoModal, setShowPoModal] = useState(false);
+  const [poSupplier, setPoSupplier] = useState('OptoTech Displays Ltd');
+  const [poMaterial, setPoMaterial] = useState('15.6 Inch IPS Touch Display Panel');
+  const [poQty, setPoQty] = useState(100);
 
-  const moveWorkOrder = (order, sourceStage, targetStage) => {
-    const sourceKey = sourceStage === 'In Production' ? 'inProduction' : sourceStage === 'Quality Check' ? 'qualityCheck' : sourceStage.toLowerCase();
-    const targetKey = targetStage === 'In Production' ? 'inProduction' : targetStage === 'Quality Check' ? 'qualityCheck' : targetStage.toLowerCase();
-
-    const updatedSource = workOrders[sourceKey].filter((w) => w.id !== order.id);
-    const updatedOrder = { ...order, stage: targetStage, progress: targetStage === 'Completed' ? 100 : 80 };
-    const updatedTarget = [...workOrders[targetKey], updatedOrder];
-
-    setWorkOrders({
-      ...workOrders,
-      [sourceKey]: updatedSource,
-      [targetKey]: updatedTarget
-    });
-
-    addToast(`Moved Work Order ${order.id} to ${targetStage}`, "success");
-  };
-
-  const handleCreateBom = (e) => {
-    e.preventDefault();
-    const matTotal = newBom.materials.reduce((acc, m) => acc + m.qty * m.unitCost * (1 + m.wastagePct / 100), 0);
-    const laborTotal = newBom.laborHours * 25; // $25/hr
-    const totalUnitCost = (matTotal + laborTotal + parseFloat(newBom.overheadCost)) / newBom.outputQty;
-
-    const created = {
-      id: `BOM-00${boms.length + 1}`,
-      finishedProduct: newBom.finishedProduct,
-      productSku: `SKU-FG-${Date.now().toString().slice(-3)}`,
-      category: newBom.category,
-      outputQty: newBom.outputQty,
-      unitCost: `$${totalUnitCost.toFixed(2)}`,
-      materials: newBom.materials,
-      overheadCost: parseFloat(newBom.overheadCost),
-      laborHours: newBom.laborHours
-    };
-
-    setBoms([...boms, created]);
-    setIsBomModalOpen(false);
-    addToast(`New Bill of Materials created for ${newBom.finishedProduct}`, "success");
-  };
-
-  const kanbanStages = [
-    { key: 'pending', name: 'Pending', color: 'border-slate-300' },
-    { key: 'inProduction', name: 'In Production', color: 'border-indigo-500' },
-    { key: 'qualityCheck', name: 'Quality Check', color: 'border-amber-500' },
-    { key: 'completed', name: 'Completed', color: 'border-emerald-500' }
+  const tabs = [
+    { id: 'bom_orders', label: 'BOM & Work Orders', icon: Factory },
+    { id: 'purchase_orders', label: 'Raw Material POs', icon: Truck },
+    { id: 'quality_control', label: 'QC & Sample Testing', icon: ShieldCheck },
+    { id: 'material_usage', label: 'Material Usage & Scrap', icon: FileText },
+    { id: 'scheduling', label: 'Production Schedule', icon: Calendar },
+    { id: 'machines', label: 'Machines & Resources', icon: Cpu },
+    { id: 'suppliers', label: 'Suppliers & Batches', icon: TrendingUp }
   ];
 
-  return (
-    <div className="space-y-6">
-      {/* Navigation Tab Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white dark:bg-slate-900 p-4 rounded-xl border border-slate-200/80 dark:border-slate-800 shadow-xs">
-        <div className="flex items-center gap-2">
-          <div className="flex items-center rounded-lg bg-slate-100 dark:bg-slate-950 p-1 border border-slate-200 dark:border-slate-800">
-            <button
-              onClick={() => setActiveTab('kanban')}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-semibold transition-all ${
-                activeTab === 'kanban'
-                  ? 'bg-white dark:bg-slate-800 text-indigo-600 dark:text-indigo-400 shadow-xs'
-                  : 'text-slate-500 hover:text-slate-900 dark:hover:text-white'
-              }`}
-            >
-              <Layers className="h-3.5 w-3.5" />
-              Work Orders Kanban
-            </button>
-            <button
-              onClick={() => setActiveTab('bom')}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-semibold transition-all ${
-                activeTab === 'bom'
-                  ? 'bg-white dark:bg-slate-800 text-indigo-600 dark:text-indigo-400 shadow-xs'
-                  : 'text-slate-500 hover:text-slate-900 dark:hover:text-white'
-              }`}
-            >
-              <Factory className="h-3.5 w-3.5" />
-              Bill of Materials (BOM)
-            </button>
-            <button
-              onClick={() => setActiveTab('calculator')}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-semibold transition-all ${
-                activeTab === 'calculator'
-                  ? 'bg-white dark:bg-slate-800 text-indigo-600 dark:text-indigo-400 shadow-xs'
-                  : 'text-slate-500 hover:text-slate-900 dark:hover:text-white'
-              }`}
-            >
-              <Calculator className="h-3.5 w-3.5" />
-              Cost Calculator
-            </button>
-            <button
-              onClick={() => setActiveTab('reports')}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-semibold transition-all ${
-                activeTab === 'reports'
-                  ? 'bg-white dark:bg-slate-800 text-indigo-600 dark:text-indigo-400 shadow-xs'
-                  : 'text-slate-500 hover:text-slate-900 dark:hover:text-white'
-              }`}
-            >
-              <BarChart2 className="h-3.5 w-3.5" />
-              Wastage Reports
-            </button>
-          </div>
-        </div>
+  const handleCreateWo = (e) => {
+    e.preventDefault();
+    const newWo = {
+      id: `WO-${Math.floor(100 + Math.random() * 900)}`,
+      orderNo: `PO-2026-${Math.floor(50 + Math.random() * 50)}`,
+      product: newWoProduct,
+      qty: Number(newWoQty),
+      bomId: "BOM-001",
+      assignedTo: "Line A - Electronics",
+      dueDate: "Aug 18, 2026",
+      priority: "High",
+      stage: "Pending"
+    };
+    setWorkOrders((prev) => ({
+      ...prev,
+      pending: [newWo, ...prev.pending]
+    }));
+    setShowWoModal(false);
+    addToast(`Work Order ${newWo.id} created successfully!`, "success");
+  };
 
-        <button
-          onClick={() => setIsBomModalOpen(true)}
-          className="flex items-center gap-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 text-xs font-semibold shadow-2xs shadow-indigo-500/20"
-        >
-          <Plus className="h-4 w-4" />
-          Create BOM Builder
-        </button>
+  const handleCreatePo = (e) => {
+    e.preventDefault();
+    const newPo = {
+      id: `PO-RM-2026-0${purchaseOrders.length + 1}`,
+      supplier: poSupplier,
+      item: poMaterial,
+      qty: Number(poQty),
+      unitCost: "$180.00",
+      total: `$${(Number(poQty) * 180).toLocaleString()}.00`,
+      status: "Sent",
+      expectedDate: "Aug 12, 2026",
+      autoReorder: true
+    };
+    setPurchaseOrders((prev) => [newPo, ...prev]);
+    setShowPoModal(false);
+    addToast(`Purchase Order ${newPo.id} sent to ${poSupplier}`, "success");
+  };
+
+  return (
+    <div className="space-y-6 w-full max-w-full min-w-0">
+      {/* Sub-Navigation Tabs */}
+      <div className="flex items-center gap-2 overflow-x-auto pb-2 border-b border-slate-200 dark:border-slate-800 scrollbar-none">
+        {tabs.map((tab) => {
+          const Icon = tab.icon;
+          const isActive = activeTab === tab.id;
+          return (
+            <button
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id)}
+              className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold whitespace-nowrap transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 shrink-0 ${
+                isActive
+                  ? 'bg-indigo-600 text-white shadow-xs'
+                  : 'bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800'
+              }`}
+            >
+              <Icon className="h-4 w-4 shrink-0" />
+              <span>{tab.label}</span>
+            </button>
+          );
+        })}
       </div>
 
-      {/* Work Orders Kanban Tab */}
-      {activeTab === 'kanban' && (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          {kanbanStages.map((stg) => {
-            const list = workOrders[stg.key] || [];
-
-            return (
-              <div
-                key={stg.key}
-                className="flex flex-col rounded-2xl border border-slate-200/80 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-950/40 p-4 shadow-xs min-h-[500px]"
+      {/* TAB 1: BOM & WORK ORDERS */}
+      {activeTab === 'bom_orders' && (
+        <div className="space-y-6">
+          {/* Header Action Row */}
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <h2 className="text-base font-bold text-slate-900 dark:text-white font-heading">
+              Bill of Materials & Live Work Orders Kanban
+            </h2>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => setShowWoModal(true)}
+                className="flex items-center gap-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white px-3.5 py-2 text-xs font-semibold shadow-2xs transition-all"
               >
-                <div className="flex items-center justify-between pb-3 border-b border-slate-200 dark:border-slate-800 mb-3">
-                  <div className="flex items-center gap-2">
-                    <span className="font-bold text-sm text-slate-900 dark:text-white font-heading">{stg.name}</span>
-                    <span className="flex h-5 w-5 items-center justify-center rounded-full bg-slate-200 dark:bg-slate-800 text-[10px] font-bold">
-                      {list.length}
+                <Plus className="h-4 w-4" />
+                <span>New Work Order</span>
+              </button>
+            </div>
+          </div>
+
+          {/* BOM Builder Recipe Cards */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {BOM_LIST.map((bom) => (
+              <div key={bom.id} className="rounded-2xl border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-900 p-5 shadow-xs flex flex-col justify-between">
+                <div>
+                  <div className="flex items-center justify-between mb-3">
+                    <span className="text-[10px] font-extrabold uppercase tracking-wider text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-950 px-2 py-0.5 rounded-md">
+                      {bom.id} • {bom.category}
                     </span>
+                    <span className="text-xs font-bold text-emerald-700 dark:text-emerald-400">
+                      Unit Cost: {bom.unitCost}
+                    </span>
+                  </div>
+
+                  <h3 className="text-sm font-bold text-slate-900 dark:text-white font-heading mb-3">
+                    {bom.finishedProduct} ({bom.productSku})
+                  </h3>
+
+                  {/* Raw Materials List */}
+                  <div className="space-y-2 border-t border-slate-100 dark:border-slate-800 pt-3">
+                    <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider block">Raw Materials Required (Per Unit)</span>
+                    {bom.materials.map((mat, idx) => (
+                      <div key={idx} className="flex items-center justify-between text-xs font-medium text-slate-700 dark:text-slate-300 p-2 rounded-lg bg-slate-50 dark:bg-slate-950/60">
+                        <span>{mat.name} ({mat.qty} {mat.unit})</span>
+                        <span className="font-semibold text-slate-900 dark:text-white">${mat.unitCost.toFixed(2)}</span>
+                      </div>
+                    ))}
                   </div>
                 </div>
 
-                <div className="space-y-3 flex-1">
-                  {list.map((order) => (
-                    <div
-                      key={order.id}
-                      className="group rounded-xl border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-900 p-4 shadow-2xs hover:shadow-md transition-all hover:border-indigo-300 dark:hover:border-indigo-800"
-                    >
-                      <div className="flex items-center justify-between">
-                        <span className="text-xs font-extrabold text-indigo-600 dark:text-indigo-400">{order.id}</span>
-                        <Badge variant={order.priority === 'Urgent' ? 'rose' : order.priority === 'High' ? 'indigo' : 'slate'}>
-                          {order.priority}
-                        </Badge>
-                      </div>
-
-                      <h4 className="text-xs font-bold text-slate-900 dark:text-white mt-1.5">{order.product}</h4>
-                      <span className="text-[11px] text-slate-400 block mt-0.5">Qty: {order.qty} Units ({order.assignedTo})</span>
-
-                      {/* Progress Bar for Production */}
-                      {order.progress && (
-                        <div className="mt-3 space-y-1">
-                          <div className="flex justify-between text-[10px] font-semibold">
-                            <span className="text-slate-400">Production Progress</span>
-                            <span className="text-indigo-600 font-bold">{order.progress}%</span>
-                          </div>
-                          <div className="h-1.5 w-full rounded-full bg-slate-100 dark:bg-slate-800 overflow-hidden">
-                            <div className="h-full bg-indigo-600 rounded-full" style={{ width: `${order.progress}%` }} />
-                          </div>
-                        </div>
-                      )}
-
-                      {/* Quick Move Stage Action */}
-                      {stg.name !== 'Completed' && (
-                        <div className="mt-3 pt-2 border-t border-slate-100 dark:border-slate-800 flex justify-end">
-                          <button
-                            onClick={() => {
-                              const next = stg.name === 'Pending' ? 'In Production' : stg.name === 'In Production' ? 'Quality Check' : 'Completed';
-                              moveWorkOrder(order, stg.name, next);
-                            }}
-                            className="text-[10px] font-bold text-indigo-600 dark:text-indigo-400 hover:underline flex items-center gap-0.5"
-                          >
-                            Advance Stage <ArrowRight className="h-3 w-3" />
-                          </button>
-                        </div>
-                      )}
-                    </div>
-                  ))}
+                <div className="mt-4 pt-3 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between text-xs text-slate-500 font-medium">
+                  <span>Labor: {bom.laborHours} hrs</span>
+                  <span>Overhead: ${bom.overheadCost.toFixed(2)}</span>
                 </div>
               </div>
-            );
-          })}
-        </div>
-      )}
-
-      {/* Bill of Materials (BOM) Tab */}
-      {activeTab === 'bom' && (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {boms.map((bom) => (
-            <div
-              key={bom.id}
-              onClick={() => {
-                setSelectedBom(bom);
-                setIsBomDrawerOpen(true);
-              }}
-              className="rounded-2xl border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 shadow-xs hover:shadow-md transition-all cursor-pointer hover:border-indigo-300 dark:hover:border-indigo-800 flex flex-col justify-between"
-            >
-              <div>
-                <div className="flex items-center justify-between">
-                  <span className="text-xs font-bold text-slate-400">{bom.id}</span>
-                  <span className="text-xs font-semibold bg-indigo-50 dark:bg-indigo-950 text-indigo-600 dark:text-indigo-400 px-2.5 py-1 rounded-lg">
-                    {bom.category}
-                  </span>
-                </div>
-
-                <h3 className="text-base font-bold text-slate-900 dark:text-white mt-2 font-heading">
-                  {bom.finishedProduct}
-                </h3>
-                <p className="text-xs text-slate-400">{bom.productSku}</p>
-
-                {/* Raw Materials Count */}
-                <div className="mt-4 space-y-2 border-t border-slate-100 dark:border-slate-800 pt-3">
-                  <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Required Raw Materials ({bom.materials.length})</span>
-                  {bom.materials.map((mat, idx) => (
-                    <div key={idx} className="flex justify-between text-xs font-medium">
-                      <span className="text-slate-700 dark:text-slate-300 truncate max-w-[200px]">{mat.name}</span>
-                      <span className="text-slate-900 dark:text-white font-bold">{mat.qty} {mat.unit}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              <div className="mt-6 border-t border-slate-100 dark:border-slate-800 pt-4 flex items-center justify-between">
-                <div>
-                  <span className="text-[10px] text-slate-400 block">Calculated Unit Cost</span>
-                  <span className="text-lg font-extrabold text-indigo-600 dark:text-indigo-400">{bom.unitCost}</span>
-                </div>
-
-                <span className="text-xs font-bold text-indigo-600 dark:text-indigo-400 flex items-center gap-1 hover:underline">
-                  View Recipe <ChevronRight className="h-4 w-4" />
-                </span>
-              </div>
-            </div>
-          ))}
-        </div>
-      )}
-
-      {/* Production Cost Calculator Tab */}
-      {activeTab === 'calculator' && (
-        <div className="rounded-2xl border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 shadow-xs space-y-6 max-w-2xl mx-auto">
-          <div className="flex items-center gap-3 border-b border-slate-200 dark:border-slate-800 pb-4">
-            <Calculator className="h-6 w-6 text-indigo-600" />
-            <div>
-              <h3 className="text-lg font-bold text-slate-900 dark:text-white font-heading">
-                Unit Production Cost Calculator
-              </h3>
-              <p className="text-xs text-slate-400">Calculate: Raw Materials + Wastage + Labor Hours + Overhead Fees</p>
-            </div>
+            ))}
           </div>
 
-          <div className="space-y-4 text-xs">
-            <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 space-y-3">
-              <div className="flex justify-between">
-                <span>Raw Materials Cost (incl. 2% avg wastage):</span>
-                <span className="font-bold text-slate-900 dark:text-white">$317.50</span>
+          {/* Kanban Board */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            {/* Column 1: Pending */}
+            <div className="rounded-2xl border border-slate-200/80 dark:border-slate-800 bg-slate-100/50 dark:bg-slate-950/50 p-4">
+              <div className="flex items-center justify-between mb-3">
+                <span className="text-xs font-bold text-slate-700 dark:text-slate-300">Pending ({workOrders.pending.length})</span>
+                <span className="h-2 w-2 rounded-full bg-slate-400" />
               </div>
-              <div className="flex justify-between">
-                <span>Direct Assembly Labor (2.5 hrs @ $25/hr):</span>
-                <span className="font-bold text-slate-900 dark:text-white">$62.50</span>
-              </div>
-              <div className="flex justify-between">
-                <span>Plant Overhead & Power Usage:</span>
-                <span className="font-bold text-slate-900 dark:text-white">$45.00</span>
-              </div>
-              <div className="flex justify-between border-t border-slate-200 dark:border-slate-800 pt-2 text-sm font-extrabold text-indigo-600">
-                <span>Total Unit Cost:</span>
-                <span>$425.00 / Unit</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Material Wastage & Efficiency Reports */}
-      {activeTab === 'reports' && (
-        <div className="rounded-2xl border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 shadow-xs space-y-4">
-          <h3 className="text-base font-bold text-slate-900 dark:text-white font-heading">
-            Monthly Production Yield vs Scrap Wastage (Units)
-          </h3>
-
-          <div className="h-64 w-full">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={PRODUCTION_TREND_DATA} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E2E8F0" opacity={0.5} />
-                <XAxis dataKey="month" tickLine={false} axisLine={false} tick={{ fill: '#94A3B8', fontSize: 12 }} />
-                <YAxis tickLine={false} axisLine={false} tick={{ fill: '#94A3B8', fontSize: 12 }} />
-                <Tooltip contentStyle={{ backgroundColor: '#0F172A', borderRadius: '12px', color: '#FFF' }} />
-                <Bar dataKey="actual" fill="#10B981" radius={[8, 8, 0, 0]} name="Good Finished Goods" />
-                <Bar dataKey="wastage" fill="#EF4444" radius={[8, 8, 0, 0]} name="Material Scrap Wastage" />
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
-        </div>
-      )}
-
-      {/* BOM Detail Drawer */}
-      <Drawer
-        isOpen={isBomDrawerOpen}
-        onClose={() => setIsBomDrawerOpen(false)}
-        title="BOM Recipe Breakdown"
-      >
-        {selectedBom && (
-          <div className="space-y-6">
-            <div className="border-b border-slate-200 dark:border-slate-800 pb-4">
-              <span className="text-xs font-bold text-slate-400">{selectedBom.id}</span>
-              <h3 className="text-xl font-bold text-slate-900 dark:text-white">{selectedBom.finishedProduct}</h3>
-              <span className="text-xs text-indigo-600 font-semibold">{selectedBom.productSku}</span>
-            </div>
-
-            <div className="space-y-3">
-              <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider">Raw Material Consumption</h4>
-              <div className="divide-y divide-slate-100 dark:divide-slate-800 text-xs">
-                {selectedBom.materials.map((m, idx) => (
-                  <div key={idx} className="py-2.5 flex justify-between">
-                    <div>
-                      <span className="font-bold text-slate-900 dark:text-white block">{m.name}</span>
-                      <span className="text-slate-400">{m.qty} {m.unit} @ ${m.unitCost} / unit ({m.wastagePct}% wastage)</span>
+              <div className="space-y-3">
+                {workOrders.pending.map((wo) => (
+                  <div key={wo.id} className="p-3.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-2xs space-y-2">
+                    <div className="flex items-center justify-between text-[11px]">
+                      <span className="font-bold text-indigo-600 dark:text-indigo-400">{wo.id}</span>
+                      <span className="text-slate-500 font-semibold">{wo.priority}</span>
                     </div>
-                    <span className="font-bold text-slate-900 dark:text-white">${(m.qty * m.unitCost).toFixed(2)}</span>
+                    <h4 className="text-xs font-bold text-slate-900 dark:text-white">{wo.product}</h4>
+                    <p className="text-[11px] text-slate-500">Qty: {wo.qty} • {wo.assignedTo}</p>
                   </div>
                 ))}
               </div>
             </div>
 
-            <div className="border-t border-slate-200 dark:border-slate-800 pt-4 flex justify-between">
-              <span className="text-sm font-bold text-slate-900 dark:text-white">Calculated Unit Cost</span>
-              <span className="text-xl font-extrabold text-indigo-600 dark:text-indigo-400">{selectedBom.unitCost}</span>
+            {/* Column 2: In Production */}
+            <div className="rounded-2xl border border-slate-200/80 dark:border-slate-800 bg-slate-100/50 dark:bg-slate-950/50 p-4">
+              <div className="flex items-center justify-between mb-3">
+                <span className="text-xs font-bold text-indigo-600 dark:text-indigo-400">In Production ({workOrders.inProduction.length})</span>
+                <span className="h-2 w-2 rounded-full bg-indigo-500 animate-pulse" />
+              </div>
+              <div className="space-y-3">
+                {workOrders.inProduction.map((wo) => (
+                  <div key={wo.id} className="p-3.5 rounded-xl border border-indigo-200/60 dark:border-indigo-900/60 bg-white dark:bg-slate-900 shadow-2xs space-y-2">
+                    <div className="flex items-center justify-between text-[11px]">
+                      <span className="font-bold text-indigo-600 dark:text-indigo-400">{wo.id}</span>
+                      <span className="text-emerald-600 font-bold">{wo.progress}%</span>
+                    </div>
+                    <h4 className="text-xs font-bold text-slate-900 dark:text-white">{wo.product}</h4>
+                    <p className="text-[11px] text-slate-500">Qty: {wo.qty} • {wo.assignedTo}</p>
+                    <div className="w-full bg-slate-200 dark:bg-slate-800 rounded-full h-1.5 overflow-hidden">
+                      <div className="bg-indigo-600 h-full rounded-full" style={{ width: `${wo.progress}%` }} />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Column 3: Quality Check */}
+            <div className="rounded-2xl border border-slate-200/80 dark:border-slate-800 bg-slate-100/50 dark:bg-slate-950/50 p-4">
+              <div className="flex items-center justify-between mb-3">
+                <span className="text-xs font-bold text-amber-600 dark:text-amber-400">Quality Check ({workOrders.qualityCheck.length})</span>
+                <span className="h-2 w-2 rounded-full bg-amber-500" />
+              </div>
+              <div className="space-y-3">
+                {workOrders.qualityCheck.map((wo) => (
+                  <div key={wo.id} className="p-3.5 rounded-xl border border-amber-200/60 dark:border-amber-900/60 bg-white dark:bg-slate-900 shadow-2xs space-y-2">
+                    <div className="flex items-center justify-between text-[11px]">
+                      <span className="font-bold text-amber-600 dark:text-amber-400">{wo.id}</span>
+                      <span className="text-xs font-bold text-emerald-600">{wo.qcStatus}</span>
+                    </div>
+                    <h4 className="text-xs font-bold text-slate-900 dark:text-white">{wo.product}</h4>
+                    <p className="text-[11px] text-slate-500">Qty: {wo.qty} • {wo.assignedTo}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Column 4: Completed */}
+            <div className="rounded-2xl border border-slate-200/80 dark:border-slate-800 bg-slate-100/50 dark:bg-slate-950/50 p-4">
+              <div className="flex items-center justify-between mb-3">
+                <span className="text-xs font-bold text-emerald-600 dark:text-emerald-400">Completed ({workOrders.completed.length})</span>
+                <span className="h-2 w-2 rounded-full bg-emerald-500" />
+              </div>
+              <div className="space-y-3">
+                {workOrders.completed.map((wo) => (
+                  <div key={wo.id} className="p-3.5 rounded-xl border border-emerald-200/60 dark:border-emerald-900/60 bg-white dark:bg-slate-900 shadow-2xs space-y-2">
+                    <div className="flex items-center justify-between text-[11px]">
+                      <span className="font-bold text-emerald-600 dark:text-emerald-400">{wo.id}</span>
+                      <CheckCircle className="h-4 w-4 text-emerald-500" />
+                    </div>
+                    <h4 className="text-xs font-bold text-slate-900 dark:text-white">{wo.product}</h4>
+                    <p className="text-[11px] text-slate-500">Qty: {wo.qty} • Finished Stock-in</p>
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
-        )}
-      </Drawer>
+        </div>
+      )}
 
-      {/* Create New BOM Modal */}
-      <Modal
-        isOpen={isBomModalOpen}
-        onClose={() => setIsBomModalOpen(false)}
-        title="BOM Recipe Builder"
-      >
-        <form onSubmit={handleCreateBom} className="space-y-4">
-          <div>
-            <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Finished Product Name</label>
-            <input
-              type="text"
-              required
-              placeholder="e.g. Smart RFID Handheld Terminal"
-              value={newBom.finishedProduct}
-              onChange={(e) => setNewBom({ ...newBom, finishedProduct: e.target.value })}
-              className="w-full rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-950 px-3.5 py-2 text-sm text-slate-900 dark:text-white"
-            />
-          </div>
-
-          <div className="grid grid-cols-2 gap-3">
+      {/* TAB 2: RAW MATERIAL PURCHASE ORDERS */}
+      {activeTab === 'purchase_orders' && (
+        <div className="space-y-4">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div>
-              <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Assembly Labor Hours</label>
-              <input
-                type="number"
-                step="0.5"
-                value={newBom.laborHours}
-                onChange={(e) => setNewBom({ ...newBom, laborHours: parseFloat(e.target.value) || 0 })}
-                className="w-full rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-950 px-3.5 py-2 text-sm text-slate-900 dark:text-white"
-              />
+              <h2 className="text-base font-bold text-slate-900 dark:text-white font-heading">
+                Raw Material Purchase Orders (Supplier POs)
+              </h2>
+              <p className="text-xs text-slate-600 dark:text-slate-400">Create supplier POs for BOM components and trigger auto-reorders.</p>
             </div>
+            <button
+              onClick={() => setShowPoModal(true)}
+              className="flex items-center gap-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white px-3.5 py-2 text-xs font-semibold shadow-2xs"
+            >
+              <Plus className="h-4 w-4" />
+              <span>Issue New PO</span>
+            </button>
+          </div>
+
+          <div className="rounded-2xl border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-900 overflow-hidden shadow-xs">
+            <div className="overflow-x-auto">
+              <table className="w-full text-left border-collapse">
+                <thead>
+                  <tr className="border-b border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-950/50 text-[11px] font-bold text-slate-500 uppercase tracking-wider">
+                    <th className="p-3.5">PO ID</th>
+                    <th className="p-3.5">Supplier</th>
+                    <th className="p-3.5">Material Component</th>
+                    <th className="p-3.5">Qty</th>
+                    <th className="p-3.5">Total Cost</th>
+                    <th className="p-3.5">Status</th>
+                    <th className="p-3.5">Expected Delivery</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100 dark:divide-slate-800/60 text-xs font-medium">
+                  {purchaseOrders.map((po) => (
+                    <tr key={po.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/40 transition-colors">
+                      <td className="p-3.5 font-bold text-indigo-600 dark:text-indigo-400">{po.id}</td>
+                      <td className="p-3.5 font-semibold text-slate-900 dark:text-white">{po.supplier}</td>
+                      <td className="p-3.5 text-slate-700 dark:text-slate-300">{po.item}</td>
+                      <td className="p-3.5 text-slate-900 dark:text-white font-bold">{po.qty} Pcs</td>
+                      <td className="p-3.5 font-bold text-slate-900 dark:text-white">{po.total}</td>
+                      <td className="p-3.5">
+                        <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
+                          po.status === 'Received' ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300' :
+                          po.status === 'Partially Received' ? 'bg-amber-50 text-amber-700 dark:bg-amber-950 dark:text-amber-300' :
+                          po.status === 'Sent' ? 'bg-indigo-50 text-indigo-700 dark:bg-indigo-950 dark:text-indigo-300' :
+                          'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300'
+                        }`}>
+                          {po.status}
+                        </span>
+                      </td>
+                      <td className="p-3.5 text-slate-500">{po.expectedDate}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* TAB 3: QUALITY CONTROL & SAMPLE TESTING */}
+      {activeTab === 'quality_control' && (
+        <div className="space-y-4">
+          <div className="flex items-center justify-between">
             <div>
-              <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Overhead Cost ($)</label>
-              <input
-                type="number"
-                value={newBom.overheadCost}
-                onChange={(e) => setNewBom({ ...newBom, overheadCost: parseFloat(e.target.value) || 0 })}
-                className="w-full rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-950 px-3.5 py-2 text-sm text-slate-900 dark:text-white"
-              />
+              <h2 className="text-base font-bold text-slate-900 dark:text-white font-heading">
+                Quality Control (QC) & Sample Batch Gate
+              </h2>
+              <p className="text-xs text-slate-600 dark:text-slate-400">Log test parameters, certificates, and gate production completed sign-offs.</p>
             </div>
           </div>
 
-          <div className="pt-4 flex justify-end gap-2 border-t border-slate-200 dark:border-slate-800">
-            <button
-              type="button"
-              onClick={() => setIsBomModalOpen(false)}
-              className="px-4 py-2 text-xs font-semibold text-slate-600 dark:text-slate-400 hover:bg-slate-100 rounded-xl"
-            >
-              Cancel
-            </button>
-            <button
-              type="submit"
-              className="px-4 py-2 text-xs font-semibold text-white bg-indigo-600 hover:bg-indigo-700 rounded-xl shadow-md"
-            >
-              Save BOM Recipe
-            </button>
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            {qcTests.map((qc) => (
+              <div key={qc.id} className="rounded-2xl border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-900 p-5 shadow-xs flex flex-col justify-between">
+                <div>
+                  <div className="flex items-center justify-between mb-3">
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500 bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded-md">
+                      {qc.id} • {qc.batchNo}
+                    </span>
+                    <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${
+                      qc.result === 'Passed' ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300' :
+                      qc.result === 'In Testing' ? 'bg-amber-50 text-amber-700 dark:bg-amber-950 dark:text-amber-300' :
+                      'bg-rose-50 text-rose-700 dark:bg-rose-950 dark:text-rose-300'
+                    }`}>
+                      {qc.result}
+                    </span>
+                  </div>
+
+                  <h3 className="text-sm font-bold text-slate-900 dark:text-white font-heading mb-1">{qc.product}</h3>
+                  <p className="text-xs text-slate-500 mb-3">Work Order: <span className="font-semibold text-indigo-600 dark:text-indigo-400">{qc.woId}</span> • Sample Size: {qc.sampleQty} Pcs</p>
+
+                  <div className="space-y-2 p-3 rounded-xl bg-slate-50 dark:bg-slate-950 text-xs font-medium text-slate-700 dark:text-slate-300">
+                    <p><span className="font-bold text-slate-900 dark:text-white">Criteria:</span> {qc.criteria}</p>
+                    <p><span className="font-bold text-slate-900 dark:text-white">Inspector Notes:</span> {qc.notes}</p>
+                  </div>
+                </div>
+
+                <div className="mt-4 pt-3 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between text-xs text-slate-500 font-medium">
+                  <span>Inspector: {qc.inspector}</span>
+                  <span className="flex items-center gap-1 text-indigo-600 dark:text-indigo-400 font-semibold">
+                    <FileCheck className="h-4 w-4" /> Cert Attached
+                  </span>
+                </div>
+              </div>
+            ))}
           </div>
-        </form>
-      </Modal>
+        </div>
+      )}
+
+      {/* TAB 4: MATERIAL USAGE & SCRAP REPORTS */}
+      {activeTab === 'material_usage' && (
+        <div className="space-y-4">
+          <h2 className="text-base font-bold text-slate-900 dark:text-white font-heading">
+            Material Usage & Scrap Impact Report
+          </h2>
+          <div className="rounded-2xl border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-900 overflow-hidden shadow-xs">
+            <table className="w-full text-left border-collapse">
+              <thead>
+                <tr className="border-b border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-950/50 text-[11px] font-bold text-slate-500 uppercase tracking-wider">
+                  <th className="p-3.5">Work Order</th>
+                  <th className="p-3.5">Raw Material Item</th>
+                  <th className="p-3.5">Planned Qty</th>
+                  <th className="p-3.5">Actual Qty</th>
+                  <th className="p-3.5">Variance %</th>
+                  <th className="p-3.5">Scrap Cost</th>
+                  <th className="p-3.5">Status</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-100 dark:divide-slate-800/60 text-xs font-medium">
+                {MATERIAL_USAGE_REPORTS.map((r, idx) => (
+                  <tr key={idx} className="hover:bg-slate-50 dark:hover:bg-slate-800/40">
+                    <td className="p-3.5 font-bold text-indigo-600 dark:text-indigo-400">{r.woId}</td>
+                    <td className="p-3.5 font-semibold text-slate-900 dark:text-white">{r.item}</td>
+                    <td className="p-3.5 text-slate-700 dark:text-slate-300">{r.plannedQty}</td>
+                    <td className="p-3.5 font-bold text-slate-900 dark:text-white">{r.actualQty}</td>
+                    <td className="p-3.5 font-bold text-amber-600">{r.variance}</td>
+                    <td className="p-3.5 font-bold text-rose-600">{r.scrapCost}</td>
+                    <td className="p-3.5 font-bold text-slate-700 dark:text-slate-300">{r.status}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
+
+      {/* TAB 5: PRODUCTION SCHEDULING */}
+      {activeTab === 'scheduling' && (
+        <div className="space-y-4">
+          <h2 className="text-base font-bold text-slate-900 dark:text-white font-heading">
+            Production Scheduling & Capacity Planning
+          </h2>
+          <div className="p-6 rounded-2xl border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-900 text-center space-y-3">
+            <Calendar className="h-10 w-10 text-indigo-500 mx-auto" />
+            <h3 className="text-sm font-bold text-slate-900 dark:text-white">Line A & Line B Gantt Schedule</h3>
+            <p className="text-xs text-slate-600 dark:text-slate-400 max-w-md mx-auto">Visual capacity planning across SMT, CNC Milling, and Assembly Lines scheduled for Aug 04 - Aug 20, 2026.</p>
+          </div>
+        </div>
+      )}
+
+      {/* TAB 6: MACHINES & RESOURCES */}
+      {activeTab === 'machines' && (
+        <div className="space-y-4">
+          <h2 className="text-base font-bold text-slate-900 dark:text-white font-heading">
+            Machine & Work Center Allocation
+          </h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            {MACHINE_RESOURCE_ALLOCATION.map((m) => (
+              <div key={m.machineId} className="p-4 rounded-2xl border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-900 space-y-2">
+                <div className="flex items-center justify-between text-xs">
+                  <span className="font-bold text-slate-500">{m.machineId}</span>
+                  <span className={`font-bold text-[10px] px-2 py-0.5 rounded-full ${
+                    m.status === 'Running' ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300' :
+                    m.status === 'Idle' ? 'bg-indigo-50 text-indigo-700 dark:bg-indigo-950 dark:text-indigo-300' :
+                    'bg-rose-50 text-rose-700 dark:bg-rose-950 dark:text-rose-300'
+                  }`}>
+                    {m.status}
+                  </span>
+                </div>
+                <h3 className="text-xs font-bold text-slate-900 dark:text-white">{m.name}</h3>
+                <p className="text-[11px] text-slate-500">Utilization: <span className="font-bold text-slate-900 dark:text-white">{m.utilization}</span></p>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* TAB 7: SUPPLIERS & BATCH TRACEABILITY */}
+      {activeTab === 'suppliers' && (
+        <div className="space-y-4">
+          <h2 className="text-base font-bold text-slate-900 dark:text-white font-heading">
+            Supplier Directory & Batch/Lot Traceability
+          </h2>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {SUPPLIER_DIRECTORY.map((sup) => (
+              <div key={sup.id} className="p-4 rounded-2xl border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-900 space-y-2 text-xs">
+                <span className="font-bold text-indigo-600">{sup.id}</span>
+                <h3 className="text-sm font-bold text-slate-900 dark:text-white">{sup.name}</h3>
+                <p className="text-slate-600 dark:text-slate-400">Contact: {sup.contact} ({sup.email})</p>
+                <p className="text-slate-600 dark:text-slate-400">Lead Time: <span className="font-bold text-slate-900 dark:text-white">{sup.leadTime}</span></p>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* MODAL: NEW WORK ORDER */}
+      {showWoModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs">
+          <div className="w-full max-w-md rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 shadow-2xl space-y-4">
+            <h3 className="text-base font-bold text-slate-900 dark:text-white font-heading">Create Production Work Order</h3>
+            <form onSubmit={handleCreateWo} className="space-y-3 text-xs">
+              <div>
+                <label className="block font-semibold mb-1">Target Product</label>
+                <select value={newWoProduct} onChange={(e) => setNewWoProduct(e.target.value)} className="w-full p-2.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950">
+                  <option>POS Touchscreen Terminal X1</option>
+                  <option>Wireless Thermal Barcode Printer</option>
+                  <option>Smart RFID Scanner Gun</option>
+                </select>
+              </div>
+              <div>
+                <label className="block font-semibold mb-1">Target Batch Quantity</label>
+                <input type="number" value={newWoQty} onChange={(e) => setNewWoQty(e.target.value)} className="w-full p-2.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950" required />
+              </div>
+              <div className="flex items-center justify-end gap-2 pt-2">
+                <button type="button" onClick={() => setShowWoModal(false)} className="px-4 py-2 rounded-xl border text-slate-600">Cancel</button>
+                <button type="submit" className="px-4 py-2 rounded-xl bg-indigo-600 text-white font-bold">Create Work Order</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL: NEW PO */}
+      {showPoModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs">
+          <div className="w-full max-w-md rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 shadow-2xl space-y-4">
+            <h3 className="text-base font-bold text-slate-900 dark:text-white font-heading">Issue Supplier Purchase Order</h3>
+            <form onSubmit={handleCreatePo} className="space-y-3 text-xs">
+              <div>
+                <label className="block font-semibold mb-1">Supplier</label>
+                <select value={poSupplier} onChange={(e) => setPoSupplier(e.target.value)} className="w-full p-2.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950">
+                  <option>OptoTech Displays Ltd</option>
+                  <option>Precision Machining Corp</option>
+                  <option>Silicon Core Semiconductors</option>
+                </select>
+              </div>
+              <div>
+                <label className="block font-semibold mb-1">Raw Material Item</label>
+                <input type="text" value={poMaterial} onChange={(e) => setPoMaterial(e.target.value)} className="w-full p-2.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950" required />
+              </div>
+              <div>
+                <label className="block font-semibold mb-1">Quantity</label>
+                <input type="number" value={poQty} onChange={(e) => setPoQty(e.target.value)} className="w-full p-2.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950" required />
+              </div>
+              <div className="flex items-center justify-end gap-2 pt-2">
+                <button type="button" onClick={() => setShowPoModal(false)} className="px-4 py-2 rounded-xl border text-slate-600">Cancel</button>
+                <button type="submit" className="px-4 py-2 rounded-xl bg-indigo-600 text-white font-bold">Send Purchase Order</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

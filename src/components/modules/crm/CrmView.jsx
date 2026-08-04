@@ -1,377 +1,257 @@
 import React, { useState } from 'react';
-import { INITIAL_LEADS_PIPELINE } from '../../../data/mockData';
-import DataTable from '../../ui/DataTable';
-import Drawer from '../../ui/Drawer';
-import Modal from '../../ui/Modal';
-import Badge from '../../ui/Badge';
 import { useApp } from '../../../context/AppContext';
-import { LayoutGrid, Table as TableIcon, Plus, Building, Mail, Phone, ArrowRight, DollarSign, UserCheck } from 'lucide-react';
+import {
+  CRM_CLIENT_ACCOUNTS,
+  INITIAL_LEADS_PIPELINE,
+  CRM_CONTRACTS,
+  CRM_CLIENT_PROJECTS
+} from '../../../data/mockData';
+import {
+  Users,
+  Plus,
+  Building,
+  FileCheck,
+  FolderKanban,
+  TrendingUp,
+  DollarSign,
+  Briefcase,
+  Phone,
+  Mail
+} from 'lucide-react';
 
 const CrmView = () => {
   const { addToast } = useApp();
+  const [activeTab, setActiveTab] = useState('accounts');
   const [pipeline, setPipeline] = useState(INITIAL_LEADS_PIPELINE);
-  const [viewMode, setViewMode] = useState('kanban'); // 'kanban' | 'table'
+  const [clients, setClients] = useState(CRM_CLIENT_ACCOUNTS);
+  const [contracts, setContracts] = useState(CRM_CONTRACTS);
 
-  // Selected Contact Drawer State
-  const [selectedDeal, setSelectedDeal] = useState(null);
-  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
-
-  // New Deal Modal State
-  const [isNewDealOpen, setIsNewDealOpen] = useState(false);
-  const [newDeal, setNewDeal] = useState({ title: '', company: '', value: '', contact: '', email: '', stage: 'Lead' });
-
-  const moveStage = (deal, currentStage, targetStage) => {
-    const sourceList = [...pipeline[currentStage.toLowerCase()]];
-    const targetList = [...pipeline[targetStage.toLowerCase()]];
-
-    const updatedSource = sourceList.filter((d) => d.id !== deal.id);
-    const updatedDeal = { ...deal, stage: targetStage };
-    const updatedTarget = [...targetList, updatedDeal];
-
-    setPipeline({
-      ...pipeline,
-      [currentStage.toLowerCase()]: updatedSource,
-      [targetStage.toLowerCase()]: updatedTarget
-    });
-
-    addToast(`Moved deal "${deal.title}" to ${targetStage}`, "success");
-  };
-
-  const handleCreateDeal = (e) => {
-    e.preventDefault();
-    const created = {
-      id: `c-${Date.now()}`,
-      ...newDeal,
-      priority: "High",
-      probability: "50%"
-    };
-    setPipeline((prev) => ({
-      ...prev,
-      [newDeal.stage.toLowerCase()]: [...prev[newDeal.stage.toLowerCase()], created]
-    }));
-    setIsNewDealOpen(false);
-    addToast(`New deal "${newDeal.title}" created in ${newDeal.stage}`, "success");
-    setNewDeal({ title: '', company: '', value: '', contact: '', email: '', stage: 'Lead' });
-  };
-
-  // Convert pipeline object to flat array for Table View
-  const flatDeals = Object.values(pipeline).flat();
-
-  const tableColumns = [
-    { header: "Deal Name", accessor: "title", sortable: true },
-    { header: "Company", accessor: "company", sortable: true },
-    { header: "Contact Person", accessor: "contact", sortable: true },
-    { header: "Value", accessor: "value", sortable: true },
-    {
-      header: "Stage",
-      accessor: "stage",
-      sortable: true,
-      render: (val) => (
-        <Badge
-          variant={
-            val === 'Won' ? 'emerald' : val === 'Proposal' ? 'indigo' : val === 'Contacted' ? 'amber' : 'slate'
-          }
-        >
-          {val}
-        </Badge>
-      )
-    },
-    {
-      header: "Actions",
-      accessor: "actions",
-      render: (_, row) => (
-        <button
-          onClick={() => {
-            setSelectedDeal(row);
-            setIsDrawerOpen(true);
-          }}
-          className="text-xs font-semibold text-indigo-600 dark:text-indigo-400 hover:underline"
-        >
-          View Profile
-        </button>
-      )
-    }
-  ];
-
-  const stages = [
-    { key: 'leads', name: 'Lead', color: 'border-slate-300 dark:border-slate-700 bg-slate-100 dark:bg-slate-800' },
-    { key: 'contacted', name: 'Contacted', color: 'border-amber-500 bg-amber-50 dark:bg-amber-950/40 text-amber-600' },
-    { key: 'proposal', name: 'Proposal', color: 'border-indigo-500 bg-indigo-50 dark:bg-indigo-950/40 text-indigo-600' },
-    { key: 'won', name: 'Won', color: 'border-emerald-500 bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600' }
+  const tabs = [
+    { id: 'accounts', label: 'Client Accounts', icon: Building },
+    { id: 'leads', label: 'Leads Pipeline', icon: Users },
+    { id: 'sales_deals', label: 'Sales Deals & Forecast', icon: TrendingUp },
+    { id: 'client_projects', label: 'Client Projects', icon: FolderKanban },
+    { id: 'contracts', label: 'Contracts & Proposals', icon: FileCheck }
   ];
 
   return (
-    <div className="space-y-6">
-      {/* Header Toolbar */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white dark:bg-slate-900 p-4 rounded-xl border border-slate-200/80 dark:border-slate-800 shadow-xs">
-        <div className="flex items-center gap-2">
-          <div className="flex items-center rounded-lg bg-slate-100 dark:bg-slate-950 p-1 border border-slate-200 dark:border-slate-800">
+    <div className="space-y-6 w-full max-w-full min-w-0">
+      {/* Navigation Sub-Tabs */}
+      <div className="flex items-center gap-2 overflow-x-auto pb-2 border-b border-slate-200 dark:border-slate-800 scrollbar-none">
+        {tabs.map((tab) => {
+          const Icon = tab.icon;
+          const isActive = activeTab === tab.id;
+          return (
             <button
-              onClick={() => setViewMode('kanban')}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-semibold transition-all ${
-                viewMode === 'kanban'
-                  ? 'bg-white dark:bg-slate-800 text-indigo-600 dark:text-indigo-400 shadow-xs'
-                  : 'text-slate-500 hover:text-slate-900 dark:hover:text-white'
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id)}
+              className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold whitespace-nowrap transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 shrink-0 ${
+                isActive
+                  ? 'bg-indigo-600 text-white shadow-xs'
+                  : 'bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800'
               }`}
             >
-              <LayoutGrid className="h-3.5 w-3.5" />
-              Kanban Board
+              <Icon className="h-4 w-4 shrink-0" />
+              <span>{tab.label}</span>
             </button>
-            <button
-              onClick={() => setViewMode('table')}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-semibold transition-all ${
-                viewMode === 'table'
-                  ? 'bg-white dark:bg-slate-800 text-indigo-600 dark:text-indigo-400 shadow-xs'
-                  : 'text-slate-500 hover:text-slate-900 dark:hover:text-white'
-              }`}
-            >
-              <TableIcon className="h-3.5 w-3.5" />
-              Table View
-            </button>
-          </div>
-
-          <span className="text-xs text-slate-400 font-medium">
-            Total Pipeline: <strong className="text-slate-900 dark:text-white">$249,500</strong>
-          </span>
-        </div>
-
-        <button
-          onClick={() => setIsNewDealOpen(true)}
-          className="flex items-center gap-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 text-xs font-semibold shadow-2xs shadow-indigo-500/20"
-        >
-          <Plus className="h-4 w-4" />
-          New CRM Deal
-        </button>
+          );
+        })}
       </div>
 
-      {/* View Switcher Output */}
-      {viewMode === 'kanban' ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          {stages.map((stg) => {
-            const list = pipeline[stg.key] || [];
-            const totalValue = list.reduce((acc, curr) => acc + parseInt(curr.value.replace(/[^0-9]/g, '') || 0), 0);
+      {/* TAB 1: CLIENT ACCOUNTS */}
+      {activeTab === 'accounts' && (
+        <div className="space-y-4">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div>
+              <h2 className="text-base font-bold text-slate-900 dark:text-white font-heading">
+                Client Accounts & Corporate Profiles
+              </h2>
+              <p className="text-xs text-slate-600 dark:text-slate-400">Manage client contacts, billing addresses, and linked active projects.</p>
+            </div>
+            <button
+              onClick={() => addToast("New Client Account dialog opened", "info")}
+              className="flex items-center gap-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white px-3.5 py-2 text-xs font-semibold shadow-2xs"
+            >
+              <Plus className="h-4 w-4" />
+              <span>Add Client Account</span>
+            </button>
+          </div>
 
-            return (
-              <div
-                key={stg.key}
-                className="flex flex-col rounded-2xl border border-slate-200/80 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-950/40 p-4 shadow-xs min-h-[500px]"
-              >
-                {/* Stage Header */}
-                <div className="flex items-center justify-between mb-3 pb-3 border-b border-slate-200/80 dark:border-slate-800">
-                  <div className="flex items-center gap-2">
-                    <span className="font-bold text-sm text-slate-900 dark:text-white font-heading">{stg.name}</span>
-                    <span className="flex h-5 w-5 items-center justify-center rounded-full bg-slate-200 dark:bg-slate-800 text-[10px] font-bold text-slate-600 dark:text-slate-300">
-                      {list.length}
-                    </span>
-                  </div>
-                  <span className="text-xs font-bold text-slate-500 dark:text-slate-400">
-                    ${totalValue.toLocaleString()}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {clients.map((cli) => (
+              <div key={cli.id} className="p-5 rounded-2xl border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-xs space-y-3">
+                <div className="flex items-center justify-between">
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-950 px-2 py-0.5 rounded-md">
+                    {cli.id}
                   </span>
+                  <span className="text-xs font-bold text-emerald-700 dark:text-emerald-400">{cli.status}</span>
+                </div>
+                <h3 className="text-sm font-bold text-slate-900 dark:text-white font-heading">{cli.company}</h3>
+                <p className="text-xs text-slate-600 dark:text-slate-400">Industry: {cli.industry}</p>
+
+                <div className="space-y-1.5 p-3 rounded-xl bg-slate-50 dark:bg-slate-950 text-xs font-medium text-slate-700 dark:text-slate-300">
+                  <p className="flex items-center gap-2"><Users className="h-3.5 w-3.5 text-slate-400" /> {cli.contactPerson}</p>
+                  <p className="flex items-center gap-2"><Mail className="h-3.5 w-3.5 text-slate-400" /> {cli.email}</p>
+                  <p className="flex items-center gap-2"><Phone className="h-3.5 w-3.5 text-slate-400" /> {cli.phone}</p>
                 </div>
 
-                {/* Cards List */}
-                <div className="flex-1 space-y-3">
-                  {list.map((deal) => (
-                    <div
-                      key={deal.id}
-                      className="group rounded-xl border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-900 p-4 shadow-2xs hover:shadow-md transition-all hover:border-indigo-300 dark:hover:border-indigo-800 cursor-pointer"
-                      onClick={() => {
-                        setSelectedDeal(deal);
-                        setIsDrawerOpen(true);
-                      }}
-                    >
-                      <div className="flex items-start justify-between">
-                        <span className="text-xs font-bold text-indigo-600 dark:text-indigo-400">{deal.company}</span>
-                        <span className="text-[10px] font-semibold text-slate-400">{deal.probability} win</span>
-                      </div>
-
-                      <h4 className="text-sm font-bold text-slate-900 dark:text-white mt-1 group-hover:text-indigo-600 transition-colors">
-                        {deal.title}
-                      </h4>
-
-                      <div className="mt-3 flex items-center justify-between text-xs border-t border-slate-100 dark:border-slate-800/80 pt-2.5">
-                        <span className="font-extrabold text-slate-900 dark:text-white">{deal.value}</span>
-                        <span className="text-slate-500 text-[11px]">{deal.contact}</span>
-                      </div>
-
-                      {/* Quick Move Stage Dropdown */}
-                      <div className="mt-3 flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                        {stg.name !== 'Won' && (
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              const nextStage =
-                                stg.name === 'Lead' ? 'Contacted' : stg.name === 'Contacted' ? 'Proposal' : 'Won';
-                              moveStage(deal, stg.name, nextStage);
-                            }}
-                            className="text-[10px] font-bold text-indigo-600 dark:text-indigo-400 hover:underline flex items-center gap-0.5"
-                          >
-                            Advance Stage <ArrowRight className="h-3 w-3" />
-                          </button>
-                        )}
-                      </div>
-                    </div>
-                  ))}
+                <div className="pt-2 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between text-xs font-bold">
+                  <span>Total Value: {cli.totalDeals}</span>
+                  <span className="text-indigo-600 dark:text-indigo-400">{cli.activeProjects} Projects</span>
                 </div>
               </div>
-            );
-          })}
+            ))}
+          </div>
         </div>
-      ) : (
-        <DataTable
-          columns={tableColumns}
-          data={flatDeals}
-          searchPlaceholder="Search deals by name or company..."
-          filterOptions={['Lead', 'Contacted', 'Proposal', 'Won']}
-        />
       )}
 
-      {/* Contact Profile Drawer */}
-      <Drawer
-        isOpen={isDrawerOpen}
-        onClose={() => setIsDrawerOpen(false)}
-        title="Contact & Deal Profile"
-      >
-        {selectedDeal && (
-          <div className="space-y-6">
-            <div className="flex items-center gap-4 border-b border-slate-200 dark:border-slate-800 pb-4">
-              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-indigo-100 dark:bg-indigo-950 text-indigo-600 dark:text-indigo-400 font-bold text-lg">
-                <Building className="h-6 w-6" />
-              </div>
-              <div>
-                <h3 className="text-lg font-bold text-slate-900 dark:text-white">{selectedDeal.company}</h3>
-                <p className="text-xs text-slate-400">{selectedDeal.title}</p>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-2 gap-3 bg-slate-50 dark:bg-slate-950 p-4 rounded-xl border border-slate-200 dark:border-slate-800">
-              <div>
-                <span className="text-[10px] text-slate-400 uppercase font-semibold">Deal Value</span>
-                <p className="text-base font-extrabold text-indigo-600 dark:text-indigo-400">{selectedDeal.value}</p>
-              </div>
-              <div>
-                <span className="text-[10px] text-slate-400 uppercase font-semibold">Stage</span>
-                <div>
-                  <Badge variant="indigo">{selectedDeal.stage}</Badge>
-                </div>
+      {/* TAB 2: LEADS PIPELINE */}
+      {activeTab === 'leads' && (
+        <div className="space-y-4">
+          <h2 className="text-base font-bold text-slate-900 dark:text-white font-heading">
+            Leads Pipeline (New → Qualified → Won)
+          </h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            {/* Stage: Lead */}
+            <div className="rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-100/50 dark:bg-slate-950/50 p-4">
+              <span className="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-3">New Leads ({pipeline.leads.length})</span>
+              <div className="space-y-3">
+                {pipeline.leads.map((l) => (
+                  <div key={l.id} className="p-3.5 rounded-xl border bg-white dark:bg-slate-900 space-y-1.5 shadow-2xs">
+                    <span className="text-[10px] font-bold text-indigo-600">{l.company}</span>
+                    <h4 className="text-xs font-bold text-slate-900 dark:text-white">{l.title}</h4>
+                    <p className="text-[11px] font-bold text-slate-900 dark:text-white">{l.value} • {l.probability}</p>
+                  </div>
+                ))}
               </div>
             </div>
 
-            <div className="space-y-3">
-              <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider">Primary Contact</h4>
-              <div className="flex items-center gap-3 p-3 rounded-xl border border-slate-200 dark:border-slate-800">
-                <UserCheck className="h-5 w-5 text-indigo-500" />
-                <div>
-                  <span className="text-xs font-bold block text-slate-900 dark:text-white">{selectedDeal.contact}</span>
-                  <span className="text-[11px] text-slate-400 block">{selectedDeal.email}</span>
-                </div>
+            {/* Stage: Contacted */}
+            <div className="rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-100/50 dark:bg-slate-950/50 p-4">
+              <span className="text-xs font-bold text-indigo-600 block mb-3">Contacted ({pipeline.contacted.length})</span>
+              <div className="space-y-3">
+                {pipeline.contacted.map((l) => (
+                  <div key={l.id} className="p-3.5 rounded-xl border bg-white dark:bg-slate-900 space-y-1.5 shadow-2xs">
+                    <span className="text-[10px] font-bold text-indigo-600">{l.company}</span>
+                    <h4 className="text-xs font-bold text-slate-900 dark:text-white">{l.title}</h4>
+                    <p className="text-[11px] font-bold text-slate-900 dark:text-white">{l.value} • {l.probability}</p>
+                  </div>
+                ))}
               </div>
             </div>
 
-            <div className="space-y-3 border-t border-slate-200 dark:border-slate-800 pt-4">
-              <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider">Activity History</h4>
-              <div className="space-y-2 text-xs">
-                <div className="p-3 rounded-lg bg-slate-50 dark:bg-slate-950">
-                  <span className="font-bold text-slate-900 dark:text-white">Proposal Sent</span>
-                  <p className="text-slate-500 mt-0.5">Sent initial $45,000 SLA contract proposal.</p>
-                </div>
-                <div className="p-3 rounded-lg bg-slate-50 dark:bg-slate-950">
-                  <span className="font-bold text-slate-900 dark:text-white">Discovery Call Completed</span>
-                  <p className="text-slate-500 mt-0.5">Discussed custom ERP workflow requirements.</p>
-                </div>
+            {/* Stage: Proposal */}
+            <div className="rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-100/50 dark:bg-slate-950/50 p-4">
+              <span className="text-xs font-bold text-amber-600 block mb-3">Proposal Sent ({pipeline.proposal.length})</span>
+              <div className="space-y-3">
+                {pipeline.proposal.map((l) => (
+                  <div key={l.id} className="p-3.5 rounded-xl border bg-white dark:bg-slate-900 space-y-1.5 shadow-2xs">
+                    <span className="text-[10px] font-bold text-amber-600">{l.company}</span>
+                    <h4 className="text-xs font-bold text-slate-900 dark:text-white">{l.title}</h4>
+                    <p className="text-[11px] font-bold text-slate-900 dark:text-white">{l.value} • {l.probability}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Stage: Won */}
+            <div className="rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-100/50 dark:bg-slate-950/50 p-4">
+              <span className="text-xs font-bold text-emerald-600 block mb-3">Closed Won ({pipeline.won.length})</span>
+              <div className="space-y-3">
+                {pipeline.won.map((l) => (
+                  <div key={l.id} className="p-3.5 rounded-xl border bg-white dark:bg-slate-900 space-y-1.5 shadow-2xs">
+                    <span className="text-[10px] font-bold text-emerald-600">{l.company}</span>
+                    <h4 className="text-xs font-bold text-slate-900 dark:text-white">{l.title}</h4>
+                    <p className="text-[11px] font-bold text-emerald-600">{l.value} • {l.probability}</p>
+                  </div>
+                ))}
               </div>
             </div>
           </div>
-        )}
-      </Drawer>
+        </div>
+      )}
 
-      {/* New Deal Modal */}
-      <Modal
-        isOpen={isNewDealOpen}
-        onClose={() => setIsNewDealOpen(false)}
-        title="Create New Sales Deal"
-      >
-        <form onSubmit={handleCreateDeal} className="space-y-4">
-          <div>
-            <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Deal Title</label>
-            <input
-              type="text"
-              required
-              placeholder="e.g. ERP License Expansion"
-              value={newDeal.title}
-              onChange={(e) => setNewDeal({ ...newDeal, title: e.target.value })}
-              className="w-full rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-950 px-3.5 py-2 text-sm text-slate-900 dark:text-white"
-            />
-          </div>
-
-          <div>
-            <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Company Name</label>
-            <input
-              type="text"
-              required
-              placeholder="e.g. Wayne Enterprises"
-              value={newDeal.company}
-              onChange={(e) => setNewDeal({ ...newDeal, company: e.target.value })}
-              className="w-full rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-950 px-3.5 py-2 text-sm text-slate-900 dark:text-white"
-            />
-          </div>
-
-          <div className="grid grid-cols-2 gap-3">
+      {/* TAB 3: SALES DEALS & FORECAST */}
+      {activeTab === 'sales_deals' && (
+        <div className="space-y-4">
+          <h2 className="text-base font-bold text-slate-900 dark:text-white font-heading">
+            Sales Deals & Revenue Forecast Summary
+          </h2>
+          <div className="p-6 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 flex items-center justify-between">
             <div>
-              <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Deal Value ($)</label>
-              <input
-                type="text"
-                required
-                placeholder="$35,000"
-                value={newDeal.value}
-                onChange={(e) => setNewDeal({ ...newDeal, value: e.target.value })}
-                className="w-full rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-950 px-3.5 py-2 text-sm text-slate-900 dark:text-white"
-              />
+              <span className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Weighted Q3 Pipeline Forecast</span>
+              <span className="text-2xl font-extrabold text-slate-900 dark:text-white">$248,500.00</span>
             </div>
-            <div>
-              <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Initial Stage</label>
-              <select
-                value={newDeal.stage}
-                onChange={(e) => setNewDeal({ ...newDeal, stage: e.target.value })}
-                className="w-full rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-950 px-3.5 py-2 text-sm text-slate-900 dark:text-white"
-              >
-                <option value="Lead">Lead</option>
-                <option value="Contacted">Contacted</option>
-                <option value="Proposal">Proposal</option>
-                <option value="Won">Won</option>
-              </select>
-            </div>
+            <span className="text-xs font-bold text-emerald-600 bg-emerald-50 dark:bg-emerald-950 px-3 py-1 rounded-full">+18.5% YoY Growth</span>
           </div>
+        </div>
+      )}
 
-          <div>
-            <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Contact Person</label>
-            <input
-              type="text"
-              required
-              placeholder="e.g. Lucius Fox"
-              value={newDeal.contact}
-              onChange={(e) => setNewDeal({ ...newDeal, contact: e.target.value })}
-              className="w-full rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-950 px-3.5 py-2 text-sm text-slate-900 dark:text-white"
-            />
+      {/* TAB 4: CLIENT PROJECTS */}
+      {activeTab === 'client_projects' && (
+        <div className="space-y-4">
+          <h2 className="text-base font-bold text-slate-900 dark:text-white font-heading">
+            Client Project Delivery (Worksuite Style)
+          </h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {CRM_CLIENT_PROJECTS.map((prj) => (
+              <div key={prj.id} className="p-5 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 space-y-3">
+                <div className="flex items-center justify-between text-xs">
+                  <span className="font-bold text-indigo-600">{prj.id}</span>
+                  <span className="font-bold text-emerald-600">{prj.status}</span>
+                </div>
+                <h3 className="text-sm font-bold text-slate-900 dark:text-white">{prj.name}</h3>
+                <p className="text-xs text-slate-600 dark:text-slate-400">Client: <span className="font-semibold text-slate-900 dark:text-white">{prj.client}</span> • Lead: {prj.lead}</p>
+                
+                <div className="space-y-1">
+                  <div className="flex justify-between text-xs font-semibold">
+                    <span>Progress</span>
+                    <span>{prj.progress}%</span>
+                  </div>
+                  <div className="w-full bg-slate-100 dark:bg-slate-800 h-2 rounded-full overflow-hidden">
+                    <div className="bg-indigo-600 h-full rounded-full" style={{ width: `${prj.progress}%` }} />
+                  </div>
+                </div>
+              </div>
+            ))}
           </div>
+        </div>
+      )}
 
-          <div className="pt-4 flex justify-end gap-2 border-t border-slate-200 dark:border-slate-800">
-            <button
-              type="button"
-              onClick={() => setIsNewDealOpen(false)}
-              className="px-4 py-2 text-xs font-semibold text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl"
-            >
-              Cancel
-            </button>
-            <button
-              type="submit"
-              className="px-4 py-2 text-xs font-semibold text-white bg-indigo-600 hover:bg-indigo-700 rounded-xl shadow-md"
-            >
-              Add Deal
-            </button>
+      {/* TAB 5: CONTRACTS & PROPOSALS */}
+      {activeTab === 'contracts' && (
+        <div className="space-y-4">
+          <h2 className="text-base font-bold text-slate-900 dark:text-white font-heading">
+            Contracts & Proposal Signatures
+          </h2>
+          <div className="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 overflow-hidden shadow-xs">
+            <table className="w-full text-left border-collapse">
+              <thead>
+                <tr className="border-b border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-950/50 text-[11px] font-bold text-slate-500 uppercase tracking-wider">
+                  <th className="p-3.5">Contract ID</th>
+                  <th className="p-3.5">Title</th>
+                  <th className="p-3.5">Client Account</th>
+                  <th className="p-3.5">Contract Value</th>
+                  <th className="p-3.5">Status</th>
+                  <th className="p-3.5">Signatory</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-100 dark:divide-slate-800/60 text-xs font-medium">
+                {CRM_CONTRACTS.map((ctr) => (
+                  <tr key={ctr.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/40">
+                    <td className="p-3.5 font-bold text-indigo-600 dark:text-indigo-400">{ctr.id}</td>
+                    <td className="p-3.5 font-bold text-slate-900 dark:text-white">{ctr.title}</td>
+                    <td className="p-3.5 text-slate-700 dark:text-slate-300">{ctr.client}</td>
+                    <td className="p-3.5 font-bold text-slate-900 dark:text-white">{ctr.value}</td>
+                    <td className="p-3.5"><span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300">{ctr.status}</span></td>
+                    <td className="p-3.5 text-slate-500">{ctr.signedBy}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
-        </form>
-      </Modal>
+        </div>
+      )}
     </div>
   );
 };

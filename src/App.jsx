@@ -7,7 +7,7 @@ import CommandPalette from './components/layout/CommandPalette';
 import QuickCreateDrawer from './components/layout/QuickCreateDrawer';
 import ToastContainer from './components/ui/ToastContainer';
 
-// Module Views
+// Core Enterprise Module Views
 import DashboardView from './components/modules/dashboard/DashboardView';
 import ServerAdminView from './components/modules/serveradmin/ServerAdminView';
 import ManufacturingView from './components/modules/manufacturing/ManufacturingView';
@@ -16,7 +16,6 @@ import MobileAppView from './components/modules/mobile/MobileAppView';
 import CrmView from './components/modules/crm/CrmView';
 import HrmView from './components/modules/hrm/HrmView';
 import AccountingView from './components/modules/accounting/AccountingView';
-import PosView from './components/modules/pos/PosView';
 import BillingView from './components/modules/billing/BillingView';
 import SettingsView from './components/modules/settings/SettingsView';
 
@@ -41,8 +40,6 @@ const MainContent = () => {
         return <HrmView />;
       case 'accounting':
         return <AccountingView />;
-      case 'pos':
-        return <PosView />;
       case 'billing':
         return <BillingView />;
       case 'settings':
