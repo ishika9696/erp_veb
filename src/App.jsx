@@ -53,8 +53,8 @@ const MainContent = () => {
   };
 
   return (
-    <main className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8 bg-slate-50/50 dark:bg-slate-950/80 transition-colors">
-      <div className="mx-auto max-w-7xl">
+    <main className="flex-1 w-full max-w-full min-w-0 overflow-y-auto overflow-x-hidden p-3 sm:p-6 lg:p-8 bg-slate-50/50 dark:bg-slate-950/80 transition-colors">
+      <div className="mx-auto w-full max-w-7xl min-w-0 overflow-x-hidden">
         <Header />
         {renderModule()}
       </div>
@@ -65,9 +65,9 @@ const MainContent = () => {
 export default function App() {
   return (
     <AppProvider>
-      <div className="flex h-screen w-screen overflow-hidden bg-slate-50 dark:bg-slate-950 font-sans text-slate-900 dark:text-slate-100 antialiased">
+      <div className="flex h-screen w-screen max-w-full overflow-hidden bg-slate-50 dark:bg-slate-950 font-sans text-slate-900 dark:text-slate-100 antialiased">
         <Sidebar />
-        <div className="flex flex-1 flex-col overflow-hidden">
+        <div className="flex flex-1 min-w-0 flex-col overflow-hidden max-w-full">
           <Navbar />
           <MainContent />
         </div>

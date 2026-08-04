@@ -14,22 +14,24 @@ const StatCard = ({ title, value, change, isPositive, period, icon, color = 'ind
   const isNumericTrend = change && (change.startsWith('+') || change.startsWith('-'));
 
   return (
-    <div className="relative overflow-hidden rounded-2xl border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-900 p-5 shadow-xs hover:shadow-md transition-all duration-200 group flex flex-col justify-between h-full min-h-[156px]">
-      {/* Label and Icon Row - Strict Vertically Centered */}
-      <div className="flex items-center justify-between gap-2">
-        <span className="text-xs font-semibold text-slate-500 dark:text-slate-400 truncate">{title}</span>
+    <div className="relative overflow-hidden rounded-2xl border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-900 p-4 sm:p-5 shadow-xs hover:shadow-md transition-all duration-200 group flex flex-col justify-between h-full min-h-[148px] w-full min-w-0">
+      {/* Label and Icon Row - Vertically Centered */}
+      <div className="flex items-center justify-between gap-2 w-full min-w-0">
+        <span className="flex-1 min-w-0 text-xs font-semibold text-slate-500 dark:text-slate-400 truncate" title={title}>
+          {title}
+        </span>
         <div className={`p-2 rounded-xl border flex items-center justify-center shrink-0 ${colorVariants[color]}`}>
           <IconComponent className="h-4 w-4" />
         </div>
       </div>
 
       {/* Value and Trend / Caption Row */}
-      <div className="mt-3 flex items-end justify-between gap-2">
+      <div className="mt-3 flex items-end justify-between gap-2 w-full min-w-0">
         <div className="min-w-0 flex-1">
-          <h3 className="text-2xl font-extrabold text-slate-900 dark:text-white tracking-tight leading-none truncate">{value}</h3>
+          <h3 className="text-xl sm:text-2xl font-extrabold text-slate-900 dark:text-white tracking-tight leading-none truncate">{value}</h3>
           
           {/* Badge + Caption Row normalized across all 4 cards */}
-          <div className="mt-2.5 flex items-center gap-2 flex-wrap text-xs font-medium">
+          <div className="mt-2.5 flex items-center gap-1.5 sm:gap-2 flex-wrap text-xs font-medium w-full min-w-0">
             <span
               className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-bold whitespace-nowrap shrink-0 ${
                 isPositive
@@ -48,7 +50,7 @@ const StatCard = ({ title, value, change, isPositive, period, icon, color = 'ind
             </span>
 
             {period && (
-              <span className="text-xs text-slate-400 dark:text-slate-500 font-medium truncate max-w-[130px] whitespace-nowrap" title={period}>
+              <span className="text-[11px] sm:text-xs text-slate-400 dark:text-slate-500 font-medium truncate max-w-[130px] whitespace-nowrap shrink-0" title={period}>
                 {period}
               </span>
             )}

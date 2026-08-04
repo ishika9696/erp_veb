@@ -38,42 +38,42 @@ const DashboardView = () => {
   };
 
   return (
-    <div className="space-y-6">
-      {/* Executive KPI Cards Grid with items-stretch for equal card height */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 items-stretch">
+    <div className="space-y-6 w-full max-w-full min-w-0">
+      {/* Executive KPI Cards Grid - Full width 1 col on mobile, 2 on sm, 4 on lg */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 items-stretch w-full min-w-0">
         {INITIAL_STATS.map((stat, idx) => (
           <StatCard key={idx} {...stat} />
         ))}
       </div>
 
       {/* Analytics Row: Production Yield Line Chart + Pipeline Shares Donut */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 w-full min-w-0">
         {/* Production Output Trend Chart (2 cols) */}
-        <div className="lg:col-span-2 rounded-2xl border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 shadow-xs flex flex-col justify-between">
-          <div className="flex items-center justify-between mb-6">
+        <div className="lg:col-span-2 rounded-2xl border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-900 p-4 sm:p-6 shadow-xs flex flex-col justify-between w-full min-w-0">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6 w-full">
             <div>
-              <div className="flex items-center gap-2">
-                <Factory className="h-5 w-5 text-emerald-500" />
-                <h3 className="text-base font-bold text-slate-900 dark:text-white font-heading">
+              <div className="flex items-center gap-2 flex-wrap">
+                <Factory className="h-5 w-5 text-emerald-500 shrink-0" />
+                <h3 className="text-sm sm:text-base lg:text-lg font-bold text-slate-900 dark:text-white font-heading">
                   Manufacturing Yield & Production Output
                 </h3>
               </div>
-              <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+              <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
                 Monthly planned output vs actual finished goods & scrap wastage (Units)
               </p>
             </div>
 
             <button
               onClick={() => setActiveModule('manufacturing')}
-              className="text-xs font-bold text-indigo-600 dark:text-indigo-400 hover:underline flex items-center gap-1"
+              className="text-xs font-bold text-indigo-600 dark:text-indigo-400 hover:underline flex items-center gap-1 shrink-0 self-start sm:self-center"
             >
               Open BOM & Orders <ArrowRight className="h-3.5 w-3.5" />
             </button>
           </div>
 
-          <div className="h-72 w-full">
+          <div className="h-64 sm:h-72 w-full min-w-0">
             <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={PRODUCTION_TREND_DATA} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
+              <AreaChart data={PRODUCTION_TREND_DATA} margin={{ top: 10, right: 10, left: -10, bottom: 0 }}>
                 <defs>
                   <linearGradient id="colorActual" x1="0" y1="0" x2="0" y2="1">
                     <stop offset="5%" stopColor="#10B981" stopOpacity={0.4} />
@@ -85,13 +85,13 @@ const DashboardView = () => {
                   </linearGradient>
                 </defs>
                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E2E8F0" opacity={0.5} />
-                <XAxis dataKey="month" tickLine={false} axisLine={false} tick={{ fill: '#94A3B8', fontSize: 12 }} />
+                <XAxis dataKey="month" tickLine={false} axisLine={false} tick={{ fill: '#94A3B8', fontSize: 11 }} />
                 <YAxis
                   tickLine={false}
                   axisLine={false}
                   tick={{ fill: '#94A3B8', fontSize: 11 }}
                   tickFormatter={(val) => Number(val).toLocaleString('en-US')}
-                  width={52}
+                  width={45}
                 />
                 <Tooltip
                   contentStyle={{
@@ -111,27 +111,27 @@ const DashboardView = () => {
         </div>
 
         {/* Lead Distribution Donut Chart (1 col) */}
-        <div className="rounded-2xl border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 shadow-xs flex flex-col justify-between">
+        <div className="rounded-2xl border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-900 p-4 sm:p-6 shadow-xs flex flex-col justify-between w-full min-w-0">
           <div>
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-base font-bold text-slate-900 dark:text-white font-heading">
+              <h3 className="text-sm sm:text-base font-bold text-slate-900 dark:text-white font-heading">
                 Sales Pipeline Shares
               </h3>
               <button
                 onClick={() => setActiveModule('crm')}
-                className="text-xs font-semibold text-indigo-600 dark:text-indigo-400 hover:underline inline-flex items-center gap-1"
+                className="text-xs font-semibold text-indigo-600 dark:text-indigo-400 hover:underline inline-flex items-center gap-1 shrink-0"
               >
                 View CRM <ArrowRight className="h-3 w-3" />
               </button>
             </div>
 
-            <div className="h-52 w-full flex items-center justify-center relative">
+            <div className="h-48 sm:h-52 w-full flex items-center justify-center relative">
               <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
                   <Pie
                     data={CRM_LEADS_DATA}
-                    innerRadius={55}
-                    outerRadius={75}
+                    innerRadius={50}
+                    outerRadius={70}
                     paddingAngle={4}
                     dataKey="value"
                   >
@@ -143,7 +143,7 @@ const DashboardView = () => {
                 </PieChart>
               </ResponsiveContainer>
               <div className="absolute flex flex-col items-center pointer-events-none">
-                <span className="text-xl font-bold text-slate-900 dark:text-white">$249K</span>
+                <span className="text-lg sm:text-xl font-bold text-slate-900 dark:text-white">$249K</span>
                 <span className="text-[10px] text-slate-400">Total Pipeline</span>
               </div>
             </div>
@@ -152,11 +152,11 @@ const DashboardView = () => {
           <div className="space-y-2 mt-4 border-t border-slate-100 dark:border-slate-800 pt-4">
             {CRM_LEADS_DATA.map((item, idx) => (
               <div key={idx} className="flex items-center justify-between text-xs font-medium">
-                <div className="flex items-center gap-2">
-                  <span className="h-2.5 w-2.5 rounded-full" style={{ backgroundColor: COLORS[idx] }} />
-                  <span className="text-slate-600 dark:text-slate-300">{item.name}</span>
+                <div className="flex items-center gap-2 truncate">
+                  <span className="h-2.5 w-2.5 rounded-full shrink-0" style={{ backgroundColor: COLORS[idx] }} />
+                  <span className="text-slate-600 dark:text-slate-300 truncate">{item.name}</span>
                 </div>
-                <span className="font-bold text-slate-900 dark:text-white">{item.value}%</span>
+                <span className="font-bold text-slate-900 dark:text-white shrink-0 ml-2">{item.value}%</span>
               </div>
             ))}
           </div>
@@ -164,28 +164,28 @@ const DashboardView = () => {
       </div>
 
       {/* Bottom Grid: Live Activity Stream + Tasks & Deadlines */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 w-full min-w-0">
         {/* Recent Activity Feed */}
-        <div className="rounded-2xl border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 shadow-xs">
+        <div className="rounded-2xl border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-900 p-4 sm:p-6 shadow-xs w-full min-w-0">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="text-base font-bold text-slate-900 dark:text-white font-heading">
+            <h3 className="text-sm sm:text-base font-bold text-slate-900 dark:text-white font-heading">
               Live Operations Activity
             </h3>
-            <span className="text-xs font-semibold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/60 px-2 py-0.5 rounded-full flex items-center gap-1">
+            <span className="text-[11px] sm:text-xs font-semibold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/60 px-2 py-0.5 rounded-full flex items-center gap-1 shrink-0">
               <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-ping" /> Real-time
             </span>
           </div>
 
-          <div className="space-y-4">
+          <div className="space-y-3 sm:space-y-4">
             {RECENT_ACTIVITIES.map((act) => (
               <div key={act.id} className="flex items-start gap-3 p-3 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
                 <img
                   src={act.avatar}
                   alt={act.user}
-                  className="h-9 w-9 rounded-xl object-cover ring-1 ring-slate-200 dark:ring-slate-700 shrink-0"
+                  className="h-8 sm:h-9 w-8 sm:w-9 rounded-xl object-cover ring-1 ring-slate-200 dark:ring-slate-700 shrink-0"
                 />
                 <div className="flex-1 min-w-0">
-                  <p className="text-xs text-slate-800 dark:text-slate-200 font-medium">
+                  <p className="text-xs text-slate-800 dark:text-slate-200 font-medium leading-relaxed">
                     <span className="font-bold text-slate-900 dark:text-white">{act.user}</span>{' '}
                     {act.action}{' '}
                     <span className="font-semibold text-indigo-600 dark:text-indigo-400">{act.target}</span>
@@ -200,18 +200,18 @@ const DashboardView = () => {
         </div>
 
         {/* Tasks Widget */}
-        <div className="rounded-2xl border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 shadow-xs flex flex-col justify-between">
+        <div className="rounded-2xl border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-900 p-4 sm:p-6 shadow-xs flex flex-col justify-between w-full min-w-0">
           <div>
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-2">
-                <CheckSquare className="h-5 w-5 text-indigo-600 dark:text-indigo-400" />
-                <h3 className="text-base font-bold text-slate-900 dark:text-white font-heading">
+                <CheckSquare className="h-5 w-5 text-indigo-600 dark:text-indigo-400 shrink-0" />
+                <h3 className="text-sm sm:text-base font-bold text-slate-900 dark:text-white font-heading">
                   Operations Checklist
                 </h3>
               </div>
               <button
                 onClick={() => addToast("Added new task", "info")}
-                className="p-1 rounded-lg border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800"
+                className="p-1 rounded-lg border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 shrink-0"
               >
                 <Plus className="h-4 w-4" />
               </button>
@@ -222,29 +222,29 @@ const DashboardView = () => {
                 <div
                   key={task.id}
                   onClick={() => toggleTask(task.id)}
-                  className={`flex items-center justify-between p-3.5 rounded-xl border transition-all cursor-pointer ${
+                  className={`flex items-center justify-between gap-2 p-3 sm:p-3.5 rounded-xl border transition-all cursor-pointer ${
                     task.completed
                       ? 'bg-slate-50/50 dark:bg-slate-950/30 border-slate-200/60 dark:border-slate-800/40 opacity-60'
                       : 'bg-white dark:bg-slate-900 border-slate-200/80 dark:border-slate-800 hover:border-indigo-300 dark:hover:border-indigo-800'
                   }`}
                 >
-                  <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-3 min-w-0 flex-1">
                     <input
                       type="checkbox"
                       checked={task.completed}
                       onChange={() => {}}
-                      className="rounded border-slate-300 text-indigo-600 focus:ring-indigo-500 h-4 w-4"
+                      className="rounded border-slate-300 text-indigo-600 focus:ring-indigo-500 h-4 w-4 shrink-0"
                     />
-                    <div>
-                      <span className={`text-xs font-semibold block ${task.completed ? 'line-through text-slate-400' : 'text-slate-900 dark:text-white'}`}>
+                    <div className="min-w-0 flex-1">
+                      <span className={`text-xs font-semibold block truncate ${task.completed ? 'line-through text-slate-400' : 'text-slate-900 dark:text-white'}`}>
                         {task.title}
                       </span>
-                      <span className="text-[10px] text-slate-400 block mt-0.5">Due: {task.due}</span>
+                      <span className="text-[10px] text-slate-400 block mt-0.5 truncate">Due: {task.due}</span>
                     </div>
                   </div>
 
                   <span
-                    className={`text-[10px] font-bold px-2 py-0.5 rounded-md ${
+                    className={`text-[10px] font-bold px-2 py-0.5 rounded-md shrink-0 ${
                       task.priority === 'Urgent'
                         ? 'bg-rose-50 text-rose-600 dark:bg-rose-950 dark:text-rose-300'
                         : task.priority === 'High'

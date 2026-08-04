@@ -10,13 +10,15 @@ export const AppProvider = ({ children }) => {
   const [tenantMode, setTenantMode] = useState('tenant');
   
   // Active Navigation Module
-  // Options: 'dashboard', 'serveradmin', 'manufacturing', 'inventory', 'mobileapp', 'crm', 'hrm', 'accounting', 'pos', 'billing', 'settings'
   const [activeModule, setActiveModule] = useState('dashboard');
   
-  // Sidebar state
+  // Desktop Sidebar state
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   
-  // Mobile Frame Simulator Toggle (allows viewing companion app inside standard desktop interface)
+  // Mobile Off-canvas Drawer state (<768px)
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  
+  // Mobile Frame Simulator Toggle
   const [isMobileSimOpen, setIsMobileSimOpen] = useState(false);
 
   // Quick Command Palette Modal
@@ -104,6 +106,8 @@ export const AppProvider = ({ children }) => {
         setActiveModule,
         sidebarCollapsed,
         setSidebarCollapsed,
+        mobileMenuOpen,
+        setMobileMenuOpen,
         isMobileSimOpen,
         setIsMobileSimOpen,
         commandPaletteOpen,

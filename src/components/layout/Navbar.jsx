@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useApp } from '../../context/AppContext';
 import {
+  Menu,
   Search,
   Bell,
   Plus,
@@ -18,7 +19,8 @@ import {
   LayoutDashboard,
   Factory,
   Package,
-  Receipt
+  Receipt,
+  X
 } from 'lucide-react';
 
 const Navbar = () => {
@@ -30,6 +32,8 @@ const Navbar = () => {
     setActiveModule,
     setCommandPaletteOpen,
     setQuickCreateOpen,
+    mobileMenuOpen,
+    setMobileMenuOpen,
     notifications,
     setNotifications,
     currentOrg,
@@ -63,55 +67,76 @@ const Navbar = () => {
   ];
 
   return (
-    <header className="sticky top-0 z-30 flex h-16 w-full items-center justify-between border-b border-slate-200/80 dark:border-slate-800 bg-white/80 dark:bg-slate-900/80 px-6 backdrop-blur-md transition-colors">
-      {/* Left: Quick Command Search Container (relative positioning context) */}
-      <div className="relative flex-1 max-w-md">
+    <header className="sticky top-0 z-30 flex h-16 w-full items-center justify-between border-b border-slate-200/80 dark:border-slate-800 bg-white/80 dark:bg-slate-900/80 px-4 sm:px-6 backdrop-blur-md transition-colors">
+      
+      {/* Left Section: Mobile Hamburger + Brand (mobile) / Search Input */}
+      <div className="flex items-center gap-3 flex-1 min-w-0 max-w-xl">
+        {/* Mobile Hamburger Button (<768px) */}
         <button
-          onClick={() => setShowSearchDropdown(!showSearchDropdown)}
-          className="flex items-center gap-3 w-full rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-950/70 px-3.5 py-2 text-xs text-slate-400 hover:border-slate-300 dark:hover:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-900 transition-all text-left group"
+          onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+          className="md:hidden p-2 rounded-xl border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 shrink-0"
+          aria-label="Open mobile menu"
         >
-          <Search className="h-4 w-4 text-slate-400 group-hover:text-indigo-500 transition-colors shrink-0" />
-          <span className="flex-1 truncate">Search BOMs, work orders, invoices, server logs...</span>
-          <kbd className="hidden sm:inline-flex items-center gap-0.5 rounded border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 px-1.5 py-0.5 text-[10px] font-semibold text-slate-400 shrink-0">
-            ⌘K
-          </kbd>
+          <Menu className="h-5 w-5" />
         </button>
 
-        {/* Anchored Search Dropdown directly below search input */}
-        {showSearchDropdown && (
-          <div className="absolute left-0 top-full mt-2 w-full rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-2 shadow-2xl z-50 animate-in fade-in zoom-in-95">
-            <div className="flex items-center justify-between px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider text-slate-400 border-b border-slate-100 dark:border-slate-800 mb-1">
-              <span>Quick Module Jump</span>
-              <button onClick={() => setCommandPaletteOpen(true)} className="text-indigo-600 dark:text-indigo-400 hover:underline">
-                Open Full ⌘K
-              </button>
-            </div>
-            <div className="space-y-1">
-              {quickSearchShortcuts.map((item, idx) => {
-                const Icon = item.icon;
-                return (
-                  <button
-                    key={idx}
-                    onClick={() => {
-                      setActiveModule(item.module);
-                      setShowSearchDropdown(false);
-                      addToast(`Jumped to ${item.label}`, "info");
-                    }}
-                    className="w-full flex items-center gap-3 px-3 py-2 rounded-xl text-left text-xs font-medium text-slate-700 dark:text-slate-200 hover:bg-indigo-50 dark:hover:bg-indigo-950/60 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors"
-                  >
-                    <Icon className="h-4 w-4 text-slate-400 shrink-0" />
-                    <span>{item.label}</span>
-                  </button>
-                );
-              })}
-            </div>
+        {/* Mobile Brand Wordmark (<768px) */}
+        <div className="md:hidden flex items-center gap-2 shrink-0">
+          <div className="flex h-7 items-center px-2 rounded-lg bg-gradient-to-tr from-indigo-600 to-emerald-500 text-white font-heading font-extrabold text-xs">
+            VEB
           </div>
-        )}
+          <span className="font-heading text-sm font-bold text-slate-900 dark:text-white">ERP</span>
+        </div>
+
+        {/* Search Input Container */}
+        <div className="relative flex-1 min-w-0 max-w-md">
+          <button
+            onClick={() => setShowSearchDropdown(!showSearchDropdown)}
+            className="flex items-center gap-2 sm:gap-3 w-full rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-950/70 px-3 py-1.5 sm:py-2 text-xs text-slate-400 hover:border-slate-300 dark:hover:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-900 transition-all text-left group"
+          >
+            <Search className="h-4 w-4 text-slate-400 group-hover:text-indigo-500 transition-colors shrink-0" />
+            <span className="flex-1 truncate text-xs">Search BOMs, orders, invoices...</span>
+            <kbd className="hidden lg:inline-flex items-center gap-0.5 rounded border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 px-1.5 py-0.5 text-[10px] font-semibold text-slate-400 shrink-0">
+              ⌘K
+            </kbd>
+          </button>
+
+          {/* Anchored Quick Search Dropdown */}
+          {showSearchDropdown && (
+            <div className="absolute left-0 top-full mt-2 w-full min-w-[260px] rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-2 shadow-2xl z-50 animate-in fade-in zoom-in-95">
+              <div className="flex items-center justify-between px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider text-slate-400 border-b border-slate-100 dark:border-slate-800 mb-1">
+                <span>Quick Module Jump</span>
+                <button onClick={() => setCommandPaletteOpen(true)} className="text-indigo-600 dark:text-indigo-400 hover:underline">
+                  Open ⌘K
+                </button>
+              </div>
+              <div className="space-y-1">
+                {quickSearchShortcuts.map((item, idx) => {
+                  const Icon = item.icon;
+                  return (
+                    <button
+                      key={idx}
+                      onClick={() => {
+                        setActiveModule(item.module);
+                        setShowSearchDropdown(false);
+                        addToast(`Jumped to ${item.label}`, "info");
+                      }}
+                      className="w-full flex items-center gap-3 px-3 py-2 rounded-xl text-left text-xs font-medium text-slate-700 dark:text-slate-200 hover:bg-indigo-50 dark:hover:bg-indigo-950/60 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors"
+                    >
+                      <Icon className="h-4 w-4 text-slate-400 shrink-0" />
+                      <span className="truncate">{item.label}</span>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+        </div>
       </div>
 
-      {/* Right Controls - Single Baseline Flex Row */}
-      <div className="flex items-center gap-3 shrink-0">
-        {/* Multi-Tenant Switcher Toggle Pill */}
+      {/* Right Controls Section */}
+      <div className="flex items-center gap-1.5 sm:gap-3 shrink-0">
+        {/* Multi-Tenant Switcher Toggle Pill (Desktop md+) */}
         <div className="hidden md:flex items-center rounded-xl bg-slate-100 dark:bg-slate-950 p-1 border border-slate-200/80 dark:border-slate-800">
           <button
             onClick={() => switchTenantMode('tenant')}
@@ -138,26 +163,26 @@ const Navbar = () => {
           </button>
         </div>
 
-        {/* Companion Mobile App View Button */}
+        {/* Companion Mobile App View Button (Desktop md+) */}
         <button
           onClick={() => setActiveModule('mobileapp')}
-          className="hidden sm:flex items-center gap-1.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 px-3 py-1.5 text-xs font-semibold text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors shadow-2xs"
+          className="hidden md:flex items-center gap-1.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 px-3 py-1.5 text-xs font-semibold text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors shadow-2xs"
           title="Open Mobile Companion App UI Simulator"
         >
           <Smartphone className="h-3.5 w-3.5 text-emerald-500" />
           <span className="hidden lg:inline">Mobile App</span>
         </button>
 
-        {/* Organization Switcher Dropdown */}
+        {/* Organization Switcher Dropdown (Desktop sm+) */}
         {tenantMode === 'tenant' && (
           <div className="relative hidden sm:block">
             <button
               onClick={() => setShowOrgMenu(!showOrgMenu)}
               className="flex items-center gap-2 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 px-3 py-1.5 text-xs font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
             >
-              <Building className="h-3.5 w-3.5 text-indigo-600 dark:text-indigo-400" />
-              <span className="font-semibold truncate max-w-[130px]">{currentOrg.name}</span>
-              <ChevronDown className="h-3.5 w-3.5 text-slate-400" />
+              <Building className="h-3.5 w-3.5 text-indigo-600 dark:text-indigo-400 shrink-0" />
+              <span className="font-semibold truncate max-w-[110px]">{currentOrg.name}</span>
+              <ChevronDown className="h-3.5 w-3.5 text-slate-400 shrink-0" />
             </button>
 
             {showOrgMenu && (
@@ -191,7 +216,7 @@ const Navbar = () => {
         {/* Quick Create Button */}
         <button
           onClick={() => setQuickCreateOpen(true)}
-          className="flex items-center gap-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white px-3.5 py-1.5 text-xs font-semibold shadow-2xs shadow-indigo-500/20 transition-all"
+          className="flex items-center gap-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white px-2.5 sm:px-3.5 py-1.5 text-xs font-semibold shadow-2xs shadow-indigo-500/20 transition-all shrink-0"
         >
           <Plus className="h-4 w-4" />
           <span className="hidden sm:inline">Create</span>
@@ -200,14 +225,14 @@ const Navbar = () => {
         {/* Dark Mode Toggle */}
         <button
           onClick={toggleTheme}
-          className="flex items-center justify-center p-2 rounded-xl border border-slate-200 dark:border-slate-800 text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+          className="p-2 rounded-xl border border-slate-200 dark:border-slate-800 text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors shrink-0"
           title={`Switch to ${theme === 'light' ? 'Dark' : 'Light'} Mode`}
         >
           {theme === 'light' ? <Moon className="h-4 w-4" /> : <Sun className="h-4 w-4" />}
         </button>
 
         {/* Notifications Bell */}
-        <div className="relative flex items-center">
+        <div className="relative flex items-center shrink-0">
           <button
             onClick={() => setShowNotifications(!showNotifications)}
             className="relative p-2 rounded-xl border border-slate-200 dark:border-slate-800 text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
@@ -222,7 +247,7 @@ const Navbar = () => {
           </button>
 
           {showNotifications && (
-            <div className="absolute right-0 mt-2 w-80 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-2xl z-50 overflow-hidden animate-in fade-in zoom-in-95">
+            <div className="absolute right-0 mt-2 w-72 sm:w-80 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-2xl z-50 overflow-hidden animate-in fade-in zoom-in-95">
               <div className="flex items-center justify-between p-4 border-b border-slate-200/80 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-950/50">
                 <h4 className="text-sm font-bold text-slate-900 dark:text-white font-heading">Notifications</h4>
                 {unreadCount > 0 && (
@@ -261,7 +286,7 @@ const Navbar = () => {
         </div>
 
         {/* User Profile Avatar */}
-        <div className="relative flex items-center">
+        <div className="relative flex items-center shrink-0">
           <button
             onClick={() => setShowProfileMenu(!showProfileMenu)}
             className="flex items-center gap-2 rounded-xl p-1 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
@@ -271,11 +296,11 @@ const Navbar = () => {
               alt="Sarah Jenkins"
               className="h-8 w-8 rounded-xl object-cover ring-2 ring-indigo-500/30 shrink-0"
             />
-            <div className="hidden text-left xl:block">
+            <div className="hidden xl:block text-left">
               <span className="block text-xs font-bold text-slate-900 dark:text-white leading-tight">Sarah Jenkins</span>
               <span className="block text-[10px] text-slate-400 font-medium leading-tight">VP of Operations</span>
             </div>
-            <ChevronDown className="h-3.5 w-3.5 text-slate-400 shrink-0" />
+            <ChevronDown className="hidden sm:block h-3.5 w-3.5 text-slate-400 shrink-0" />
           </button>
 
           {showProfileMenu && (
