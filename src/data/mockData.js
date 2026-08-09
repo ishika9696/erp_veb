@@ -207,12 +207,133 @@ export const WORK_ORDERS_KANBAN = {
   ]
 };
 
-// Raw Material Purchase Orders (PO)
+// Raw Material & Unified Purchase Orders (PO)
 export const MANUFACTURING_PURCHASE_ORDERS = [
-  { id: "PO-RM-2026-01", supplier: "OptoTech Displays Ltd", item: "15.6 Inch IPS Touch Display Panel", qty: 200, unitCost: "$180.00", total: "$36,000.00", status: "Received", expectedDate: "Aug 02, 2026", autoReorder: true },
-  { id: "PO-RM-2026-02", supplier: "Precision Machining Corp", item: "Aluminium CNC Terminal Casing", qty: 150, unitCost: "$85.00", total: "$12,750.00", status: "Partially Received", expectedDate: "Aug 06, 2026", autoReorder: true },
-  { id: "PO-RM-2026-03", supplier: "Silicon Core Semiconductors", item: "ARM Octa-Core Industrial Motherboard", qty: 100, unitCost: "$110.00", total: "$11,000.00", status: "Sent", expectedDate: "Aug 10, 2026", autoReorder: false },
-  { id: "PO-RM-2026-04", supplier: "PrintEngine Global", item: "Thermal Printhead Engine 80mm", qty: 50, unitCost: "$45.00", total: "$2,250.00", status: "Draft", expectedDate: "Aug 14, 2026", autoReorder: true }
+  {
+    id: "PO-RM-2026-01",
+    supplier: "OptoTech Displays Ltd",
+    item: "15.6 Inch IPS Touch Display Panel",
+    type: "Raw Material",
+    qty: 200,
+    unitCost: "$180.00",
+    total: "$36,000.00",
+    numericTotal: 36000,
+    status: "Received",
+    orderDate: "2026-07-25",
+    expectedDate: "2026-08-02",
+    autoReorder: true,
+    shippingAddress: "Plant 1 Assembly Dock, Sector 4, Acme Facility",
+    billingAddress: "Acme HQ, Accounts Payable, Suite 400",
+    notes: "Fragile optical grade panels. Inspect package seals before dock sign-off.",
+    terms: "Net 30 days. Quality guarantee per Master Supply Agreement #4419.",
+    items: [
+      { desc: "15.6 Inch IPS Touch Display Panel", qty: 200, unitCost: 180, tax: 0, amount: 36000 }
+    ],
+    auditTrail: [
+      { step: "PO Created (Draft)", by: "Marcus Vance (Manufacturing)", time: "2026-07-25 09:15 AM" },
+      { step: "PO Approved & Dispatched", by: "Sarah Jenkins (VP Ops)", time: "2026-07-25 11:30 AM" },
+      { step: "Shipment Received at Dock", by: "Marcus Vance (Manufacturing)", time: "2026-08-02 02:40 PM" }
+    ]
+  },
+  {
+    id: "PO-RM-2026-02",
+    supplier: "Precision Machining Corp",
+    item: "Aluminium CNC Terminal Casing",
+    type: "Raw Material",
+    qty: 150,
+    unitCost: "$85.00",
+    total: "$12,750.00",
+    numericTotal: 12750,
+    status: "Partially Received",
+    orderDate: "2026-07-28",
+    expectedDate: "2026-08-06",
+    autoReorder: true,
+    shippingAddress: "Plant 1 Machining Wing, Sector 2",
+    billingAddress: "Acme HQ, Accounts Payable, Suite 400",
+    notes: "Batch #1 (75 units) delivered. Remaining 75 units in transit via freight.",
+    terms: "Payment upon complete consignment receipt.",
+    items: [
+      { desc: "Aluminium CNC Terminal Casing", qty: 150, unitCost: 85, tax: 0, amount: 12750 }
+    ],
+    auditTrail: [
+      { step: "PO Created & Dispatched", by: "Marcus Vance", time: "2026-07-28 10:00 AM" },
+      { step: "Partial Delivery Logged (75 units)", by: "Receiving Bay A", time: "2026-08-03 04:15 PM" }
+    ]
+  },
+  {
+    id: "PO-RM-2026-03",
+    supplier: "Silicon Core Semiconductors",
+    item: "ARM Octa-Core Industrial Motherboard",
+    type: "Raw Material",
+    qty: 100,
+    unitCost: "$110.00",
+    total: "$11,000.00",
+    numericTotal: 11000,
+    status: "Sent",
+    orderDate: "2026-08-01",
+    expectedDate: "2026-08-10",
+    autoReorder: false,
+    shippingAddress: "Component Vault Room B, Sector 3",
+    billingAddress: "Acme HQ, Accounts Payable, Suite 400",
+    notes: "Air freight dispatch confirmed with tracking #AWB-992014881.",
+    terms: "Net 15 days upon delivery verification.",
+    items: [
+      { desc: "ARM Octa-Core Industrial Motherboard", qty: 100, unitCost: 110, tax: 0, amount: 11000 }
+    ],
+    auditTrail: [
+      { step: "Requisition Generated", by: "Priya Sharma", time: "2026-07-31 03:20 PM" },
+      { step: "PO Dispatched to Vendor", by: "David Chen (Finance)", time: "2026-08-01 09:00 AM" }
+    ]
+  },
+  {
+    id: "PO-RM-2026-04",
+    supplier: "PrintEngine Global",
+    item: "Thermal Printhead Engine 80mm",
+    type: "Raw Material",
+    qty: 50,
+    unitCost: "$45.00",
+    total: "$2,250.00",
+    numericTotal: 2250,
+    status: "Draft",
+    orderDate: "2026-08-04",
+    expectedDate: "2026-08-14",
+    autoReorder: true,
+    shippingAddress: "Main Assembly Depot, Bay 4",
+    billingAddress: "Acme HQ, Accounts Payable, Suite 400",
+    notes: "Standard printhead replacement cycle for Peripherals Line B.",
+    terms: "Standard vendor terms.",
+    items: [
+      { desc: "Thermal Printhead Engine 80mm", qty: 50, unitCost: 45, tax: 0, amount: 2250 }
+    ],
+    auditTrail: [
+      { step: "Draft Prepared", by: "Marcus Vance", time: "2026-08-04 11:45 AM" }
+    ]
+  },
+  {
+    id: "PO-GEN-2026-05",
+    supplier: "Dell Technologies",
+    item: "Enterprise 2U Rack Servers R750",
+    type: "General Purchase",
+    qty: 2,
+    unitCost: "$11,250.00",
+    total: "$22,500.00",
+    numericTotal: 22500,
+    status: "Received",
+    orderDate: "2026-07-20",
+    expectedDate: "2026-07-29",
+    autoReorder: false,
+    shippingAddress: "Data Center Room 3, Acme Tech Park",
+    billingAddress: "Acme HQ, Accounts Payable, Suite 400",
+    notes: "Dual Xeon Scalable, 128GB ECC RAM, 3.84TB NVMe storage array.",
+    terms: "3-Year ProSupport Plus on-site warranty included.",
+    items: [
+      { desc: "Dell PowerEdge R750 Rack Server 128GB", qty: 2, unitCost: 11250, tax: 0, amount: 22500 }
+    ],
+    auditTrail: [
+      { step: "IT Infrastructure PO Created", by: "Sarah Jenkins", time: "2026-07-20 08:30 AM" },
+      { step: "Delivered & Provisioned in Rack", by: "IT Operations", time: "2026-07-29 03:00 PM" }
+    ]
+  }
 ];
 
 // Quality Control (QC) & Sample Testing

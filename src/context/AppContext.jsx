@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import { MANUFACTURING_PURCHASE_ORDERS, FINANCE_PURCHASE_BILLS } from '../data/mockData';
 
 const AppContext = createContext();
 
@@ -35,6 +36,12 @@ export const AppProvider = ({ children }) => {
     avatar: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=100"
   });
 
+  // Unified Purchase Orders (shared between Finance & Manufacturing)
+  const [purchaseOrders, setPurchaseOrders] = useState(MANUFACTURING_PURCHASE_ORDERS);
+
+  // Finance Purchase Bills (Vendor Bills)
+  const [bills, setBills] = useState(FINANCE_PURCHASE_BILLS);
+
   // Notifications State
   const [notifications, setNotifications] = useState([
     { id: 1, title: "Production Completed", message: "WO-889: Smart RFID Scanner Gun batch done", time: "5m ago", read: false, icon: "CheckCircle" },
@@ -55,6 +62,59 @@ export const AppProvider = ({ children }) => {
 
   const removeToast = (id) => {
     setToasts((prev) => prev.filter((t) => t.id !== id));
+  };
+
+  // PO & Bill Sync Helpers
+  const addPurchaseOrder = (newPo) => {
+    setPurchaseOrders((prev) => [newPo, ...prev]);
+  };
+
+  const updatePurchaseOrder = (id, updatedPo) => {
+    setPurchaseOrders((prev) =>
+      prev.map((item) => (item.id === id ? { ...item, ...updatedPo } : item))
+    );
+  };
+
+  const deletePurchaseOrder = (id) => {
+    setPurchaseOrders((prev) => prev.filter((item) => item.id !== id));
+  };
+
+  const convertPoToPurchaseBill = (po) => {
+    const billId = `BILL-2026-0${bills.length + 1}`;
+    const newBill = {
+      id: billId,
+      vendor: po.supplier,
+      billDate: new Date().toISOString().split('T')[0],
+      dueDate: po.expectedDate || "2026-08-25",
+      amount: po.total || `$${(po.numericTotal || 0).toLocaleString()}.00`,
+      status: "Unpaid",
+      poRef: po.id,
+      items: po.items || [{ desc: po.item, qty: po.qty, unitCost: po.unitCost, amount: po.numericTotal }]
+    };
+
+    setBills((prev) => [newBill, ...prev]);
+    
+    // Log in PO audit trail
+    const auditEntry = {
+      step: `Converted to Purchase Bill (${billId})`,
+      by: "David Chen (Finance)",
+      time: new Date().toLocaleString()
+    };
+    
+    setPurchaseOrders((prev) =>
+      prev.map((item) =>
+        item.id === po.id
+          ? {
+              ...item,
+              convertedBillId: billId,
+              auditTrail: [...(item.auditTrail || []), auditEntry]
+            }
+          : item
+      )
+    );
+
+    addToast(`Purchase Order ${po.id} converted to Purchase Bill ${billId} ($${(po.numericTotal || 0).toLocaleString()})`, 'success', 'Bill Created');
+    return billId;
   };
 
   // Toggle Theme Class on HTML element
@@ -120,7 +180,15 @@ export const AppProvider = ({ children }) => {
         setNotifications,
         toasts,
         addToast,
-        removeToast
+        removeToast,
+        purchaseOrders,
+        setPurchaseOrders,
+        bills,
+        setBills,
+        addPurchaseOrder,
+        updatePurchaseOrder,
+        deletePurchaseOrder,
+        convertPoToPurchaseBill
       }}
     >
       {children}

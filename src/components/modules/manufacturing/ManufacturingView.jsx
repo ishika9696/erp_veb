@@ -4,7 +4,6 @@ import {
   BOM_LIST,
   WORK_ORDERS_KANBAN,
   RAW_MATERIALS_INVENTORY,
-  MANUFACTURING_PURCHASE_ORDERS,
   QUALITY_CONTROL_TESTS,
   MATERIAL_USAGE_REPORTS,
   MACHINE_RESOURCE_ALLOCATION,
@@ -27,15 +26,24 @@ import {
   DollarSign,
   TrendingUp,
   XCircle,
-  FileCheck
+  FileCheck,
+  Pencil,
+  Eye,
+  Trash2,
+  X
 } from 'lucide-react';
 
 const ManufacturingView = () => {
-  const { addToast } = useApp();
+  const {
+    addToast,
+    purchaseOrders,
+    addPurchaseOrder,
+    updatePurchaseOrder,
+    deletePurchaseOrder
+  } = useApp();
   const [activeTab, setActiveTab] = useState('bom_orders');
   const [searchQuery, setSearchQuery] = useState('');
   const [workOrders, setWorkOrders] = useState(WORK_ORDERS_KANBAN);
-  const [purchaseOrders, setPurchaseOrders] = useState(MANUFACTURING_PURCHASE_ORDERS);
   const [qcTests, setQcTests] = useState(QUALITY_CONTROL_TESTS);
 
   // New Work Order Modal
@@ -43,8 +51,10 @@ const ManufacturingView = () => {
   const [newWoProduct, setNewWoProduct] = useState('POS Touchscreen Terminal X1');
   const [newWoQty, setNewWoQty] = useState(50);
 
-  // New PO Modal
+  // PO Modals
   const [showPoModal, setShowPoModal] = useState(false);
+  const [editPoModal, setEditPoModal] = useState(null);
+  const [viewPoModal, setViewPoModal] = useState(null);
   const [poSupplier, setPoSupplier] = useState('OptoTech Displays Ltd');
   const [poMaterial, setPoMaterial] = useState('15.6 Inch IPS Touch Display Panel');
   const [poQty, setPoQty] = useState(100);
@@ -86,16 +96,48 @@ const ManufacturingView = () => {
       id: `PO-RM-2026-0${purchaseOrders.length + 1}`,
       supplier: poSupplier,
       item: poMaterial,
+      type: "Raw Material",
       qty: Number(poQty),
       unitCost: "$180.00",
       total: `$${(Number(poQty) * 180).toLocaleString()}.00`,
+      numericTotal: Number(poQty) * 180,
       status: "Sent",
-      expectedDate: "Aug 12, 2026",
-      autoReorder: true
+      orderDate: new Date().toISOString().split('T')[0],
+      expectedDate: "2026-08-14",
+      autoReorder: true,
+      shippingAddress: "Plant 1 Assembly Dock, Sector 4",
+      billingAddress: "Acme HQ, Accounts Payable",
+      items: [{ desc: poMaterial, qty: Number(poQty), unitCost: 180, amount: Number(poQty) * 180 }],
+      auditTrail: [
+        { step: "PO Issued from Manufacturing", by: "Marcus Vance", time: new Date().toLocaleString() }
+      ]
     };
-    setPurchaseOrders((prev) => [newPo, ...prev]);
+    addPurchaseOrder(newPo);
     setShowPoModal(false);
     addToast(`Purchase Order ${newPo.id} sent to ${poSupplier}`, "success");
+  };
+
+  const handleSaveEditPo = (e) => {
+    e.preventDefault();
+    if (!editPoModal) return;
+    const numQty = Number(editPoModal.qty) || 1;
+    const unitPrice = Number(editPoModal.unitCost?.toString().replace(/[^0-9.-]+/g,"")) || 180;
+    const totalVal = numQty * unitPrice;
+
+    const updated = {
+      ...editPoModal,
+      qty: numQty,
+      total: `$${totalVal.toLocaleString()}.00`,
+      numericTotal: totalVal,
+      auditTrail: [
+        ...(editPoModal.auditTrail || []),
+        { step: "PO Modified in Manufacturing", by: "Marcus Vance", time: new Date().toLocaleString() }
+      ]
+    };
+
+    updatePurchaseOrder(editPoModal.id, updated);
+    setEditPoModal(null);
+    addToast(`Purchase Order ${editPoModal.id} updated successfully`, "success");
   };
 
   return (
@@ -298,29 +340,75 @@ const ManufacturingView = () => {
                     <th className="p-3.5">Total Cost</th>
                     <th className="p-3.5">Status</th>
                     <th className="p-3.5">Expected Delivery</th>
+                    <th className="p-3.5 text-right">Actions</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100 dark:divide-slate-800/60 text-xs font-medium">
-                  {purchaseOrders.map((po) => (
-                    <tr key={po.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/40 transition-colors">
-                      <td className="p-3.5 font-bold text-indigo-600 dark:text-indigo-400">{po.id}</td>
-                      <td className="p-3.5 font-semibold text-slate-900 dark:text-white">{po.supplier}</td>
-                      <td className="p-3.5 text-slate-700 dark:text-slate-300">{po.item}</td>
-                      <td className="p-3.5 text-slate-900 dark:text-white font-bold">{po.qty} Pcs</td>
-                      <td className="p-3.5 font-bold text-slate-900 dark:text-white">{po.total}</td>
-                      <td className="p-3.5">
-                        <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
-                          po.status === 'Received' ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300' :
-                          po.status === 'Partially Received' ? 'bg-amber-50 text-amber-700 dark:bg-amber-950 dark:text-amber-300' :
-                          po.status === 'Sent' ? 'bg-indigo-50 text-indigo-700 dark:bg-indigo-950 dark:text-indigo-300' :
-                          'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300'
-                        }`}>
-                          {po.status}
-                        </span>
-                      </td>
-                      <td className="p-3.5 text-slate-500">{po.expectedDate}</td>
-                    </tr>
-                  ))}
+                  {purchaseOrders.map((po) => {
+                    const isLocked = po.status === 'Received' || po.status === 'Closed';
+                    return (
+                      <tr key={po.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/40 transition-colors">
+                        <td className="p-3.5 font-bold text-indigo-600 dark:text-indigo-400">{po.id}</td>
+                        <td className="p-3.5 font-semibold text-slate-900 dark:text-white">{po.supplier}</td>
+                        <td className="p-3.5 text-slate-700 dark:text-slate-300">{po.item || (po.items && po.items[0]?.desc) || 'Procurement Item'}</td>
+                        <td className="p-3.5 text-slate-900 dark:text-white font-bold">{po.qty || (po.items && po.items[0]?.qty) || 1} Pcs</td>
+                        <td className="p-3.5 font-bold text-slate-900 dark:text-white">{po.total}</td>
+                        <td className="p-3.5">
+                          <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
+                            po.status === 'Received' ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300' :
+                            po.status === 'Partially Received' ? 'bg-amber-50 text-amber-700 dark:bg-amber-950 dark:text-amber-300' :
+                            po.status === 'Sent' ? 'bg-indigo-50 text-indigo-700 dark:bg-indigo-950 dark:text-indigo-300' :
+                            po.status === 'Draft' ? 'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300' :
+                            'bg-rose-50 text-rose-700 dark:bg-rose-950 dark:text-rose-300'
+                          }`}>
+                            {po.status}
+                          </span>
+                        </td>
+                        <td className="p-3.5 text-slate-500">{po.expectedDate}</td>
+                        <td className="p-3.5 text-right">
+                          <div className="flex items-center justify-end gap-1">
+                            <button
+                              onClick={() => setViewPoModal(po)}
+                              title="View PO Details"
+                              className="p-1.5 rounded-lg text-slate-500 hover:text-indigo-600 hover:bg-indigo-50 dark:hover:bg-indigo-950/50 transition-colors"
+                            >
+                              <Eye className="w-3.5 h-3.5" />
+                            </button>
+
+                            {isLocked ? (
+                              <div className="relative group inline-block">
+                                <button
+                                  disabled
+                                  className="p-1.5 rounded-lg text-slate-400 dark:text-slate-600 cursor-not-allowed opacity-40"
+                                >
+                                  <Pencil className="w-3.5 h-3.5" />
+                                </button>
+                                <div className="hidden group-hover:block absolute right-0 bottom-full mb-1.5 w-48 p-2 bg-slate-900 dark:bg-slate-800 text-white text-[11px] rounded-lg shadow-xl z-50 pointer-events-none text-left">
+                                  Received / Closed POs cannot be edited — records are locked for accounting integrity.
+                                </div>
+                              </div>
+                            ) : (
+                              <button
+                                onClick={() => setEditPoModal({ ...po })}
+                                title="Edit PO"
+                                className="p-1.5 rounded-lg text-slate-500 hover:text-amber-600 hover:bg-amber-50 dark:hover:bg-amber-950/50 transition-colors"
+                              >
+                                <Pencil className="w-3.5 h-3.5" />
+                              </button>
+                            )}
+
+                            <button
+                              onClick={() => deletePurchaseOrder(po.id)}
+                              title="Delete PO"
+                              className="p-1.5 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/50 transition-colors"
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })}
                 </tbody>
               </table>
             </div>
@@ -529,6 +617,144 @@ const ManufacturingView = () => {
                 <button type="submit" className="px-4 py-2 rounded-xl bg-indigo-600 text-white font-bold">Send Purchase Order</button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL: EDIT PO */}
+      {editPoModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs">
+          <div className="w-full max-w-md rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 shadow-2xl space-y-4">
+            <div className="flex items-center justify-between">
+              <h3 className="text-base font-bold text-slate-900 dark:text-white font-heading">Edit Purchase Order ({editPoModal.id})</h3>
+              <button onClick={() => setEditPoModal(null)} className="p-1 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-400">
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+            <form onSubmit={handleSaveEditPo} className="space-y-3 text-xs">
+              <div>
+                <label className="block font-semibold mb-1">Supplier</label>
+                <input
+                  type="text"
+                  value={editPoModal.supplier || ''}
+                  onChange={(e) => setEditPoModal({ ...editPoModal, supplier: e.target.value })}
+                  className="w-full p-2.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950"
+                  required
+                />
+              </div>
+              <div>
+                <label className="block font-semibold mb-1">Item / Component</label>
+                <input
+                  type="text"
+                  value={editPoModal.item || (editPoModal.items && editPoModal.items[0]?.desc) || ''}
+                  onChange={(e) => setEditPoModal({ ...editPoModal, item: e.target.value })}
+                  className="w-full p-2.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950"
+                  required
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block font-semibold mb-1">Quantity</label>
+                  <input
+                    type="number"
+                    value={editPoModal.qty || (editPoModal.items && editPoModal.items[0]?.qty) || 1}
+                    onChange={(e) => setEditPoModal({ ...editPoModal, qty: e.target.value })}
+                    className="w-full p-2.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950"
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="block font-semibold mb-1">Expected Delivery</label>
+                  <input
+                    type="date"
+                    value={editPoModal.expectedDate || ''}
+                    onChange={(e) => setEditPoModal({ ...editPoModal, expectedDate: e.target.value })}
+                    className="w-full p-2.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950"
+                  />
+                </div>
+              </div>
+              <div>
+                <label className="block font-semibold mb-1">Status</label>
+                <select
+                  value={editPoModal.status || 'Draft'}
+                  onChange={(e) => setEditPoModal({ ...editPoModal, status: e.target.value })}
+                  className="w-full p-2.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950"
+                >
+                  <option value="Draft">Draft</option>
+                  <option value="Sent">Sent</option>
+                  <option value="Partially Received">Partially Received</option>
+                  <option value="Received">Received</option>
+                  <option value="Cancelled">Cancelled</option>
+                </select>
+              </div>
+              <div className="flex items-center justify-end gap-2 pt-3 border-t border-slate-200 dark:border-slate-800">
+                <button type="button" onClick={() => setEditPoModal(null)} className="px-4 py-2 rounded-xl border text-slate-600 dark:text-slate-400">Cancel</button>
+                <button type="submit" className="px-4 py-2 rounded-xl bg-indigo-600 text-white font-bold">Save Changes</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL: VIEW PO */}
+      {viewPoModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs">
+          <div className="w-full max-w-lg rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 shadow-2xl space-y-4">
+            <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3">
+              <div>
+                <span className="text-[11px] font-bold uppercase text-indigo-600 dark:text-indigo-400 tracking-wider">Purchase Order Detail</span>
+                <h3 className="text-base font-bold text-slate-900 dark:text-white font-heading">{viewPoModal.id}</h3>
+              </div>
+              <button onClick={() => setViewPoModal(null)} className="p-1 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-400">
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+            <div className="grid grid-cols-2 gap-3 text-xs">
+              <div className="p-3 bg-slate-50 dark:bg-slate-950 rounded-xl">
+                <span className="text-[10px] text-slate-400 font-bold block">Supplier</span>
+                <span className="font-bold text-slate-900 dark:text-white">{viewPoModal.supplier}</span>
+              </div>
+              <div className="p-3 bg-slate-50 dark:bg-slate-950 rounded-xl">
+                <span className="text-[10px] text-slate-400 font-bold block">Status</span>
+                <span className="font-bold text-indigo-600 dark:text-indigo-400">{viewPoModal.status}</span>
+              </div>
+              <div className="p-3 bg-slate-50 dark:bg-slate-950 rounded-xl">
+                <span className="text-[10px] text-slate-400 font-bold block">Item / Material</span>
+                <span className="font-medium text-slate-700 dark:text-slate-300">{viewPoModal.item || (viewPoModal.items && viewPoModal.items[0]?.desc)}</span>
+              </div>
+              <div className="p-3 bg-slate-50 dark:bg-slate-950 rounded-xl">
+                <span className="text-[10px] text-slate-400 font-bold block">Total Amount</span>
+                <span className="font-bold text-slate-900 dark:text-white">{viewPoModal.total}</span>
+              </div>
+              <div className="p-3 bg-slate-50 dark:bg-slate-950 rounded-xl">
+                <span className="text-[10px] text-slate-400 font-bold block">Order Date</span>
+                <span className="font-medium text-slate-700 dark:text-slate-300">{viewPoModal.orderDate || '2026-08-01'}</span>
+              </div>
+              <div className="p-3 bg-slate-50 dark:bg-slate-950 rounded-xl">
+                <span className="text-[10px] text-slate-400 font-bold block">Expected Delivery</span>
+                <span className="font-medium text-slate-700 dark:text-slate-300">{viewPoModal.expectedDate}</span>
+              </div>
+            </div>
+
+            {viewPoModal.auditTrail && viewPoModal.auditTrail.length > 0 && (
+              <div className="pt-2">
+                <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider block mb-2">Audit Trail</span>
+                <div className="space-y-1.5 max-h-32 overflow-y-auto">
+                  {viewPoModal.auditTrail.map((log, idx) => (
+                    <div key={idx} className="text-[11px] flex items-center justify-between text-slate-600 dark:text-slate-400 bg-slate-50 dark:bg-slate-950 p-2 rounded-lg">
+                      <span className="font-medium">{log.step} ({log.by})</span>
+                      <span className="text-[10px] text-slate-400">{log.time}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            <div className="flex items-center justify-end pt-3 border-t border-slate-100 dark:border-slate-800">
+              <button onClick={() => setViewPoModal(null)} className="px-4 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 text-xs font-semibold">
+                Close
+              </button>
+            </div>
           </div>
         </div>
       )}
