@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useApp } from '../../../context/AppContext';
+import RawMaterialsView from './RawMaterialsView';
 import {
   BOM_LIST,
   WORK_ORDERS_KANBAN,
@@ -30,6 +31,7 @@ import {
   Pencil,
   Eye,
   Trash2,
+  Boxes,
   X
 } from 'lucide-react';
 
@@ -61,6 +63,7 @@ const ManufacturingView = () => {
 
   const tabs = [
     { id: 'bom_orders', label: 'BOM & Work Orders', icon: Factory },
+    { id: 'raw_materials', label: 'Raw Materials Master', icon: Boxes },
     { id: 'purchase_orders', label: 'Raw Material POs', icon: Truck },
     { id: 'quality_control', label: 'QC & Sample Testing', icon: ShieldCheck },
     { id: 'material_usage', label: 'Material Usage & Scrap', icon: FileText },
@@ -307,6 +310,11 @@ const ManufacturingView = () => {
             </div>
           </div>
         </div>
+      )}
+
+      {/* TAB: RAW MATERIALS MASTER */}
+      {activeTab === 'raw_materials' && (
+        <RawMaterialsView />
       )}
 
       {/* TAB 2: RAW MATERIAL PURCHASE ORDERS */}

@@ -1,13 +1,14 @@
 import React, { useState } from 'react';
 import { useApp } from '../../../context/AppContext';
+import RawMaterialsView from '../manufacturing/RawMaterialsView';
 import {
-  RAW_MATERIALS_INVENTORY,
   INVENTORY_STOCK_INS,
   INVENTORY_ADJUSTMENTS,
   INVENTORY_AUDITS
 } from '../../../data/mockData';
 import {
   Package,
+  Boxes,
   Plus,
   ArrowRightLeft,
   SlidersHorizontal,
@@ -19,9 +20,13 @@ import {
 } from 'lucide-react';
 
 const InventoryView = () => {
-  const { addToast } = useApp();
+  const {
+    addToast,
+    inventoryItems,
+    addStockToItem,
+    recordStockAdjustment
+  } = useApp();
   const [activeTab, setActiveTab] = useState('overview');
-  const [inventoryList, setInventoryList] = useState(RAW_MATERIALS_INVENTORY);
   const [stockInLogs, setStockInLogs] = useState(INVENTORY_STOCK_INS);
   const [adjustments, setAdjustments] = useState(INVENTORY_ADJUSTMENTS);
 
@@ -49,6 +54,7 @@ const InventoryView = () => {
 
   const tabs = [
     { id: 'overview', label: 'Stock Overview', icon: Package },
+    { id: 'raw_materials', label: 'Raw Materials Master', icon: Boxes },
     { id: 'stock_in', label: 'Add Inventory (Stock-In)', icon: Plus },
     { id: 'transfer', label: 'Transfer Stock', icon: ArrowRightLeft },
     { id: 'adjustment', label: 'Stock Adjustment', icon: SlidersHorizontal },
@@ -70,13 +76,13 @@ const InventoryView = () => {
     };
     setStockInLogs((prev) => [newLog, ...prev]);
 
-    // Update inventory stock
-    setInventoryList((prev) =>
-      prev.map((inv) => (inv.name === inItem ? { ...inv, stock: inv.stock + Number(inQty), isLow: false } : inv))
-    );
+    // Update global inventory stock
+    const targetItem = inventoryItems.find((i) => i.name === inItem);
+    if (targetItem) {
+      addStockToItem(targetItem.id, Number(inQty), inWarehouse, inReason, "Sarah Jenkins");
+    }
 
     setShowStockInModal(false);
-    addToast(`Stock-In ${newLog.id}: Added ${inQty} units to ${inWarehouse}`, "success");
   };
 
   const handleTransferSubmit = (e) => {
@@ -99,12 +105,12 @@ const InventoryView = () => {
     };
     setAdjustments((prev) => [newAdj, ...prev]);
 
-    setInventoryList((prev) =>
-      prev.map((inv) => (inv.name === adjItem ? { ...inv, stock: Math.max(0, inv.stock + Number(adjQty)) } : inv))
-    );
+    const targetItem = inventoryItems.find((i) => i.name === adjItem);
+    if (targetItem) {
+      recordStockAdjustment(targetItem.id, Number(adjQty), adjReason, "Component Vault", "Sarah Jenkins");
+    }
 
     setShowAdjustModal(false);
-    addToast(`Adjustment ${newAdj.id} recorded (${adjQty} units)`, "warning");
   };
 
   return (
@@ -118,7 +124,7 @@ const InventoryView = () => {
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold whitespace-nowrap transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 shrink-0 ${
+              className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold whitespace-nowrap transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 shrink-0 cursor-pointer ${
                 isActive
                   ? 'bg-indigo-600 text-white shadow-xs'
                   : 'bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800'
@@ -130,6 +136,11 @@ const InventoryView = () => {
           );
         })}
       </div>
+
+      {/* TAB: RAW MATERIALS MASTER */}
+      {activeTab === 'raw_materials' && (
+        <RawMaterialsView />
+      )}
 
       {/* TAB 1: STOCK OVERVIEW */}
       {activeTab === 'overview' && (
@@ -143,15 +154,22 @@ const InventoryView = () => {
             </div>
             <div className="flex items-center gap-2">
               <button
+                onClick={() => setActiveTab('raw_materials')}
+                className="flex items-center gap-1.5 rounded-xl border border-indigo-200 dark:border-indigo-800/80 bg-indigo-50 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-300 px-3.5 py-2 text-xs font-semibold hover:bg-indigo-100 dark:hover:bg-indigo-900/60 transition-colors cursor-pointer"
+              >
+                <Boxes className="h-4 w-4" />
+                <span>Raw Materials Master</span>
+              </button>
+              <button
                 onClick={() => setShowStockInModal(true)}
-                className="flex items-center gap-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white px-3.5 py-2 text-xs font-semibold shadow-2xs"
+                className="flex items-center gap-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white px-3.5 py-2 text-xs font-semibold shadow-2xs cursor-pointer"
               >
                 <Plus className="h-4 w-4" />
                 <span>Add Inventory</span>
               </button>
               <button
                 onClick={() => setShowTransferModal(true)}
-                className="flex items-center gap-1.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 px-3.5 py-2 text-xs font-semibold"
+                className="flex items-center gap-1.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 px-3.5 py-2 text-xs font-semibold cursor-pointer"
               >
                 <ArrowRightLeft className="h-4 w-4" />
                 <span>Transfer</span>
@@ -164,6 +182,7 @@ const InventoryView = () => {
               <thead>
                 <tr className="border-b border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-950/50 text-[11px] font-bold text-slate-500 uppercase tracking-wider">
                   <th className="p-3.5">SKU / Item</th>
+                  <th className="p-3.5">Type</th>
                   <th className="p-3.5">Warehouse Location</th>
                   <th className="p-3.5">Current Stock</th>
                   <th className="p-3.5">Min Threshold</th>
@@ -172,29 +191,47 @@ const InventoryView = () => {
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100 dark:divide-slate-800/60 text-xs font-medium">
-                {inventoryList.map((item) => (
-                  <tr key={item.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/40">
-                    <td className="p-3.5">
-                      <span className="font-bold text-slate-900 dark:text-white block">{item.name}</span>
-                      <span className="text-[10px] text-slate-500">{item.sku}</span>
-                    </td>
-                    <td className="p-3.5 text-slate-700 dark:text-slate-300">{item.warehouse}</td>
-                    <td className="p-3.5 font-bold text-slate-900 dark:text-white">{item.stock} {item.unit}</td>
-                    <td className="p-3.5 text-slate-500">{item.minStock} {item.unit}</td>
-                    <td className="p-3.5 font-bold text-slate-900 dark:text-white">{item.unitCost}</td>
-                    <td className="p-3.5">
-                      {item.isLow ? (
-                        <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-rose-50 text-rose-700 dark:bg-rose-950 dark:text-rose-300 flex items-center gap-1 w-fit">
-                          <AlertTriangle className="h-3 w-3" /> Low Stock
+                {inventoryItems.map((item) => {
+                  const isOut = Number(item.stock) <= 0;
+                  const isLow = Number(item.stock) <= Number(item.minStock) && !isOut;
+
+                  return (
+                    <tr key={item.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/40">
+                      <td className="p-3.5">
+                        <span className="font-bold text-slate-900 dark:text-white block">{item.name}</span>
+                        <span className="text-[10px] font-mono text-indigo-600 dark:text-indigo-400 font-bold">{item.sku}</span>
+                      </td>
+                      <td className="p-3.5">
+                        <span className={`text-[10px] font-bold px-2 py-0.5 rounded-md uppercase ${
+                          item.type === 'raw_material'
+                            ? 'bg-indigo-50 text-indigo-700 dark:bg-indigo-950 dark:text-indigo-300'
+                            : 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300'
+                        }`}>
+                          {item.type === 'raw_material' ? 'Raw Material' : 'Finished Good'}
                         </span>
-                      ) : (
-                        <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300 flex items-center gap-1 w-fit">
-                          <CheckCircle className="h-3 w-3" /> Optimal
-                        </span>
-                      )}
-                    </td>
-                  </tr>
-                ))}
+                      </td>
+                      <td className="p-3.5 text-slate-700 dark:text-slate-300">{item.warehouse}</td>
+                      <td className="p-3.5 font-bold text-slate-900 dark:text-white">{item.stock} {item.unit}</td>
+                      <td className="p-3.5 text-slate-500">{item.minStock} {item.unit}</td>
+                      <td className="p-3.5 font-bold text-slate-900 dark:text-white">{item.unitCost}</td>
+                      <td className="p-3.5">
+                        {isOut ? (
+                          <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-rose-50 text-rose-700 dark:bg-rose-950 dark:text-rose-300 flex items-center gap-1 w-fit">
+                            <AlertTriangle className="h-3 w-3" /> Out of Stock
+                          </span>
+                        ) : isLow ? (
+                          <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-50 text-amber-700 dark:bg-amber-950 dark:text-amber-300 flex items-center gap-1 w-fit">
+                            <AlertTriangle className="h-3 w-3" /> Low Stock
+                          </span>
+                        ) : (
+                          <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300 flex items-center gap-1 w-fit">
+                            <CheckCircle className="h-3 w-3" /> Optimal
+                          </span>
+                        )}
+                      </td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           </div>

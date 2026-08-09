@@ -4,6 +4,7 @@ import {
   LayoutDashboard,
   Factory,
   Package,
+  Boxes,
   Users,
   UserCheck,
   Receipt,
@@ -36,6 +37,7 @@ const Sidebar = () => {
       items: [
         { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard, badge: null },
         { id: 'manufacturing', label: 'Manufacturing & QC', icon: Factory, badge: 'BOM & QC' },
+        { id: 'raw_materials', label: 'Raw Materials', icon: Boxes, badge: 'Catalog' },
         { id: 'inventory', label: 'Warehouse & Stock', icon: Package, badge: 'Stock-In' }
       ]
     },

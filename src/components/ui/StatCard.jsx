@@ -6,7 +6,10 @@ import {
   AlertTriangle,
   ArrowUpRight,
   ArrowDownRight,
-  TrendingUp
+  TrendingUp,
+  Boxes,
+  XCircle,
+  Package
 } from 'lucide-react';
 
 const iconMap = {
@@ -14,10 +17,13 @@ const iconMap = {
   Factory,
   CheckCircle,
   AlertTriangle,
-  TrendingUp
+  TrendingUp,
+  Boxes,
+  XCircle,
+  Package
 };
 
-const StatCard = ({ title, value, change, isPositive, period, icon, color = 'indigo', chartData = [] }) => {
+const StatCard = ({ title, value, change, isPositive, period, icon, color = 'indigo', chartData = [], onClick }) => {
   const IconComponent = iconMap[icon] || TrendingUp;
 
   const colorVariants = {
@@ -30,7 +36,12 @@ const StatCard = ({ title, value, change, isPositive, period, icon, color = 'ind
   const isNumericTrend = change && (change.startsWith('+') || change.startsWith('-'));
 
   return (
-    <div className="relative overflow-hidden rounded-2xl border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-900 p-4 sm:p-5 shadow-xs hover:shadow-md transition-all duration-200 group flex flex-col justify-between h-full min-h-[148px] w-full min-w-0">
+    <div
+      onClick={onClick}
+      className={`relative overflow-hidden rounded-2xl border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-900 p-4 sm:p-5 shadow-xs hover:shadow-md transition-all duration-200 group flex flex-col justify-between h-full min-h-[148px] w-full min-w-0 ${
+        onClick ? 'cursor-pointer hover:border-indigo-400 dark:hover:border-indigo-600' : ''
+      }`}
+    >
       {/* Label and Icon Row - Vertically Centered */}
       <div className="flex items-center justify-between gap-2 w-full min-w-0">
         <h3 className="flex-1 min-w-0 text-xs font-semibold text-slate-600 dark:text-slate-400 truncate" title={title}>

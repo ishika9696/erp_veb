@@ -365,12 +365,318 @@ export const SUPPLIER_DIRECTORY = [
   { id: "SUP-03", name: "Silicon Core Semiconductors", contact: "Kenji Sato", email: "sato@siliconcore.jp", leadTime: "12 Days", rating: "4.8 / 5", primaryMaterial: "Industrial Motherboards", priceHistory: "$110.00 (-4%)" }
 ];
 
-// 4. INVENTORY MODULE DATA
+// 4. INVENTORY & RAW MATERIALS MASTER DATA (Single Source of Truth)
 export const RAW_MATERIALS_INVENTORY = [
-  { id: "RM-101", name: "15.6 Inch IPS Touch Display Panel", sku: "SKU-RM-101", stock: 140, minStock: 20, unit: "Pcs", unitCost: "$180.00", warehouse: "Main Assembly Depot" },
-  { id: "RM-102", name: "Aluminium CNC Terminal Casing", sku: "SKU-RM-102", stock: 12, minStock: 30, unit: "Pcs", unitCost: "$85.00", warehouse: "Main Assembly Depot", isLow: true },
-  { id: "RM-103", name: "ARM Octa-Core Industrial Motherboard", sku: "SKU-RM-103", stock: 85, minStock: 25, unit: "Pcs", unitCost: "$110.00", warehouse: "Component Vault" },
-  { id: "RM-104", name: "Thermal Printhead Engine 80mm", sku: "SKU-RM-104", stock: 8, minStock: 15, unit: "Pcs", unitCost: "$45.00", warehouse: "Component Vault", isLow: true }
+  {
+    id: "RM-101",
+    name: "15.6 Inch IPS Touch Display Panel",
+    sku: "SKU-RM-101",
+    type: "raw_material",
+    category: "Electronics & Displays",
+    unit: "Pcs",
+    stock: 140,
+    minStock: 20,
+    unitCost: "$180.00",
+    numericCost: 180.00,
+    warehouse: "Main Assembly Depot",
+    preferredSupplier: "OptoTech Displays Ltd",
+    supplierLeadTime: "5 Days",
+    description: "Industrial 1080p capacitive 10-point multi-touch display panel with tempered glass coating and anti-glare finish.",
+    warehouses: [
+      { name: "Main Assembly Depot", qty: 100 },
+      { name: "Component Vault", qty: 40 }
+    ],
+    linkedBoms: [
+      { id: "BOM-001", product: "POS Touchscreen Terminal X1", qtyPerUnit: 1, unit: "Pcs" }
+    ],
+    stockMovements: [
+      { id: "MOV-101", type: "Stock-In (PO Receipt)", ref: "PO-RM-2026-01", qty: +200, date: "2026-08-02", user: "Marcus Vance", warehouse: "Main Assembly Depot" },
+      { id: "MOV-102", type: "Production Consumption", ref: "WO-898", qty: -25, date: "2026-08-05", user: "Marcus Vance", warehouse: "Main Assembly Depot" },
+      { id: "MOV-103", type: "Production Consumption", ref: "WO-901", qty: -35, date: "2026-08-07", user: "Marcus Vance", warehouse: "Main Assembly Depot" }
+    ]
+  },
+  {
+    id: "RM-102",
+    name: "Aluminium CNC Terminal Casing",
+    sku: "SKU-RM-102",
+    type: "raw_material",
+    category: "Metals & Enclosures",
+    unit: "Pcs",
+    stock: 12,
+    minStock: 30,
+    unitCost: "$85.00",
+    numericCost: 85.00,
+    warehouse: "Main Assembly Depot",
+    preferredSupplier: "Precision Machining Corp",
+    supplierLeadTime: "7 Days",
+    isLow: true,
+    description: "Anodized space-grey aircraft-grade aluminium chassis with precision port cutouts and integrated passive heatsink.",
+    warehouses: [
+      { name: "Main Assembly Depot", qty: 12 },
+      { name: "Component Vault", qty: 0 }
+    ],
+    linkedBoms: [
+      { id: "BOM-001", product: "POS Touchscreen Terminal X1", qtyPerUnit: 1, unit: "Pcs" }
+    ],
+    stockMovements: [
+      { id: "MOV-201", type: "Stock-In (PO Receipt)", ref: "PO-RM-2026-02", qty: +75, date: "2026-08-03", user: "Marcus Vance", warehouse: "Main Assembly Depot" },
+      { id: "MOV-202", type: "Production Consumption", ref: "WO-898", qty: -25, date: "2026-08-05", user: "Marcus Vance", warehouse: "Main Assembly Depot" },
+      { id: "MOV-203", type: "Production Consumption", ref: "WO-901", qty: -38, date: "2026-08-07", user: "Marcus Vance", warehouse: "Main Assembly Depot" }
+    ]
+  },
+  {
+    id: "RM-103",
+    name: "ARM Octa-Core Industrial Motherboard",
+    sku: "SKU-RM-103",
+    type: "raw_material",
+    category: "Processors & Chips",
+    unit: "Pcs",
+    stock: 85,
+    minStock: 25,
+    unitCost: "$110.00",
+    numericCost: 110.00,
+    warehouse: "Component Vault",
+    preferredSupplier: "Silicon Core Semiconductors",
+    supplierLeadTime: "12 Days",
+    description: "Custom embedded compute board with Octa-core ARM SoC, 8GB LPDDR4 RAM, onboard Gigabit Ethernet and Dual HDMI.",
+    warehouses: [
+      { name: "Main Assembly Depot", qty: 25 },
+      { name: "Component Vault", qty: 60 }
+    ],
+    linkedBoms: [
+      { id: "BOM-001", product: "POS Touchscreen Terminal X1", qtyPerUnit: 1, unit: "Pcs" }
+    ],
+    stockMovements: [
+      { id: "MOV-301", type: "Stock-In (PO Receipt)", ref: "PO-RM-2026-03", qty: +100, date: "2026-07-28", user: "Sarah Jenkins", warehouse: "Component Vault" },
+      { id: "MOV-302", type: "Stock Adjustment", ref: "ADJ-2026-02", qty: +2, date: "2026-08-02", user: "Sarah Jenkins", warehouse: "Component Vault" },
+      { id: "MOV-303", type: "Production Consumption", ref: "WO-898", qty: -17, date: "2026-08-06", user: "Marcus Vance", warehouse: "Component Vault" }
+    ]
+  },
+  {
+    id: "RM-104",
+    name: "Thermal Printhead Engine 80mm",
+    sku: "SKU-RM-104",
+    type: "raw_material",
+    category: "Thermal & Printing",
+    unit: "Pcs",
+    stock: 8,
+    minStock: 15,
+    unitCost: "$45.00",
+    numericCost: 45.00,
+    warehouse: "Component Vault",
+    preferredSupplier: "OptoTech Displays Ltd",
+    supplierLeadTime: "6 Days",
+    isLow: true,
+    description: "High-speed 250mm/sec 203 DPI direct thermal receipt print mechanism with integrated auto-cutter.",
+    warehouses: [
+      { name: "Main Assembly Depot", qty: 2 },
+      { name: "Component Vault", qty: 6 }
+    ],
+    linkedBoms: [
+      { id: "BOM-002", product: "Wireless Thermal Barcode Printer", qtyPerUnit: 1, unit: "Pcs" }
+    ],
+    stockMovements: [
+      { id: "MOV-401", type: "Stock-In (PO Receipt)", ref: "PO-RM-2026-04", qty: +30, date: "2026-07-25", user: "Sarah Jenkins", warehouse: "Component Vault" },
+      { id: "MOV-402", type: "Production Consumption", ref: "WO-902", qty: -20, date: "2026-08-04", user: "Marcus Vance", warehouse: "Component Vault" },
+      { id: "MOV-403", type: "Stock Adjustment", ref: "ADJ-2026-03", qty: -2, date: "2026-08-07", user: "Sarah Jenkins", warehouse: "Component Vault" }
+    ]
+  },
+  {
+    id: "RM-105",
+    name: "ABS Plastic Enclosure Box",
+    sku: "SKU-RM-105",
+    type: "raw_material",
+    category: "Plastics & Polymers",
+    unit: "Pcs",
+    stock: 220,
+    minStock: 50,
+    unitCost: "$22.00",
+    numericCost: 22.00,
+    warehouse: "Main Assembly Depot",
+    preferredSupplier: "Precision Machining Corp",
+    supplierLeadTime: "4 Days",
+    description: "Flame-retardant UL94-V0 molded ABS plastic housing for handheld printers and barcode scanners.",
+    warehouses: [
+      { name: "Main Assembly Depot", qty: 170 },
+      { name: "Component Vault", qty: 50 }
+    ],
+    linkedBoms: [
+      { id: "BOM-002", product: "Wireless Thermal Barcode Printer", qtyPerUnit: 1, unit: "Pcs" }
+    ],
+    stockMovements: [
+      { id: "MOV-501", type: "Stock-In (PO Receipt)", ref: "PO-RM-2026-05", qty: +300, date: "2026-07-30", user: "Marcus Vance", warehouse: "Main Assembly Depot" },
+      { id: "MOV-502", type: "Stock Adjustment", ref: "ADJ-2026-01", qty: -3, date: "2026-07-31", user: "Sarah Jenkins", warehouse: "Component Vault" },
+      { id: "MOV-503", type: "Production Consumption", ref: "WO-902", qty: -77, date: "2026-08-04", user: "Marcus Vance", warehouse: "Main Assembly Depot" }
+    ]
+  },
+  {
+    id: "RM-106",
+    name: "Bluetooth 5.0 Wireless BLE Module",
+    sku: "SKU-RM-106",
+    type: "raw_material",
+    category: "Processors & Chips",
+    unit: "Pcs",
+    stock: 0,
+    minStock: 25,
+    unitCost: "$18.00",
+    numericCost: 18.00,
+    warehouse: "Component Vault",
+    preferredSupplier: "Silicon Core Semiconductors",
+    supplierLeadTime: "10 Days",
+    isLow: true,
+    isOutOfStock: true,
+    description: "Ultra-low power Bluetooth 5.0 Dual Mode transmitter/receiver chip with integrated PCB trace antenna.",
+    warehouses: [
+      { name: "Main Assembly Depot", qty: 0 },
+      { name: "Component Vault", qty: 0 }
+    ],
+    linkedBoms: [
+      { id: "BOM-002", product: "Wireless Thermal Barcode Printer", qtyPerUnit: 1, unit: "Pcs" }
+    ],
+    stockMovements: [
+      { id: "MOV-601", type: "Stock-In (PO Receipt)", ref: "PO-RM-2026-06", qty: +100, date: "2026-07-15", user: "Sarah Jenkins", warehouse: "Component Vault" },
+      { id: "MOV-602", type: "Production Consumption", ref: "WO-902", qty: -100, date: "2026-08-06", user: "Marcus Vance", warehouse: "Component Vault" }
+    ]
+  },
+  {
+    id: "RM-107",
+    name: "Copper Shielded Data Cable Harness",
+    sku: "SKU-RM-107",
+    type: "raw_material",
+    category: "Cables & Wiring",
+    unit: "meter",
+    stock: 450,
+    minStock: 100,
+    unitCost: "$4.50",
+    numericCost: 4.50,
+    warehouse: "Main Assembly Depot",
+    preferredSupplier: "OptoTech Displays Ltd",
+    supplierLeadTime: "3 Days",
+    description: "Double-shielded twisted pair copper wire harness with gold-plated internal pin terminals.",
+    warehouses: [
+      { name: "Main Assembly Depot", qty: 300 },
+      { name: "Component Vault", qty: 150 }
+    ],
+    linkedBoms: [
+      { id: "BOM-001", product: "POS Touchscreen Terminal X1", qtyPerUnit: 2, unit: "meter" },
+      { id: "BOM-002", product: "Wireless Thermal Barcode Printer", qtyPerUnit: 1, unit: "meter" }
+    ],
+    stockMovements: [
+      { id: "MOV-701", type: "Stock-In (PO Receipt)", ref: "PO-RM-2026-07", qty: +500, date: "2026-08-01", user: "Marcus Vance", warehouse: "Main Assembly Depot" },
+      { id: "MOV-702", type: "Production Consumption", ref: "WO-898", qty: -50, date: "2026-08-05", user: "Marcus Vance", warehouse: "Main Assembly Depot" }
+    ]
+  },
+  {
+    id: "RM-108",
+    name: "Corrugated Export Packaging Box",
+    sku: "SKU-RM-108",
+    type: "raw_material",
+    category: "Packaging & Boxes",
+    unit: "box",
+    stock: 320,
+    minStock: 80,
+    unitCost: "$6.20",
+    numericCost: 6.20,
+    warehouse: "Main Assembly Depot",
+    preferredSupplier: "Precision Machining Corp",
+    supplierLeadTime: "2 Days",
+    description: "Heavy-duty 5-ply kraft corrugated cardboard retail/shipping box with custom die-cut foam inserts.",
+    warehouses: [
+      { name: "Main Assembly Depot", qty: 320 },
+      { name: "Component Vault", qty: 0 }
+    ],
+    linkedBoms: [
+      { id: "BOM-001", product: "POS Touchscreen Terminal X1", qtyPerUnit: 1, unit: "box" },
+      { id: "BOM-002", product: "Wireless Thermal Barcode Printer", qtyPerUnit: 1, unit: "box" }
+    ],
+    stockMovements: [
+      { id: "MOV-801", type: "Stock-In (PO Receipt)", ref: "PO-RM-2026-08", qty: +400, date: "2026-08-01", user: "Marcus Vance", warehouse: "Main Assembly Depot" },
+      { id: "MOV-802", type: "Production Consumption", ref: "WO-889", qty: -80, date: "2026-08-02", user: "Marcus Vance", warehouse: "Main Assembly Depot" }
+    ]
+  }
+];
+
+// Unified Inventory (Raw Materials + Finished Goods)
+export const INITIAL_INVENTORY_ITEMS = [
+  ...RAW_MATERIALS_INVENTORY,
+  {
+    id: "FG-201",
+    name: "POS Touchscreen Terminal X1",
+    sku: "SKU-HW-101",
+    type: "finished_good",
+    category: "Finished Hardware",
+    unit: "Pcs",
+    stock: 42,
+    minStock: 10,
+    unitCost: "$412.50",
+    numericCost: 412.50,
+    warehouse: "Finished Goods Hub",
+    preferredSupplier: "Internal Assembly Plant",
+    supplierLeadTime: "2 Days",
+    description: "Complete flagship 15.6 inch all-in-one POS point of sale terminal with integrated capacitive screen and high-speed CPU.",
+    warehouses: [
+      { name: "Finished Goods Hub", qty: 42 }
+    ],
+    linkedBoms: [
+      { id: "BOM-001", product: "POS Touchscreen Terminal X1", qtyPerUnit: 1, unit: "Pcs" }
+    ],
+    stockMovements: [
+      { id: "MOV-901", type: "Production Output", ref: "WO-889", qty: +50, date: "2026-08-01", user: "Priya Sharma", warehouse: "Finished Goods Hub" },
+      { id: "MOV-902", type: "Sales Dispatch", ref: "SO-2026-88", qty: -8, date: "2026-08-04", user: "David Wu", warehouse: "Finished Goods Hub" }
+    ]
+  },
+  {
+    id: "FG-202",
+    name: "Wireless Thermal Barcode Printer",
+    sku: "SKU-HW-102",
+    type: "finished_good",
+    category: "Finished Hardware",
+    unit: "Pcs",
+    stock: 28,
+    minStock: 8,
+    unitCost: "$118.00",
+    numericCost: 118.00,
+    warehouse: "Finished Goods Hub",
+    preferredSupplier: "Internal Assembly Plant",
+    supplierLeadTime: "1 Day",
+    description: "Compact wireless thermal 80mm barcode and receipt printer with Bluetooth 5.0 and USB-C connectivity.",
+    warehouses: [
+      { name: "Finished Goods Hub", qty: 28 }
+    ],
+    linkedBoms: [
+      { id: "BOM-002", product: "Wireless Thermal Barcode Printer", qtyPerUnit: 1, unit: "Pcs" }
+    ],
+    stockMovements: [
+      { id: "MOV-903", type: "Production Output", ref: "WO-889", qty: +35, date: "2026-08-02", user: "Priya Sharma", warehouse: "Finished Goods Hub" },
+      { id: "MOV-904", type: "Sales Dispatch", ref: "SO-2026-91", qty: -7, date: "2026-08-05", user: "David Wu", warehouse: "Finished Goods Hub" }
+    ]
+  },
+  {
+    id: "FG-203",
+    name: "Smart RFID Scanner Gun",
+    sku: "SKU-HW-103",
+    type: "finished_good",
+    category: "Finished Hardware",
+    unit: "Pcs",
+    stock: 65,
+    minStock: 15,
+    unitCost: "$165.00",
+    numericCost: 165.00,
+    warehouse: "Finished Goods Hub",
+    preferredSupplier: "Internal Assembly Plant",
+    supplierLeadTime: "2 Days",
+    description: "Industrial handheld UHF RFID and 2D barcode scanner gun with rugged drop protection.",
+    warehouses: [
+      { name: "Finished Goods Hub", qty: 65 }
+    ],
+    linkedBoms: [
+      { id: "BOM-004", product: "Smart RFID Scanner Gun", qtyPerUnit: 1, unit: "Pcs" }
+    ],
+    stockMovements: [
+      { id: "MOV-905", type: "Production Output", ref: "WO-889", qty: +80, date: "2026-08-02", user: "Priya Sharma", warehouse: "Finished Goods Hub" },
+      { id: "MOV-906", type: "Sales Dispatch", ref: "SO-2026-94", qty: -15, date: "2026-08-06", user: "David Wu", warehouse: "Finished Goods Hub" }
+    ]
+  }
 ];
 
 // Stock-In Entries

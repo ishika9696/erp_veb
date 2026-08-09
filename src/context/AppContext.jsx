@@ -1,5 +1,9 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { MANUFACTURING_PURCHASE_ORDERS, FINANCE_PURCHASE_BILLS } from '../data/mockData';
+import {
+  MANUFACTURING_PURCHASE_ORDERS,
+  FINANCE_PURCHASE_BILLS,
+  INITIAL_INVENTORY_ITEMS
+} from '../data/mockData';
 
 const AppContext = createContext();
 
@@ -35,6 +39,12 @@ export const AppProvider = ({ children }) => {
     plan: "Manufacturing Enterprise",
     avatar: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=100"
   });
+
+  // Unified Inventory Items (Raw Materials + Finished Goods)
+  const [inventoryItems, setInventoryItems] = useState(INITIAL_INVENTORY_ITEMS);
+
+  // Deep-linking filter for Raw Materials (e.g. from Dashboard Low Stock alert)
+  const [rawMaterialFilter, setRawMaterialFilter] = useState('all');
 
   // Unified Purchase Orders (shared between Finance & Manufacturing)
   const [purchaseOrders, setPurchaseOrders] = useState(MANUFACTURING_PURCHASE_ORDERS);
@@ -117,6 +127,104 @@ export const AppProvider = ({ children }) => {
     return billId;
   };
 
+  // Inventory Item Helpers
+  const addInventoryItem = (newItem) => {
+    setInventoryItems((prev) => [newItem, ...prev]);
+    addToast(`${newItem.name} (${newItem.sku}) added to inventory catalog`, 'success');
+  };
+
+  const updateInventoryItem = (id, updatedFields) => {
+    setInventoryItems((prev) =>
+      prev.map((item) => {
+        if (item.id === id) {
+          const updated = { ...item, ...updatedFields };
+          // Re-evaluate isLow and isOutOfStock
+          updated.isOutOfStock = Number(updated.stock) <= 0;
+          updated.isLow = Number(updated.stock) <= Number(updated.minStock);
+          return updated;
+        }
+        return item;
+      })
+    );
+    addToast(`Inventory record ${id} updated`, 'success');
+  };
+
+  const deleteInventoryItem = (id) => {
+    setInventoryItems((prev) => prev.filter((item) => item.id !== id));
+    addToast(`Item ${id} removed from inventory`, 'info');
+  };
+
+  const addStockToItem = (itemId, qtyToAdd, warehouse = 'Main Assembly Depot', source = 'Stock-In Entry', user = 'Marcus Vance') => {
+    const numQty = Number(qtyToAdd) || 0;
+    setInventoryItems((prev) =>
+      prev.map((item) => {
+        if (item.id === itemId) {
+          const newStock = Number(item.stock) + numQty;
+          const updatedWarehouses = (item.warehouses && item.warehouses.length > 0)
+            ? item.warehouses.map((wh) => wh.name === warehouse ? { ...wh, qty: wh.qty + numQty } : wh)
+            : [{ name: warehouse, qty: newStock }];
+          
+          const newMovement = {
+            id: `MOV-${Date.now()}`,
+            type: source,
+            ref: `STK-IN-${Math.floor(100 + Math.random() * 900)}`,
+            qty: numQty,
+            date: new Date().toISOString().split('T')[0],
+            user,
+            warehouse
+          };
+
+          return {
+            ...item,
+            stock: newStock,
+            warehouses: updatedWarehouses,
+            isOutOfStock: newStock <= 0,
+            isLow: newStock <= Number(item.minStock),
+            stockMovements: [newMovement, ...(item.stockMovements || [])]
+          };
+        }
+        return item;
+      })
+    );
+    addToast(`Added +${numQty} units to inventory for item #${itemId}`, 'success');
+  };
+
+  const recordStockAdjustment = (itemId, qtyChange, reason = 'Inventory Audit Correction', warehouse = 'Component Vault', user = 'Sarah Jenkins') => {
+    const numChange = Number(qtyChange) || 0;
+    setInventoryItems((prev) =>
+      prev.map((item) => {
+        if (item.id === itemId) {
+          const newStock = Math.max(0, Number(item.stock) + numChange);
+          const updatedWarehouses = (item.warehouses && item.warehouses.length > 0)
+            ? item.warehouses.map((wh) => wh.name === warehouse ? { ...wh, qty: Math.max(0, wh.qty + numChange) } : wh)
+            : [{ name: warehouse, qty: newStock }];
+          
+          const newMovement = {
+            id: `MOV-${Date.now()}`,
+            type: "Stock Adjustment",
+            ref: `ADJ-${Math.floor(100 + Math.random() * 900)}`,
+            qty: numChange,
+            date: new Date().toISOString().split('T')[0],
+            user,
+            warehouse,
+            reason
+          };
+
+          return {
+            ...item,
+            stock: newStock,
+            warehouses: updatedWarehouses,
+            isOutOfStock: newStock <= 0,
+            isLow: newStock <= Number(item.minStock),
+            stockMovements: [newMovement, ...(item.stockMovements || [])]
+          };
+        }
+        return item;
+      })
+    );
+    addToast(`Adjustment of ${numChange > 0 ? `+${numChange}` : numChange} units recorded for #${itemId}`, 'warning');
+  };
+
   // Toggle Theme Class on HTML element
   useEffect(() => {
     const root = document.documentElement;
@@ -181,6 +289,15 @@ export const AppProvider = ({ children }) => {
         toasts,
         addToast,
         removeToast,
+        inventoryItems,
+        setInventoryItems,
+        rawMaterialFilter,
+        setRawMaterialFilter,
+        addInventoryItem,
+        updateInventoryItem,
+        deleteInventoryItem,
+        addStockToItem,
+        recordStockAdjustment,
         purchaseOrders,
         setPurchaseOrders,
         bills,

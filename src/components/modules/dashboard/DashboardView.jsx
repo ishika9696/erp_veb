@@ -25,8 +25,13 @@ import { useApp } from '../../../context/AppContext';
 const COLORS = ['#4F46E5', '#10B981', '#F59E0B', '#EF4444'];
 
 const DashboardView = () => {
-  const { setActiveModule, addToast } = useApp();
+  const { setActiveModule, addToast, inventoryItems, setRawMaterialFilter } = useApp();
   const [tasks, setTasks] = useState(UPCOMING_TASKS);
+
+  // Compute live raw materials low stock items
+  const lowStockRawMaterials = inventoryItems.filter(
+    (item) => item.type === 'raw_material' && Number(item.stock) <= Number(item.minStock)
+  );
 
   const toggleTask = (id) => {
     setTasks((prev) =>
@@ -39,9 +44,22 @@ const DashboardView = () => {
     <div className="space-y-6 w-full max-w-full min-w-0">
       {/* Executive KPI Cards Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 items-stretch w-full min-w-0">
-        {INITIAL_STATS.map((stat, idx) => (
-          <StatCard key={idx} {...stat} />
-        ))}
+        {INITIAL_STATS.map((stat, idx) => {
+          if (stat.title === "Low Stock Alerts") {
+            return (
+              <StatCard
+                key={idx}
+                {...stat}
+                value={`${lowStockRawMaterials.length} Items`}
+                onClick={() => {
+                  setRawMaterialFilter('low_stock');
+                  setActiveModule('raw_materials');
+                }}
+              />
+            );
+          }
+          return <StatCard key={idx} {...stat} />;
+        })}
       </div>
 
       {/* Analytics Row: Production Yield Line Chart + Pipeline Shares Donut */}

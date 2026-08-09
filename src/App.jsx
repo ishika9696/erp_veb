@@ -11,6 +11,7 @@ import ToastContainer from './components/ui/ToastContainer';
 import DashboardView from './components/modules/dashboard/DashboardView';
 import ServerAdminView from './components/modules/serveradmin/ServerAdminView';
 import ManufacturingView from './components/modules/manufacturing/ManufacturingView';
+import RawMaterialsView from './components/modules/manufacturing/RawMaterialsView';
 import InventoryView from './components/modules/inventory/InventoryView';
 import MobileAppView from './components/modules/mobile/MobileAppView';
 import CrmView from './components/modules/crm/CrmView';
@@ -30,6 +31,8 @@ const MainContent = () => {
         return <ServerAdminView />;
       case 'manufacturing':
         return <ManufacturingView />;
+      case 'raw_materials':
+        return <RawMaterialsView />;
       case 'inventory':
         return <InventoryView />;
       case 'mobileapp':
