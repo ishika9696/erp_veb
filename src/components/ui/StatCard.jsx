@@ -9,7 +9,10 @@ import {
   TrendingUp,
   Boxes,
   XCircle,
-  Package
+  Package,
+  Users,
+  UserCheck,
+  Briefcase
 } from 'lucide-react';
 
 const iconMap = {
@@ -20,7 +23,10 @@ const iconMap = {
   TrendingUp,
   Boxes,
   XCircle,
-  Package
+  Package,
+  Users,
+  UserCheck,
+  Briefcase
 };
 
 const StatCard = ({ title, value, change, isPositive, period, icon, color = 'indigo', chartData = [], onClick }) => {

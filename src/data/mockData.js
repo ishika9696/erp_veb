@@ -48,7 +48,24 @@ export const INITIAL_STATS = [
     icon: "AlertTriangle",
     color: "rose",
     chartData: [8, 6, 5, 4, 3, 3, 3]
+  },
+  {
+    title: "Total Workforce",
+    value: "46 Staff",
+    change: "+4 this month",
+    isPositive: true,
+    period: "42 Active Today (91.3%)",
+    icon: "Users",
+    color: "indigo",
+    chartData: [40, 41, 42, 42, 44, 45, 46]
   }
+];
+
+export const TODAY_ATTENDANCE_DATA = [
+  { name: "Present", value: 40, color: "#10B981" },
+  { name: "Late", value: 2, color: "#F59E0B" },
+  { name: "On Leave", value: 3, color: "#6366F1" },
+  { name: "Absent", value: 1, color: "#EF4444" }
 ];
 
 export const PRODUCTION_TREND_DATA = [
@@ -1019,12 +1036,12 @@ export const CRM_CLIENT_PROJECTS = [
 
 // 6. HRM MODULE DATA
 export const INITIAL_EMPLOYEES = [
-  { id: "EMP-001", name: "Sarah Jenkins", role: "VP of Operations", department: "Executive", status: "Active", salary: "$145,000", email: "s.jenkins@acme.com", phone: "+1 555-0192", avatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150", isOnline: true },
-  { id: "EMP-002", name: "Alex Rivera", role: "Lead Sales Director", department: "Sales", status: "Active", salary: "$120,000", email: "a.rivera@acme.com", phone: "+1 555-0143", avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150", isOnline: true },
-  { id: "EMP-003", name: "Elena Rostova", role: "HR Business Partner", department: "Human Resources", status: "On Leave", salary: "$95,000", email: "e.rostova@acme.com", phone: "+1 555-0188", avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150", isOnline: false },
-  { id: "EMP-004", name: "David Chen", role: "Senior Financial Analyst", department: "Finance", status: "Active", salary: "$110,000", email: "d.chen@acme.com", phone: "+1 555-0167", avatar: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150", isOnline: true },
-  { id: "EMP-005", name: "Priya Sharma", role: "Product Lead", department: "Manufacturing", status: "Remote", salary: "$130,000", email: "p.sharma@acme.com", phone: "+1 555-0122", avatar: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=150", isOnline: true },
-  { id: "EMP-006", name: "Marcus Vance", role: "Plant Operations Lead", department: "Manufacturing", status: "Active", salary: "$125,000", email: "m.vance@acme.com", phone: "+1 555-0177", avatar: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150", isOnline: false }
+  { id: "EMP-001", name: "Sarah Jenkins", role: "VP of Operations", department: "Executive", status: "Active", attendance: "Present", checkIn: "08:45 AM", shift: "General Shift", salary: "$145,000", email: "s.jenkins@acme.com", phone: "+1 555-0192", avatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150", isOnline: true, assignedWorkOrder: null },
+  { id: "EMP-002", name: "Alex Rivera", role: "Lead Sales Director", department: "Sales", status: "Active", attendance: "Late", checkIn: "09:05 AM", shift: "General Shift", salary: "$120,000", email: "a.rivera@acme.com", phone: "+1 555-0143", avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150", isOnline: true, assignedWorkOrder: null },
+  { id: "EMP-003", name: "Elena Rostova", role: "HR Business Partner", department: "Human Resources", status: "On Leave", attendance: "On Leave", checkIn: "--:--", shift: "Day Shift", salary: "$95,000", email: "e.rostova@acme.com", phone: "+1 555-0188", avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150", isOnline: false, assignedWorkOrder: null },
+  { id: "EMP-004", name: "David Chen", role: "Senior Financial Analyst", department: "Finance", status: "Active", attendance: "Present", checkIn: "08:50 AM", shift: "General Shift", salary: "$110,000", email: "d.chen@acme.com", phone: "+1 555-0167", avatar: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150", isOnline: true, assignedWorkOrder: null },
+  { id: "EMP-005", name: "Priya Sharma", role: "Product Lead", department: "Manufacturing", status: "Remote", attendance: "Present", checkIn: "08:30 AM", shift: "Production Shift A", salary: "$130,000", email: "p.sharma@acme.com", phone: "+1 555-0122", avatar: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=150", isOnline: true, assignedWorkOrder: "WO-901 (Assembly Bay 4)" },
+  { id: "EMP-006", name: "Marcus Vance", role: "Plant Operations Lead", department: "Manufacturing", status: "Active", attendance: "Present", checkIn: "08:30 AM", shift: "SMT Production Lead", salary: "$125,000", email: "m.vance@acme.com", phone: "+1 555-0177", avatar: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150", isOnline: true, assignedWorkOrder: "WO-898 (SMT Line 2)" }
 ];
 
 export const HRM_LEAVE_TYPES = [
