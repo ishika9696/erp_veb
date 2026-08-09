@@ -5,6 +5,7 @@ import { ChevronRight, Home, Calendar, RefreshCw } from 'lucide-react';
 const moduleTitles = {
   dashboard: { title: "VEB ERP Company Dashboard", sub: "Real-time overview of manufacturing output, revenue, and active operations." },
   manufacturing: { title: "Manufacturing & Production", sub: "Bill of Materials (BOM), work orders Kanban, raw material consumption & unit cost calculator." },
+  raw_materials: { title: "Raw Materials Master Catalog", sub: "Centralized bill-of-materials components, reorder thresholds, supplier lead times, and warehouse stock levels." },
   inventory: { title: "Warehouse & Raw Material Inventory", sub: "Stock levels, low-stock reorder alerts, and inter-warehouse stock transfers." },
   serveradmin: { title: "Super Admin & Infrastructure Control", sub: "Server health (CPU/RAM/Storage gauges), multi-tenant hosting, database backups, and system logs." },
   mobileapp: { title: "VEB Mobile Companion Simulator", sub: "Native mobile app companion for field technicians, GPS attendance check-in, and tasks." },

@@ -400,36 +400,39 @@ const RawMaterialsView = () => {
 
       {/* Search, Multi-Level Filters & Sort Toolbar */}
       <div className="p-4 rounded-2xl border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-xs space-y-3">
-        <div className="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-3">
-          {/* Instant Search */}
-          <div className="relative flex-1 min-w-0">
-            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+        <div className="flex flex-col xl:flex-row items-stretch xl:items-center justify-between gap-3">
+          {/* Instant Search with clean inline icon */}
+          <div className="relative flex-1 min-w-[260px] max-w-md">
+            <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
+              <Search className="h-4 w-4 text-slate-400" />
+            </div>
             <input
               type="text"
-              placeholder="Search raw materials by Name, SKU, Supplier, or Material specification..."
+              placeholder="Search raw materials by Name, SKU, Supplier, or Material..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-950 text-xs text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              className="w-full h-10 pl-10 pr-9 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-950 text-xs text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all"
             />
             {searchQuery && (
               <button
+                type="button"
                 onClick={() => setSearchQuery('')}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-white"
+                className="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-slate-600 dark:hover:text-white cursor-pointer"
               >
                 <X className="h-3.5 w-3.5" />
               </button>
             )}
           </div>
 
-          {/* Quick Filters */}
-          <div className="flex items-center gap-2 flex-wrap text-xs">
+          {/* Quick Filters - All on one consistent baseline */}
+          <div className="flex items-center gap-2.5 flex-wrap">
             {/* Category Filter */}
-            <div className="flex items-center gap-1">
-              <span className="text-[11px] font-bold text-slate-500 hidden sm:inline">Category:</span>
+            <div className="flex items-center gap-1.5">
+              <span className="text-[11px] font-bold text-slate-500 whitespace-nowrap hidden sm:inline">Category:</span>
               <select
                 value={categoryFilter}
                 onChange={(e) => setCategoryFilter(e.target.value)}
-                className="p-2 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-950 text-xs font-semibold text-slate-700 dark:text-slate-300 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                className="h-10 px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-950 text-xs font-semibold text-slate-700 dark:text-slate-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 cursor-pointer"
               >
                 <option value="all">All Categories ({rawMaterials.length})</option>
                 {categories.filter(c => c !== 'all').map((cat) => (
@@ -439,14 +442,14 @@ const RawMaterialsView = () => {
             </div>
 
             {/* Status Filter */}
-            <div className="flex items-center gap-1">
-              <span className="text-[11px] font-bold text-slate-500 hidden sm:inline">Stock Status:</span>
+            <div className="flex items-center gap-1.5">
+              <span className="text-[11px] font-bold text-slate-500 whitespace-nowrap hidden sm:inline">Stock Status:</span>
               <select
                 value={statusFilter}
                 onChange={(e) => setStatusFilter(e.target.value)}
-                className="p-2 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-950 text-xs font-semibold text-slate-700 dark:text-slate-300 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                className="h-10 px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-950 text-xs font-semibold text-slate-700 dark:text-slate-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 cursor-pointer"
               >
-                <option value="all">All Stock Statuses</option>
+                <option value="all">All Statuses</option>
                 <option value="in_stock">In Stock (Optimal)</option>
                 <option value="low_stock">Low Stock (Reorder Alert)</option>
                 <option value="out_of_stock">Out of Stock (Zero Units)</option>
@@ -454,12 +457,12 @@ const RawMaterialsView = () => {
             </div>
 
             {/* Supplier Filter */}
-            <div className="flex items-center gap-1">
-              <span className="text-[11px] font-bold text-slate-500 hidden md:inline">Supplier:</span>
+            <div className="flex items-center gap-1.5">
+              <span className="text-[11px] font-bold text-slate-500 whitespace-nowrap hidden md:inline">Supplier:</span>
               <select
                 value={supplierFilter}
                 onChange={(e) => setSupplierFilter(e.target.value)}
-                className="p-2 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-950 text-xs font-semibold text-slate-700 dark:text-slate-300 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                className="h-10 px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-950 text-xs font-semibold text-slate-700 dark:text-slate-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 cursor-pointer"
               >
                 <option value="all">All Suppliers</option>
                 {suppliers.filter(s => s !== 'all').map((sup) => (
@@ -469,12 +472,12 @@ const RawMaterialsView = () => {
             </div>
 
             {/* Sort Dropdown */}
-            <div className="flex items-center gap-1">
-              <ArrowUpDown className="h-3.5 w-3.5 text-slate-400 hidden sm:inline" />
+            <div className="flex items-center gap-1.5">
+              <ArrowUpDown className="h-3.5 w-3.5 text-slate-400 hidden sm:inline shrink-0" />
               <select
                 value={sortBy}
                 onChange={(e) => setSortBy(e.target.value)}
-                className="p-2 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-950 text-xs font-semibold text-slate-700 dark:text-slate-300 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                className="h-10 px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-950 text-xs font-semibold text-slate-700 dark:text-slate-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 cursor-pointer"
               >
                 <option value="stock_asc">Stock: Lowest First (Urgent)</option>
                 <option value="stock_desc">Stock: Highest First</option>
@@ -488,7 +491,7 @@ const RawMaterialsView = () => {
         </div>
 
         {/* Quick Stock Filter Pills */}
-        <div className="flex items-center gap-2 pt-1 border-t border-slate-100 dark:border-slate-800/80 flex-wrap">
+        <div className="flex items-center gap-2 pt-2.5 border-t border-slate-100 dark:border-slate-800/80 flex-wrap">
           <span className="text-[11px] font-bold text-slate-500 mr-1">Quick Filters:</span>
           <button
             onClick={() => setStatusFilter('all')}
@@ -542,19 +545,22 @@ const RawMaterialsView = () => {
 
       {/* RAW MATERIALS DATA TABLE */}
       <div className="rounded-2xl border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-900 overflow-hidden shadow-xs">
-        <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse">
+        <div className="overflow-x-auto scrollbar-thin scrollbar-thumb-slate-200 dark:scrollbar-thumb-slate-800">
+          <table className="w-full text-left border-collapse min-w-[1150px]">
             <thead>
               <tr className="border-b border-slate-200 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-950/70 text-[11px] font-bold text-slate-500 uppercase tracking-wider">
-                <th className="p-3.5">Material & SKU</th>
-                <th className="p-3.5">Category</th>
-                <th className="p-3.5">Current Stock</th>
-                <th className="p-3.5">Reorder Level</th>
-                <th className="p-3.5">Unit Cost</th>
-                <th className="p-3.5">Total Value</th>
-                <th className="p-3.5">Preferred Supplier</th>
-                <th className="p-3.5">Status</th>
-                <th className="p-3.5 text-right">Actions</th>
+                {/* Sticky Material & SKU Header */}
+                <th className="sticky left-0 z-20 bg-slate-50 dark:bg-slate-950 pl-4 pr-3 py-3.5 whitespace-nowrap min-w-[210px] border-r border-slate-200/80 dark:border-slate-800 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.06)] dark:shadow-[2px_0_5px_-2px_rgba(0,0,0,0.4)]">
+                  Material & SKU
+                </th>
+                <th className="px-3 py-3.5 min-w-[150px] whitespace-nowrap">Category</th>
+                <th className="px-3 py-3.5 min-w-[130px] whitespace-nowrap">Current Stock</th>
+                <th className="px-3 py-3.5 min-w-[110px] whitespace-nowrap">Reorder Level</th>
+                <th className="px-3 py-3.5 min-w-[100px] whitespace-nowrap">Unit Cost</th>
+                <th className="px-3 py-3.5 min-w-[110px] whitespace-nowrap">Total Value</th>
+                <th className="px-3 py-3.5 min-w-[160px]">Preferred Supplier</th>
+                <th className="px-3 py-3.5 min-w-[110px] whitespace-nowrap">Status</th>
+                <th className="pl-3 pr-4 py-3.5 text-right min-w-[180px] whitespace-nowrap">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 dark:divide-slate-800/60 text-xs font-medium">
@@ -576,9 +582,9 @@ const RawMaterialsView = () => {
                   const isLow = Number(item.stock) <= Number(item.minStock) && !isOut;
 
                   return (
-                    <tr key={item.id} className="hover:bg-slate-50/80 dark:hover:bg-slate-800/40 transition-colors">
-                      {/* Material Name & SKU */}
-                      <td className="p-3.5">
+                    <tr key={item.id} className="group hover:bg-slate-50/80 dark:hover:bg-slate-800/40 transition-colors">
+                      {/* Sticky Material Name & SKU Cell */}
+                      <td className="sticky left-0 z-10 bg-white dark:bg-slate-900 group-hover:bg-slate-50 dark:group-hover:bg-slate-850 pl-4 pr-3 py-3.5 whitespace-nowrap border-r border-slate-200/80 dark:border-slate-800 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.06)] dark:shadow-[2px_0_5px_-2px_rgba(0,0,0,0.4)] transition-colors">
                         <div className="flex flex-col">
                           <button
                             onClick={() => setViewItem(item)}
@@ -597,14 +603,14 @@ const RawMaterialsView = () => {
                       </td>
 
                       {/* Category */}
-                      <td className="p-3.5">
-                        <span className="text-[11px] font-semibold px-2 py-0.5 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 whitespace-nowrap">
+                      <td className="px-3 py-3.5 whitespace-nowrap">
+                        <span className="text-[11px] font-semibold px-2 py-0.5 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300">
                           {item.category}
                         </span>
                       </td>
 
                       {/* Current Stock */}
-                      <td className="p-3.5">
+                      <td className="px-3 py-3.5 whitespace-nowrap">
                         <div className="space-y-1">
                           <div className="flex items-center gap-1.5">
                             <span className={`font-bold text-xs ${
@@ -630,22 +636,22 @@ const RawMaterialsView = () => {
                       </td>
 
                       {/* Reorder Level */}
-                      <td className="p-3.5 text-slate-600 dark:text-slate-400 font-medium">
+                      <td className="px-3 py-3.5 text-slate-600 dark:text-slate-400 font-medium whitespace-nowrap">
                         {item.minStock} {item.unit}
                       </td>
 
                       {/* Unit Cost */}
-                      <td className="p-3.5 font-bold text-slate-900 dark:text-white">
+                      <td className="px-3 py-3.5 font-bold text-slate-900 dark:text-white whitespace-nowrap">
                         {item.unitCost}
                       </td>
 
                       {/* Total Inventory Value */}
-                      <td className="p-3.5 font-bold text-slate-900 dark:text-white">
+                      <td className="px-3 py-3.5 font-bold text-slate-900 dark:text-white whitespace-nowrap">
                         ${itemValue.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                       </td>
 
                       {/* Preferred Supplier */}
-                      <td className="p-3.5">
+                      <td className="px-3 py-3.5">
                         <div>
                           <span className="font-semibold text-slate-800 dark:text-slate-200 block text-xs truncate max-w-[150px]">
                             {item.preferredSupplier || 'Internal Depot'}
@@ -657,7 +663,7 @@ const RawMaterialsView = () => {
                       </td>
 
                       {/* Status Badge */}
-                      <td className="p-3.5">
+                      <td className="px-3 py-3.5 whitespace-nowrap">
                         {isOut ? (
                           <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-rose-50 text-rose-700 dark:bg-rose-950 dark:text-rose-300 flex items-center gap-1 w-fit">
                             <XCircle className="h-3 w-3" /> Out of Stock
@@ -674,7 +680,7 @@ const RawMaterialsView = () => {
                       </td>
 
                       {/* Action Menu */}
-                      <td className="p-3.5 text-right">
+                      <td className="pl-3 pr-4 py-3.5 text-right whitespace-nowrap">
                         <div className="flex items-center justify-end gap-1">
                           {/* View Profile Detail */}
                           <button
