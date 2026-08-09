@@ -669,6 +669,18 @@ const AccountingView = () => {
     addToast(`Purchase Order ${po.id} updated successfully`, "success", "Record Updated");
   };
 
+  // Currency Formatter guaranteeing two decimal places ($0.00)
+  const formatCurrency = (val) => {
+    if (val === undefined || val === null || val === '') return '$0.00';
+    if (typeof val === 'number') {
+      return `$${val.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+    }
+    const str = val.toString().trim();
+    const num = Number(str.replace(/[^0-9.-]+/g, ''));
+    if (isNaN(num)) return '$0.00';
+    return `$${num.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+  };
+
   // Reusable Action Button with Tooltip for Locked State
   const renderEditActionButton = (isLocked, lockedReason, onEditClick) => {
     if (isLocked) {
@@ -846,19 +858,22 @@ const AccountingView = () => {
 
           {/* Invoices Table */}
           <div className="rounded-2xl border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-900 overflow-hidden shadow-xs">
-            <div className="overflow-x-auto">
-              <table className="w-full text-left border-collapse min-w-[850px]">
+            <div className="overflow-x-auto scrollbar-thin scrollbar-thumb-slate-200 dark:scrollbar-thumb-slate-800">
+              <table className="w-full text-left border-collapse min-w-[920px]">
                 <thead>
-                  <tr className="border-b border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-950/50 text-[11px] font-bold text-slate-500 uppercase tracking-wider">
-                    <th className="p-4">Invoice #</th>
-                    <th className="p-4">Client Account</th>
-                    <th className="p-4">Project / Origin</th>
-                    <th className="p-4">Issue Date</th>
-                    <th className="p-4">Due Date</th>
-                    <th className="p-4">Total Amount</th>
-                    <th className="p-4">Amount Due</th>
-                    <th className="p-4">Status</th>
-                    <th className="p-4 text-right">Actions</th>
+                  <tr className="border-b border-slate-200 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-950/70 text-[11px] font-bold text-slate-500 uppercase tracking-wider">
+                    {/* Sticky Invoice # Header */}
+                    <th className="sticky left-0 z-20 bg-slate-50 dark:bg-slate-950 pl-4 pr-3 py-3.5 whitespace-nowrap min-w-[135px] border-r border-slate-200/80 dark:border-slate-800 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.06)] dark:shadow-[2px_0_5px_-2px_rgba(0,0,0,0.4)]">
+                      Invoice #
+                    </th>
+                    <th className="px-3 py-3.5 min-w-[160px]">Client Account</th>
+                    <th className="px-3 py-3.5 min-w-[160px]">Project / Origin</th>
+                    <th className="px-3 py-3.5 min-w-[100px] whitespace-nowrap">Issue Date</th>
+                    <th className="px-3 py-3.5 min-w-[100px] whitespace-nowrap">Due Date</th>
+                    <th className="px-3 py-3.5 min-w-[110px] whitespace-nowrap">Total Amount</th>
+                    <th className="px-3 py-3.5 min-w-[110px] whitespace-nowrap">Amount Due</th>
+                    <th className="px-3 py-3.5 min-w-[100px] whitespace-nowrap">Status</th>
+                    <th className="pl-3 pr-4 py-3.5 text-right min-w-[180px] whitespace-nowrap">Actions</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100 dark:divide-slate-800/60 text-xs font-medium">
@@ -871,24 +886,27 @@ const AccountingView = () => {
                     .map((inv) => {
                       const isPaid = inv.status === 'Paid';
                       return (
-                        <tr key={inv.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/40 transition-colors">
-                          <td className="p-4 font-bold text-indigo-600 dark:text-indigo-400">{inv.id}</td>
-                          <td className="p-4 font-bold text-slate-900 dark:text-white">{inv.client}</td>
-                          <td className="p-4 text-slate-600 dark:text-slate-400">
-                            {inv.project || 'General Billing'}
-                            {inv.estimateRef && <span className="block text-[10px] text-indigo-500 font-semibold">From {inv.estimateRef}</span>}
+                        <tr key={inv.id} className="group hover:bg-slate-50/80 dark:hover:bg-slate-800/40 transition-colors">
+                          {/* Sticky Invoice # Data Cell */}
+                          <td className="sticky left-0 z-10 bg-white dark:bg-slate-900 group-hover:bg-slate-50 dark:group-hover:bg-slate-850 pl-4 pr-3 py-3.5 font-bold text-indigo-600 dark:text-indigo-400 whitespace-nowrap border-r border-slate-200/80 dark:border-slate-800 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.06)] dark:shadow-[2px_0_5px_-2px_rgba(0,0,0,0.4)] transition-colors">
+                            {inv.id}
                           </td>
-                          <td className="p-4 text-slate-600 dark:text-slate-400">{inv.date}</td>
-                          <td className="p-4 text-slate-500">{inv.dueDate}</td>
-                          <td className="p-4 font-bold text-slate-900 dark:text-white">{inv.amount}</td>
-                          <td className="p-4 font-bold text-emerald-600">{inv.amountDue}</td>
-                          <td className="p-4"><Badge variant={getBadgeVariant(inv.status)}>{inv.status}</Badge></td>
-                          <td className="p-4 text-right">
+                          <td className="px-3 py-3.5 font-bold text-slate-900 dark:text-white min-w-[160px]">{inv.client}</td>
+                          <td className="px-3 py-3.5 text-slate-600 dark:text-slate-400 min-w-[160px]">
+                            <span className="block font-medium text-slate-800 dark:text-slate-200">{inv.project || 'General Billing'}</span>
+                            {inv.estimateRef && <span className="block text-[10px] text-indigo-500 font-semibold mt-0.5">From {inv.estimateRef}</span>}
+                          </td>
+                          <td className="px-3 py-3.5 text-slate-600 dark:text-slate-400 whitespace-nowrap">{inv.date}</td>
+                          <td className="px-3 py-3.5 text-slate-500 whitespace-nowrap">{inv.dueDate}</td>
+                          <td className="px-3 py-3.5 font-bold text-slate-900 dark:text-white whitespace-nowrap">{formatCurrency(inv.numericAmount || inv.amount)}</td>
+                          <td className="px-3 py-3.5 font-bold text-emerald-600 dark:text-emerald-400 whitespace-nowrap">{formatCurrency(inv.numericAmountDue !== undefined ? inv.numericAmountDue : inv.amountDue)}</td>
+                          <td className="px-3 py-3.5 whitespace-nowrap"><Badge variant={getBadgeVariant(inv.status)}>{inv.status}</Badge></td>
+                          <td className="pl-3 pr-4 py-3.5 text-right whitespace-nowrap">
                             <div className="flex items-center justify-end gap-1.5">
                               {/* View Action */}
                               <button
                                 onClick={() => setActiveDocView({ type: 'invoice', data: inv })}
-                                className="p-1.5 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-indigo-50 text-slate-600 dark:text-slate-300 hover:text-indigo-600 cursor-pointer"
+                                className="p-1.5 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-indigo-50 dark:hover:bg-indigo-950/80 text-slate-600 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-indigo-400 cursor-pointer transition-colors"
                                 title="View Invoice"
                               >
                                 <Eye className="h-4 w-4" />
@@ -914,7 +932,7 @@ const AccountingView = () => {
                                     setShowRecordPaymentModal(inv);
                                     setPaymentForm({ ...paymentForm, amount: inv.numericAmountDue || inv.numericAmount });
                                   }}
-                                  className="px-2.5 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-[11px] cursor-pointer"
+                                  className="px-2.5 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-[11px] cursor-pointer shadow-2xs transition-colors"
                                   title="Record Payment"
                                 >
                                   Pay
@@ -927,7 +945,7 @@ const AccountingView = () => {
                                   setShowConvertToCreditNoteModal(inv);
                                   setCreditNoteForm({ ...creditNoteForm, amount: inv.numericAmount });
                                 }}
-                                className="px-2 py-1 rounded-lg border border-slate-200 dark:border-slate-800 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 font-bold text-[11px] cursor-pointer"
+                                className="px-2 py-1 rounded-lg border border-slate-200 dark:border-slate-800 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 font-bold text-[11px] cursor-pointer transition-colors"
                                 title="Issue Credit Note"
                               >
                                 Credit Note
@@ -1042,26 +1060,29 @@ const AccountingView = () => {
 
           {/* Unified Purchase Orders Table */}
           <div className="rounded-2xl border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-900 overflow-hidden shadow-xs">
-            <div className="overflow-x-auto">
-              <table className="w-full text-left border-collapse min-w-[900px]">
+            <div className="overflow-x-auto scrollbar-thin scrollbar-thumb-slate-200 dark:scrollbar-thumb-slate-800">
+              <table className="w-full text-left border-collapse min-w-[950px]">
                 <thead>
-                  <tr className="border-b border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-950/50 text-[11px] font-bold text-slate-500 uppercase tracking-wider">
-                    <th className="p-4 w-10">
+                  <tr className="border-b border-slate-200 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-950/70 text-[11px] font-bold text-slate-500 uppercase tracking-wider">
+                    <th className="p-3.5 w-10 text-center">
                       <input
                         type="checkbox"
                         onChange={(e) => setSelectedPoIds(e.target.checked ? purchaseOrders.map(p => p.id) : [])}
                         checked={selectedPoIds.length === purchaseOrders.length && purchaseOrders.length > 0}
-                        className="rounded border-slate-300 text-indigo-600"
+                        className="rounded border-slate-300 text-indigo-600 focus:ring-indigo-500 cursor-pointer"
                       />
                     </th>
-                    <th className="p-4">PO #</th>
-                    <th className="p-4">Supplier / Vendor</th>
-                    <th className="p-4">Type</th>
-                    <th className="p-4">Order Date</th>
-                    <th className="p-4">Expected Delivery</th>
-                    <th className="p-4">Total Amount</th>
-                    <th className="p-4">Status</th>
-                    <th className="p-4 text-right">Actions</th>
+                    {/* Sticky PO # Header */}
+                    <th className="sticky left-0 z-20 bg-slate-50 dark:bg-slate-950 pl-4 pr-3 py-3.5 whitespace-nowrap min-w-[135px] border-r border-slate-200/80 dark:border-slate-800 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.06)] dark:shadow-[2px_0_5px_-2px_rgba(0,0,0,0.4)]">
+                      PO #
+                    </th>
+                    <th className="px-3 py-3.5 min-w-[170px]">Supplier / Vendor</th>
+                    <th className="px-3 py-3.5 min-w-[120px] whitespace-nowrap">Type</th>
+                    <th className="px-3 py-3.5 min-w-[100px] whitespace-nowrap">Order Date</th>
+                    <th className="px-3 py-3.5 min-w-[110px] whitespace-nowrap">Expected Delivery</th>
+                    <th className="px-3 py-3.5 min-w-[110px] whitespace-nowrap">Total Amount</th>
+                    <th className="px-3 py-3.5 min-w-[110px] whitespace-nowrap">Status</th>
+                    <th className="pl-3 pr-4 py-3.5 text-right min-w-[190px] whitespace-nowrap">Actions</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100 dark:divide-slate-800/60 text-xs font-medium">
@@ -1077,28 +1098,29 @@ const AccountingView = () => {
                       const canConvertToBill = (po.status === 'Received' || po.status === 'Partially Received') && !po.convertedBillId;
 
                       return (
-                        <tr key={po.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/40 transition-colors">
-                          <td className="p-4">
+                        <tr key={po.id} className="group hover:bg-slate-50/80 dark:hover:bg-slate-800/40 transition-colors">
+                          <td className="p-3.5 text-center">
                             <input
                               type="checkbox"
                               checked={selectedPoIds.includes(po.id)}
                               onChange={() => setSelectedPoIds(prev => prev.includes(po.id) ? prev.filter(i => i !== po.id) : [...prev, po.id])}
-                              className="rounded border-slate-300 text-indigo-600"
+                              className="rounded border-slate-300 text-indigo-600 focus:ring-indigo-500 cursor-pointer"
                             />
                           </td>
-                          <td className="p-4 font-bold text-indigo-600 dark:text-indigo-400">
+                          {/* Sticky PO # Cell */}
+                          <td className="sticky left-0 z-10 bg-white dark:bg-slate-900 group-hover:bg-slate-50 dark:group-hover:bg-slate-850 pl-4 pr-3 py-3.5 font-bold text-indigo-600 dark:text-indigo-400 whitespace-nowrap border-r border-slate-200/80 dark:border-slate-800 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.06)] dark:shadow-[2px_0_5px_-2px_rgba(0,0,0,0.4)] transition-colors">
                             {po.id}
                             {po.convertedBillId && (
-                              <span className="block text-[10px] text-emerald-600 font-medium">
+                              <span className="block text-[10px] text-emerald-600 font-medium mt-0.5">
                                 Bill: {po.convertedBillId}
                               </span>
                             )}
                           </td>
-                          <td className="p-4 font-bold text-slate-900 dark:text-white">
+                          <td className="px-3 py-3.5 font-bold text-slate-900 dark:text-white min-w-[170px]">
                             {po.supplier}
-                            <span className="block text-[11px] font-normal text-slate-500">{po.item}</span>
+                            <span className="block text-[11px] font-normal text-slate-500 mt-0.5">{po.item}</span>
                           </td>
-                          <td className="p-4">
+                          <td className="px-3 py-3.5 whitespace-nowrap">
                             <span className={`inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-bold ${
                               po.type === 'Raw Material'
                                 ? 'bg-indigo-50 text-indigo-700 dark:bg-indigo-950/70 dark:text-indigo-300 border border-indigo-200/50'
@@ -1107,13 +1129,13 @@ const AccountingView = () => {
                               {po.type || 'Raw Material'}
                             </span>
                           </td>
-                          <td className="p-4 text-slate-600 dark:text-slate-400">{po.orderDate || '2026-08-01'}</td>
-                          <td className="p-4 text-slate-500 font-medium">{po.expectedDate}</td>
-                          <td className="p-4 font-bold text-slate-900 dark:text-white">{po.total}</td>
-                          <td className="p-4">
+                          <td className="px-3 py-3.5 text-slate-600 dark:text-slate-400 whitespace-nowrap">{po.orderDate || '2026-08-01'}</td>
+                          <td className="px-3 py-3.5 text-slate-500 font-medium whitespace-nowrap">{po.expectedDate}</td>
+                          <td className="px-3 py-3.5 font-bold text-slate-900 dark:text-white whitespace-nowrap">{formatCurrency(po.numericTotal || po.total)}</td>
+                          <td className="px-3 py-3.5 whitespace-nowrap">
                             <Badge variant={getBadgeVariant(po.status)}>{po.status}</Badge>
                           </td>
-                          <td className="p-4 text-right">
+                          <td className="pl-3 pr-4 py-3.5 text-right whitespace-nowrap">
                             <div className="flex items-center justify-end gap-1.5">
                               {/* View Action */}
                               <button
@@ -1235,31 +1257,37 @@ const AccountingView = () => {
 
           {/* Estimates Table */}
           <div className="rounded-2xl border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-900 overflow-hidden shadow-xs">
-            <div className="overflow-x-auto">
-              <table className="w-full text-left border-collapse min-w-[800px]">
+            <div className="overflow-x-auto scrollbar-thin scrollbar-thumb-slate-200 dark:scrollbar-thumb-slate-800">
+              <table className="w-full text-left border-collapse min-w-[850px]">
                 <thead>
-                  <tr className="border-b border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-950/50 text-[11px] font-bold text-slate-500 uppercase tracking-wider">
-                    <th className="p-4">Estimate #</th>
-                    <th className="p-4">Client Account</th>
-                    <th className="p-4">Project Title</th>
-                    <th className="p-4">Created Date</th>
-                    <th className="p-4">Valid Until</th>
-                    <th className="p-4">Total Amount</th>
-                    <th className="p-4">Status</th>
-                    <th className="p-4 text-right">Actions</th>
+                  <tr className="border-b border-slate-200 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-950/70 text-[11px] font-bold text-slate-500 uppercase tracking-wider">
+                    {/* Sticky Estimate # Header */}
+                    <th className="sticky left-0 z-20 bg-slate-50 dark:bg-slate-950 pl-4 pr-3 py-3.5 whitespace-nowrap min-w-[135px] border-r border-slate-200/80 dark:border-slate-800 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.06)] dark:shadow-[2px_0_5px_-2px_rgba(0,0,0,0.4)]">
+                      Estimate #
+                    </th>
+                    <th className="px-3 py-3.5 min-w-[160px]">Client Account</th>
+                    <th className="px-3 py-3.5 min-w-[160px]">Project Title</th>
+                    <th className="px-3 py-3.5 min-w-[100px] whitespace-nowrap">Created Date</th>
+                    <th className="px-3 py-3.5 min-w-[100px] whitespace-nowrap">Valid Until</th>
+                    <th className="px-3 py-3.5 min-w-[110px] whitespace-nowrap">Total Amount</th>
+                    <th className="px-3 py-3.5 min-w-[100px] whitespace-nowrap">Status</th>
+                    <th className="pl-3 pr-4 py-3.5 text-right min-w-[170px] whitespace-nowrap">Actions</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100 dark:divide-slate-800/60 text-xs font-medium">
                   {estimates.map((est) => (
-                    <tr key={est.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/40 transition-colors">
-                      <td className="p-4 font-bold text-indigo-600 dark:text-indigo-400">{est.id}</td>
-                      <td className="p-4 font-bold text-slate-900 dark:text-white">{est.client}</td>
-                      <td className="p-4 text-slate-600 dark:text-slate-400">{est.project}</td>
-                      <td className="p-4 text-slate-600 dark:text-slate-400">{est.date}</td>
-                      <td className="p-4 text-slate-500">{est.validUntil}</td>
-                      <td className="p-4 font-bold text-slate-900 dark:text-white">{est.amount}</td>
-                      <td className="p-4"><Badge variant={getBadgeVariant(est.status)}>{est.status}</Badge></td>
-                      <td className="p-4 text-right">
+                    <tr key={est.id} className="group hover:bg-slate-50/80 dark:hover:bg-slate-800/40 transition-colors">
+                      {/* Sticky Estimate # Cell */}
+                      <td className="sticky left-0 z-10 bg-white dark:bg-slate-900 group-hover:bg-slate-50 dark:group-hover:bg-slate-850 pl-4 pr-3 py-3.5 font-bold text-indigo-600 dark:text-indigo-400 whitespace-nowrap border-r border-slate-200/80 dark:border-slate-800 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.06)] dark:shadow-[2px_0_5px_-2px_rgba(0,0,0,0.4)] transition-colors">
+                        {est.id}
+                      </td>
+                      <td className="px-3 py-3.5 font-bold text-slate-900 dark:text-white min-w-[160px]">{est.client}</td>
+                      <td className="px-3 py-3.5 text-slate-600 dark:text-slate-400 min-w-[160px]">{est.project}</td>
+                      <td className="px-3 py-3.5 text-slate-600 dark:text-slate-400 whitespace-nowrap">{est.date}</td>
+                      <td className="px-3 py-3.5 text-slate-500 whitespace-nowrap">{est.validUntil}</td>
+                      <td className="px-3 py-3.5 font-bold text-slate-900 dark:text-white whitespace-nowrap">{formatCurrency(est.numericAmount || est.amount)}</td>
+                      <td className="px-3 py-3.5 whitespace-nowrap"><Badge variant={getBadgeVariant(est.status)}>{est.status}</Badge></td>
+                      <td className="pl-3 pr-4 py-3.5 text-right whitespace-nowrap">
                         <div className="flex items-center justify-end gap-1.5">
                           {/* View */}
                           <button
@@ -1386,27 +1414,30 @@ const AccountingView = () => {
 
           {/* Payments Table */}
           <div className="rounded-2xl border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-900 overflow-hidden shadow-xs">
-            <div className="overflow-x-auto">
-              <table className="w-full text-left border-collapse min-w-[850px]">
+            <div className="overflow-x-auto scrollbar-thin scrollbar-thumb-slate-200 dark:scrollbar-thumb-slate-800">
+              <table className="w-full text-left border-collapse min-w-[920px]">
                 <thead>
-                  <tr className="border-b border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-950/50 text-[11px] font-bold text-slate-500 uppercase tracking-wider">
-                    <th className="p-4 w-10">
+                  <tr className="border-b border-slate-200 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-950/70 text-[11px] font-bold text-slate-500 uppercase tracking-wider">
+                    <th className="p-3.5 w-10 text-center">
                       <input
                         type="checkbox"
                         onChange={(e) => setSelectedPaymentIds(e.target.checked ? payments.map(p => p.id) : [])}
                         checked={selectedPaymentIds.length === payments.length && payments.length > 0}
-                        className="rounded border-slate-300 text-indigo-600"
+                        className="rounded border-slate-300 text-indigo-600 focus:ring-indigo-500 cursor-pointer"
                       />
                     </th>
-                    <th className="p-4">Payment ID</th>
-                    <th className="p-4">Client Account</th>
-                    <th className="p-4">Invoice Ref</th>
-                    <th className="p-4">Payment Method</th>
-                    <th className="p-4">Txn / Ref ID</th>
-                    <th className="p-4">Date</th>
-                    <th className="p-4">Amount Paid</th>
-                    <th className="p-4">Status</th>
-                    <th className="p-4 text-right">Actions</th>
+                    {/* Sticky Payment ID Header */}
+                    <th className="sticky left-0 z-20 bg-slate-50 dark:bg-slate-950 pl-4 pr-3 py-3.5 whitespace-nowrap min-w-[135px] border-r border-slate-200/80 dark:border-slate-800 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.06)] dark:shadow-[2px_0_5px_-2px_rgba(0,0,0,0.4)]">
+                      Payment ID
+                    </th>
+                    <th className="px-3 py-3.5 min-w-[160px]">Client Account</th>
+                    <th className="px-3 py-3.5 min-w-[130px] whitespace-nowrap">Invoice Ref</th>
+                    <th className="px-3 py-3.5 min-w-[150px]">Payment Method</th>
+                    <th className="px-3 py-3.5 min-w-[130px] whitespace-nowrap">Txn / Ref ID</th>
+                    <th className="px-3 py-3.5 min-w-[100px] whitespace-nowrap">Date</th>
+                    <th className="px-3 py-3.5 min-w-[110px] whitespace-nowrap">Amount Paid</th>
+                    <th className="px-3 py-3.5 min-w-[100px] whitespace-nowrap">Status</th>
+                    <th className="pl-3 pr-4 py-3.5 text-right min-w-[150px] whitespace-nowrap">Actions</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100 dark:divide-slate-800/60 text-xs font-medium">
@@ -1419,24 +1450,27 @@ const AccountingView = () => {
                     .map((p) => {
                       const isSettled = p.status === 'Completed';
                       return (
-                        <tr key={p.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/40 transition-colors">
-                          <td className="p-4">
+                        <tr key={p.id} className="group hover:bg-slate-50/80 dark:hover:bg-slate-800/40 transition-colors">
+                          <td className="p-3.5 text-center">
                             <input
                               type="checkbox"
                               checked={selectedPaymentIds.includes(p.id)}
                               onChange={() => setSelectedPaymentIds(prev => prev.includes(p.id) ? prev.filter(i => i !== p.id) : [...prev, p.id])}
-                              className="rounded border-slate-300 text-indigo-600"
+                              className="rounded border-slate-300 text-indigo-600 focus:ring-indigo-500 cursor-pointer"
                             />
                           </td>
-                          <td className="p-4 font-bold text-indigo-600 dark:text-indigo-400">{p.id}</td>
-                          <td className="p-4 font-bold text-slate-900 dark:text-white">{p.client}</td>
-                          <td className="p-4 font-bold text-indigo-600">{p.invoiceId}</td>
-                          <td className="p-4 text-slate-700 dark:text-slate-300">{p.method}</td>
-                          <td className="p-4 text-slate-500 font-mono text-[11px]">{p.txnId}</td>
-                          <td className="p-4 text-slate-600 dark:text-slate-400">{p.date}</td>
-                          <td className="p-4 font-bold text-emerald-600">{p.amount}</td>
-                          <td className="p-4"><Badge variant={getBadgeVariant(p.status)}>{p.status}</Badge></td>
-                          <td className="p-4 text-right">
+                          {/* Sticky Payment ID Cell */}
+                          <td className="sticky left-0 z-10 bg-white dark:bg-slate-900 group-hover:bg-slate-50 dark:group-hover:bg-slate-850 pl-4 pr-3 py-3.5 font-bold text-indigo-600 dark:text-indigo-400 whitespace-nowrap border-r border-slate-200/80 dark:border-slate-800 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.06)] dark:shadow-[2px_0_5px_-2px_rgba(0,0,0,0.4)] transition-colors">
+                            {p.id}
+                          </td>
+                          <td className="px-3 py-3.5 font-bold text-slate-900 dark:text-white min-w-[160px]">{p.client}</td>
+                          <td className="px-3 py-3.5 font-bold text-indigo-600 dark:text-indigo-400 whitespace-nowrap">{p.invoiceId}</td>
+                          <td className="px-3 py-3.5 text-slate-700 dark:text-slate-300">{p.method}</td>
+                          <td className="px-3 py-3.5 text-slate-500 font-mono text-[11px] whitespace-nowrap">{p.txnId}</td>
+                          <td className="px-3 py-3.5 text-slate-600 dark:text-slate-400 whitespace-nowrap">{p.date}</td>
+                          <td className="px-3 py-3.5 font-bold text-emerald-600 dark:text-emerald-400 whitespace-nowrap">{formatCurrency(p.numericAmount || p.amount)}</td>
+                          <td className="px-3 py-3.5 whitespace-nowrap"><Badge variant={getBadgeVariant(p.status)}>{p.status}</Badge></td>
+                          <td className="pl-3 pr-4 py-3.5 text-right whitespace-nowrap">
                             <div className="flex items-center justify-end gap-1.5">
                               {/* Edit Action with Locked Tooltip */}
                               {renderEditActionButton(
@@ -1511,18 +1545,21 @@ const AccountingView = () => {
 
           {/* Credit Notes Table */}
           <div className="rounded-2xl border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-900 overflow-hidden shadow-xs">
-            <div className="overflow-x-auto">
-              <table className="w-full text-left border-collapse min-w-[800px]">
+            <div className="overflow-x-auto scrollbar-thin scrollbar-thumb-slate-200 dark:scrollbar-thumb-slate-800">
+              <table className="w-full text-left border-collapse min-w-[850px]">
                 <thead>
-                  <tr className="border-b border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-950/50 text-[11px] font-bold text-slate-500 uppercase tracking-wider">
-                    <th className="p-4">Credit Note #</th>
-                    <th className="p-4">Client Account</th>
-                    <th className="p-4">Original Invoice</th>
-                    <th className="p-4">Issue Date</th>
-                    <th className="p-4">Credit Amount</th>
-                    <th className="p-4">Remaining Balance</th>
-                    <th className="p-4">Status</th>
-                    <th className="p-4 text-right">Actions</th>
+                  <tr className="border-b border-slate-200 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-950/70 text-[11px] font-bold text-slate-500 uppercase tracking-wider">
+                    {/* Sticky Credit Note # Header */}
+                    <th className="sticky left-0 z-20 bg-slate-50 dark:bg-slate-950 pl-4 pr-3 py-3.5 whitespace-nowrap min-w-[135px] border-r border-slate-200/80 dark:border-slate-800 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.06)] dark:shadow-[2px_0_5px_-2px_rgba(0,0,0,0.4)]">
+                      Credit Note #
+                    </th>
+                    <th className="px-3 py-3.5 min-w-[160px]">Client Account</th>
+                    <th className="px-3 py-3.5 min-w-[130px] whitespace-nowrap">Original Invoice</th>
+                    <th className="px-3 py-3.5 min-w-[100px] whitespace-nowrap">Issue Date</th>
+                    <th className="px-3 py-3.5 min-w-[110px] whitespace-nowrap">Credit Amount</th>
+                    <th className="px-3 py-3.5 min-w-[110px] whitespace-nowrap">Remaining Balance</th>
+                    <th className="px-3 py-3.5 min-w-[100px] whitespace-nowrap">Status</th>
+                    <th className="pl-3 pr-4 py-3.5 text-right min-w-[160px] whitespace-nowrap">Actions</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100 dark:divide-slate-800/60 text-xs font-medium">
@@ -1530,15 +1567,18 @@ const AccountingView = () => {
                     const isFullyRedeemed = cn.status === 'Fully Redeemed' || cn.numericRemainingBalance === 0;
 
                     return (
-                      <tr key={cn.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/40 transition-colors">
-                        <td className="p-4 font-bold text-indigo-600 dark:text-indigo-400">{cn.id}</td>
-                        <td className="p-4 font-bold text-slate-900 dark:text-white">{cn.client}</td>
-                        <td className="p-4 font-bold text-indigo-600">{cn.originalInvoice}</td>
-                        <td className="p-4 text-slate-600 dark:text-slate-400">{cn.issueDate}</td>
-                        <td className="p-4 font-bold text-slate-900 dark:text-white">{cn.creditAmount}</td>
-                        <td className="p-4 font-bold text-emerald-600">{cn.remainingBalance}</td>
-                        <td className="p-4"><Badge variant={getBadgeVariant(cn.status)}>{cn.status}</Badge></td>
-                        <td className="p-4 text-right">
+                      <tr key={cn.id} className="group hover:bg-slate-50/80 dark:hover:bg-slate-800/40 transition-colors">
+                        {/* Sticky Credit Note # Cell */}
+                        <td className="sticky left-0 z-10 bg-white dark:bg-slate-900 group-hover:bg-slate-50 dark:group-hover:bg-slate-850 pl-4 pr-3 py-3.5 font-bold text-indigo-600 dark:text-indigo-400 whitespace-nowrap border-r border-slate-200/80 dark:border-slate-800 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.06)] dark:shadow-[2px_0_5px_-2px_rgba(0,0,0,0.4)] transition-colors">
+                          {cn.id}
+                        </td>
+                        <td className="px-3 py-3.5 font-bold text-slate-900 dark:text-white min-w-[160px]">{cn.client}</td>
+                        <td className="px-3 py-3.5 font-bold text-indigo-600 dark:text-indigo-400 whitespace-nowrap">{cn.originalInvoice}</td>
+                        <td className="px-3 py-3.5 text-slate-600 dark:text-slate-400 whitespace-nowrap">{cn.issueDate}</td>
+                        <td className="px-3 py-3.5 font-bold text-slate-900 dark:text-white whitespace-nowrap">{formatCurrency(cn.numericCreditAmount || cn.creditAmount)}</td>
+                        <td className="px-3 py-3.5 font-bold text-emerald-600 dark:text-emerald-400 whitespace-nowrap">{formatCurrency(cn.numericRemainingBalance !== undefined ? cn.numericRemainingBalance : cn.remainingBalance)}</td>
+                        <td className="px-3 py-3.5 whitespace-nowrap"><Badge variant={getBadgeVariant(cn.status)}>{cn.status}</Badge></td>
+                        <td className="pl-3 pr-4 py-3.5 text-right whitespace-nowrap">
                           <div className="flex items-center justify-end gap-1.5">
                             {/* View */}
                             <button
@@ -1601,60 +1641,68 @@ const AccountingView = () => {
             </button>
           </div>
 
-          <div className="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 overflow-hidden shadow-xs">
-            <table className="w-full text-left border-collapse">
-              <thead>
-                <tr className="border-b border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-950/50 text-[11px] font-bold text-slate-500 uppercase tracking-wider">
-                  <th className="p-4">Bill No</th>
-                  <th className="p-4">Vendor Name</th>
-                  <th className="p-4">Bill Date</th>
-                  <th className="p-4">Due Date</th>
-                  <th className="p-4">Amount</th>
-                  <th className="p-4">PO Ref</th>
-                  <th className="p-4">Status</th>
-                  <th className="p-4 text-right">Actions</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-100 dark:divide-slate-800/60 text-xs font-medium">
-                {bills.map((b) => {
-                  const isPaid = b.status === 'Paid';
+          <div className="rounded-2xl border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-900 overflow-hidden shadow-xs">
+            <div className="overflow-x-auto scrollbar-thin scrollbar-thumb-slate-200 dark:scrollbar-thumb-slate-800">
+              <table className="w-full text-left border-collapse min-w-[850px]">
+                <thead>
+                  <tr className="border-b border-slate-200 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-950/70 text-[11px] font-bold text-slate-500 uppercase tracking-wider">
+                    {/* Sticky Bill No Header */}
+                    <th className="sticky left-0 z-20 bg-slate-50 dark:bg-slate-950 pl-4 pr-3 py-3.5 whitespace-nowrap min-w-[135px] border-r border-slate-200/80 dark:border-slate-800 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.06)] dark:shadow-[2px_0_5px_-2px_rgba(0,0,0,0.4)]">
+                      Bill No
+                    </th>
+                    <th className="px-3 py-3.5 min-w-[160px]">Vendor Name</th>
+                    <th className="px-3 py-3.5 min-w-[100px] whitespace-nowrap">Bill Date</th>
+                    <th className="px-3 py-3.5 min-w-[100px] whitespace-nowrap">Due Date</th>
+                    <th className="px-3 py-3.5 min-w-[110px] whitespace-nowrap">Amount</th>
+                    <th className="px-3 py-3.5 min-w-[110px] whitespace-nowrap">PO Ref</th>
+                    <th className="px-3 py-3.5 min-w-[100px] whitespace-nowrap">Status</th>
+                    <th className="pl-3 pr-4 py-3.5 text-right min-w-[160px] whitespace-nowrap">Actions</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100 dark:divide-slate-800/60 text-xs font-medium">
+                  {bills.map((b) => {
+                    const isPaid = b.status === 'Paid';
 
-                  return (
-                    <tr key={b.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/40">
-                      <td className="p-4 font-bold text-indigo-600 dark:text-indigo-400">{b.id}</td>
-                      <td className="p-4 font-bold text-slate-900 dark:text-white">{b.vendor}</td>
-                      <td className="p-4 text-slate-600 dark:text-slate-400">{b.billDate}</td>
-                      <td className="p-4 text-slate-500">{b.dueDate}</td>
-                      <td className="p-4 font-bold text-slate-900 dark:text-white">{b.amount}</td>
-                      <td className="p-4 font-semibold text-indigo-600">{b.poRef || 'Direct'}</td>
-                      <td className="p-4"><Badge variant={getBadgeVariant(b.status)}>{b.status}</Badge></td>
-                      <td className="p-4 text-right">
-                        <div className="flex items-center justify-end gap-1.5">
-                          {/* Edit Action */}
-                          {renderEditActionButton(
-                            isPaid,
-                            "Paid bills cannot be edited — record an adjustment instead",
-                            () => setEditBillModal({ ...b })
-                          )}
+                    return (
+                      <tr key={b.id} className="group hover:bg-slate-50/80 dark:hover:bg-slate-800/40 transition-colors">
+                        {/* Sticky Bill No Cell */}
+                        <td className="sticky left-0 z-10 bg-white dark:bg-slate-900 group-hover:bg-slate-50 dark:group-hover:bg-slate-850 pl-4 pr-3 py-3.5 font-bold text-indigo-600 dark:text-indigo-400 whitespace-nowrap border-r border-slate-200/80 dark:border-slate-800 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.06)] dark:shadow-[2px_0_5px_-2px_rgba(0,0,0,0.4)] transition-colors">
+                          {b.id}
+                        </td>
+                        <td className="px-3 py-3.5 font-bold text-slate-900 dark:text-white min-w-[160px]">{b.vendor}</td>
+                        <td className="px-3 py-3.5 text-slate-600 dark:text-slate-400 whitespace-nowrap">{b.billDate}</td>
+                        <td className="px-3 py-3.5 text-slate-500 whitespace-nowrap">{b.dueDate}</td>
+                        <td className="px-3 py-3.5 font-bold text-slate-900 dark:text-white whitespace-nowrap">{formatCurrency(b.numericAmount || b.amount)}</td>
+                        <td className="px-3 py-3.5 font-semibold text-indigo-600 dark:text-indigo-400 whitespace-nowrap">{b.poRef || 'Direct'}</td>
+                        <td className="px-3 py-3.5 whitespace-nowrap"><Badge variant={getBadgeVariant(b.status)}>{b.status}</Badge></td>
+                        <td className="pl-3 pr-4 py-3.5 text-right whitespace-nowrap">
+                          <div className="flex items-center justify-end gap-1.5">
+                            {/* Edit Action */}
+                            {renderEditActionButton(
+                              isPaid,
+                              "Paid bills cannot be edited — record an adjustment instead",
+                              () => setEditBillModal({ ...b })
+                            )}
 
-                          {!isPaid && (
-                            <button
-                              onClick={() => {
-                                setBills(prev => prev.map(item => item.id === b.id ? { ...item, status: 'Paid' } : item));
-                                addToast(`Marked Bill ${b.id} as Paid`, "success");
-                              }}
-                              className="px-2.5 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-[11px] cursor-pointer"
-                            >
-                              Mark Paid
-                            </button>
-                          )}
-                        </div>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
+                            {!isPaid && (
+                              <button
+                                onClick={() => {
+                                  setBills(prev => prev.map(item => item.id === b.id ? { ...item, status: 'Paid' } : item));
+                                  addToast(`Marked Bill ${b.id} as Paid`, "success");
+                                }}
+                                className="px-2.5 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-[11px] cursor-pointer shadow-2xs transition-colors"
+                              >
+                                Mark Paid
+                              </button>
+                            )}
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
       )}
@@ -1678,29 +1726,36 @@ const AccountingView = () => {
             </button>
           </div>
 
-          <div className="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 overflow-hidden shadow-xs">
-            <table className="w-full text-left border-collapse">
-              <thead>
-                <tr className="border-b border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-950/50 text-[11px] font-bold text-slate-500 uppercase tracking-wider">
-                  <th className="p-4">Exp ID</th>
-                  <th className="p-4">Category</th>
-                  <th className="p-4">Vendor</th>
-                  <th className="p-4">Amount</th>
-                  <th className="p-4">Date</th>
-                  <th className="p-4">Recurring</th>
-                  <th className="p-4 text-right">Actions</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-100 dark:divide-slate-800/60 text-xs font-medium">
-                {expenses.map((e) => (
-                  <tr key={e.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/40">
-                    <td className="p-4 font-bold text-indigo-600 dark:text-indigo-400">{e.id}</td>
-                    <td className="p-4 font-bold text-slate-900 dark:text-white">{e.category}</td>
-                    <td className="p-4 text-slate-700 dark:text-slate-300">{e.vendor}</td>
-                    <td className="p-4 font-bold text-slate-900 dark:text-white">{e.amount}</td>
-                    <td className="p-4 text-slate-500">{e.date}</td>
-                    <td className="p-4 text-slate-600 dark:text-slate-400 font-semibold">{e.recurring}</td>
-                    <td className="p-4 text-right">
+          <div className="rounded-2xl border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-900 overflow-hidden shadow-xs">
+            <div className="overflow-x-auto scrollbar-thin scrollbar-thumb-slate-200 dark:scrollbar-thumb-slate-800">
+              <table className="w-full text-left border-collapse min-w-[850px]">
+                <thead>
+                  <tr className="border-b border-slate-200 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-950/70 text-[11px] font-bold text-slate-500 uppercase tracking-wider">
+                    {/* Sticky Exp ID Header */}
+                    <th className="sticky left-0 z-20 bg-slate-50 dark:bg-slate-950 pl-4 pr-3 py-3.5 whitespace-nowrap min-w-[135px] border-r border-slate-200/80 dark:border-slate-800 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.06)] dark:shadow-[2px_0_5px_-2px_rgba(0,0,0,0.4)]">
+                      Exp ID
+                    </th>
+                    <th className="px-3 py-3.5 min-w-[150px]">Category</th>
+                    <th className="px-3 py-3.5 min-w-[160px]">Vendor</th>
+                    <th className="px-3 py-3.5 min-w-[110px] whitespace-nowrap">Amount</th>
+                    <th className="px-3 py-3.5 min-w-[100px] whitespace-nowrap">Date</th>
+                    <th className="px-3 py-3.5 min-w-[120px] whitespace-nowrap">Recurring</th>
+                    <th className="pl-3 pr-4 py-3.5 text-right min-w-[130px] whitespace-nowrap">Actions</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100 dark:divide-slate-800/60 text-xs font-medium">
+                  {expenses.map((e) => (
+                    <tr key={e.id} className="group hover:bg-slate-50/80 dark:hover:bg-slate-800/40 transition-colors">
+                      {/* Sticky Exp ID Cell */}
+                      <td className="sticky left-0 z-10 bg-white dark:bg-slate-900 group-hover:bg-slate-50 dark:group-hover:bg-slate-850 pl-4 pr-3 py-3.5 font-bold text-indigo-600 dark:text-indigo-400 whitespace-nowrap border-r border-slate-200/80 dark:border-slate-800 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.06)] dark:shadow-[2px_0_5px_-2px_rgba(0,0,0,0.4)] transition-colors">
+                        {e.id}
+                      </td>
+                      <td className="px-3 py-3.5 font-bold text-slate-900 dark:text-white min-w-[150px]">{e.category}</td>
+                      <td className="px-3 py-3.5 text-slate-700 dark:text-slate-300 min-w-[160px]">{e.vendor}</td>
+                      <td className="px-3 py-3.5 font-bold text-slate-900 dark:text-white whitespace-nowrap">{formatCurrency(e.numericAmount || e.amount)}</td>
+                      <td className="px-3 py-3.5 text-slate-500 whitespace-nowrap">{e.date}</td>
+                      <td className="px-3 py-3.5 text-slate-600 dark:text-slate-400 font-semibold whitespace-nowrap">{e.recurring}</td>
+                      <td className="pl-3 pr-4 py-3.5 text-right whitespace-nowrap">
                       <div className="flex items-center justify-end gap-1.5">
                         {/* Edit Action */}
                         {renderEditActionButton(
@@ -1723,6 +1778,7 @@ const AccountingView = () => {
                 ))}
               </tbody>
             </table>
+            </div>
           </div>
         </div>
       )}
@@ -1762,25 +1818,42 @@ const AccountingView = () => {
             ))}
           </div>
 
-          <div className="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 overflow-hidden shadow-xs">
+          <div className="rounded-2xl border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-900 overflow-hidden shadow-xs">
             <div className="p-4 border-b border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-950/50">
               <h3 className="text-xs font-bold text-slate-900 dark:text-white font-heading">Recent Bank Feed Transactions</h3>
             </div>
-            <table className="w-full text-left border-collapse text-xs font-medium">
-              <tbody className="divide-y divide-slate-100 dark:divide-slate-800/60">
-                {bankReconciles.map((rec) => (
-                  <tr key={rec.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/40">
-                    <td className="p-4 font-mono font-bold text-slate-500">{rec.id}</td>
-                    <td className="p-4 text-slate-600 dark:text-slate-400">{rec.date}</td>
-                    <td className="p-4 font-bold text-slate-900 dark:text-white">{rec.description}</td>
-                    <td className="p-4 text-slate-600 dark:text-slate-400">{rec.bankAccount}</td>
-                    <td className={`p-4 font-bold ${rec.amount.startsWith('+') ? 'text-emerald-600' : 'text-slate-900 dark:text-white'}`}>{rec.amount}</td>
-                    <td className="p-4"><Badge variant={getBadgeVariant(rec.status)}>{rec.status}</Badge></td>
-                    <td className="p-4 text-slate-500 font-mono text-[11px]">{rec.matchedEntity}</td>
+            <div className="overflow-x-auto scrollbar-thin scrollbar-thumb-slate-200 dark:scrollbar-thumb-slate-800">
+              <table className="w-full text-left border-collapse text-xs font-medium min-w-[750px]">
+                <thead>
+                  <tr className="border-b border-slate-200 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-950/70 text-[11px] font-bold text-slate-500 uppercase tracking-wider">
+                    <th className="sticky left-0 z-20 bg-slate-50 dark:bg-slate-950 pl-4 pr-3 py-3 whitespace-nowrap min-w-[110px] border-r border-slate-200/80 dark:border-slate-800 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.06)] dark:shadow-[2px_0_5px_-2px_rgba(0,0,0,0.4)]">
+                      Feed ID
+                    </th>
+                    <th className="px-3 py-3 min-w-[95px] whitespace-nowrap">Date</th>
+                    <th className="px-3 py-3 min-w-[180px]">Description</th>
+                    <th className="px-3 py-3 min-w-[160px]">Bank Account</th>
+                    <th className="px-3 py-3 min-w-[110px] whitespace-nowrap">Amount</th>
+                    <th className="px-3 py-3 min-w-[100px] whitespace-nowrap">Status</th>
+                    <th className="pl-3 pr-4 py-3 min-w-[120px] whitespace-nowrap font-mono text-[11px]">Matched Entity</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody className="divide-y divide-slate-100 dark:divide-slate-800/60">
+                  {bankReconciles.map((rec) => (
+                    <tr key={rec.id} className="group hover:bg-slate-50/80 dark:hover:bg-slate-800/40 transition-colors">
+                      <td className="sticky left-0 z-10 bg-white dark:bg-slate-900 group-hover:bg-slate-50 dark:group-hover:bg-slate-850 pl-4 pr-3 py-3 font-mono font-bold text-slate-700 dark:text-slate-300 whitespace-nowrap border-r border-slate-200/80 dark:border-slate-800 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.06)] dark:shadow-[2px_0_5px_-2px_rgba(0,0,0,0.4)] transition-colors">
+                        {rec.id}
+                      </td>
+                      <td className="px-3 py-3 text-slate-600 dark:text-slate-400 whitespace-nowrap">{rec.date}</td>
+                      <td className="px-3 py-3 font-bold text-slate-900 dark:text-white min-w-[180px]">{rec.description}</td>
+                      <td className="px-3 py-3 text-slate-600 dark:text-slate-400">{rec.bankAccount}</td>
+                      <td className={`px-3 py-3 font-bold whitespace-nowrap ${rec.amount.startsWith('+') ? 'text-emerald-600 dark:text-emerald-400' : 'text-slate-900 dark:text-white'}`}>{rec.amount}</td>
+                      <td className="px-3 py-3 whitespace-nowrap"><Badge variant={getBadgeVariant(rec.status)}>{rec.status}</Badge></td>
+                      <td className="pl-3 pr-4 py-3 text-slate-500 font-mono text-[11px] whitespace-nowrap">{rec.matchedEntity}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
       )}
