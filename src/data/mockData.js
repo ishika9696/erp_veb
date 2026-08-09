@@ -162,48 +162,327 @@ export const BOM_LIST = [
     finishedProduct: "POS Touchscreen Terminal X1",
     productSku: "SKU-HW-101",
     category: "Hardware Electronics",
+    version: "v2.4",
+    status: "Active (Approved)",
     outputQty: 1,
     unitCost: "$412.50",
-    materials: [
-      { name: "15.6 Inch IPS Touch Display Panel", qty: 1, unit: "Pcs", unitCost: 180.00, wastagePct: 1 },
-      { name: "Aluminium CNC Terminal Casing", qty: 1, unit: "Pcs", unitCost: 85.00, wastagePct: 2 },
-      { name: "ARM Octa-Core Industrial Motherboard", qty: 1, unit: "Pcs", unitCost: 110.00, wastagePct: 0 },
-      { name: "Thermal Printer Module Sub-Assembly", qty: 1, unit: "Pcs", unitCost: 37.50, wastagePct: 1 }
-    ],
+    numericUnitCost: 412.50,
+    materialsCost: 305.00,
+    directLaborCost: 62.50,
     overheadCost: 45.00,
-    laborHours: 2.5
+    laborHours: 2.5,
+    laborRatePerHour: 25.00,
+    avgWastagePct: 1.8,
+    targetMsrp: 799.00,
+    marginPct: "48.4%",
+    description: "Flagship industrial-grade 15.6-inch dual-core POS touchscreen terminal engineered for heavy retail & hospitality duty cycles.",
+    materials: [
+      { sku: "SKU-RM-101", name: "15.6 Inch IPS Touch Display Panel", qty: 1, unit: "Pcs", unitCost: 180.00, wastagePct: 1.0, subtotal: 180.00, supplier: "OptoTech Displays Ltd", stockStatus: "In Stock (145 Pcs)" },
+      { sku: "SKU-RM-102", name: "Aluminium CNC Terminal Casing", qty: 1, unit: "Pcs", unitCost: 85.00, wastagePct: 2.0, subtotal: 85.00, supplier: "Precision Machining Corp", stockStatus: "In Stock (82 Pcs)" },
+      { sku: "SKU-RM-103", name: "ARM Octa-Core Industrial Motherboard", qty: 1, unit: "Pcs", unitCost: 110.00, wastagePct: 0.5, subtotal: 110.00, supplier: "Silicon Core Semiconductors", stockStatus: "In Stock (64 Pcs)" },
+      { sku: "SKU-RM-104", name: "Thermal Printer Module Sub-Assembly", qty: 1, unit: "Pcs", unitCost: 37.50, wastagePct: 1.5, subtotal: 37.50, supplier: "PrintEngine Global", stockStatus: "Low Stock (18 Pcs)" },
+      { sku: "SKU-RM-105", name: "Shielded Heavy Duty USB-C & Serial Harness", qty: 2, unit: "Pcs", unitCost: 4.50, wastagePct: 0.0, subtotal: 9.00, supplier: "Apex Fasteners & Cables", stockStatus: "In Stock (320 Pcs)" },
+      { sku: "SKU-RM-108", name: "Heavy Duty Corrugated Shipping Pack", qty: 1, unit: "box", unitCost: 3.50, wastagePct: 1.0, subtotal: 3.50, supplier: "PackPro Supplies", stockStatus: "In Stock (450 boxes)" }
+    ],
+    linkedWorkOrders: [
+      { id: "WO-901", qty: 50, stage: "Pending", priority: "High", assignedTo: "Line A - Electronics", dueDate: "Aug 12, 2026", progress: 0 },
+      { id: "WO-898", qty: 25, stage: "In Production", priority: "Urgent", assignedTo: "Marcus Vance", dueDate: "Aug 06, 2026", progress: 65 }
+    ],
+    versionHistory: [
+      { version: "v2.4", date: "2026-08-01", author: "Marcus Vance (Lead Engineer)", notes: "Added shielded USB-C harness and updated motherboard revision for enhanced thermal dissipation." },
+      { version: "v2.3", date: "2026-06-15", author: "Sarah Jenkins", notes: "Switched casing material to lightweight CNC Aluminium alloy for better EMI shielding." },
+      { version: "v2.0", date: "2026-03-10", author: "Marcus Vance", notes: "Initial production release with IPS display integration." }
+    ]
   },
   {
     id: "BOM-002",
     finishedProduct: "Wireless Thermal Barcode Printer",
     productSku: "SKU-HW-102",
     category: "Peripherals",
+    version: "v1.8",
+    status: "Active (Approved)",
     outputQty: 1,
     unitCost: "$118.00",
-    materials: [
-      { name: "Thermal Printhead Engine 80mm", qty: 1, unit: "Pcs", unitCost: 45.00, wastagePct: 1 },
-      { name: "ABS Plastic Enclosure Box", qty: 1, unit: "Pcs", unitCost: 22.00, wastagePct: 3 },
-      { name: "Bluetooth 5.0 Wireless Module", qty: 1, unit: "Pcs", unitCost: 18.00, wastagePct: 0 },
-      { name: "Stepper Motor Drive Gear", qty: 2, unit: "Pcs", unitCost: 6.50, wastagePct: 2 }
-    ],
+    numericUnitCost: 118.00,
+    materialsCost: 91.50,
+    directLaborCost: 24.00,
     overheadCost: 20.00,
-    laborHours: 1.2
+    laborHours: 1.2,
+    laborRatePerHour: 20.00,
+    avgWastagePct: 2.1,
+    targetMsrp: 249.00,
+    marginPct: "52.6%",
+    description: "Compact 80mm wireless thermal barcode and receipt printer with Bluetooth 5.0 and direct USB host connectivity.",
+    materials: [
+      { sku: "SKU-RM-104", name: "Thermal Printhead Engine 80mm", qty: 1, unit: "Pcs", unitCost: 45.00, wastagePct: 1.0, subtotal: 45.00, supplier: "PrintEngine Global", stockStatus: "Low Stock (18 Pcs)" },
+      { sku: "SKU-RM-106", name: "ABS Plastic Enclosure Box", qty: 1, unit: "Pcs", unitCost: 22.00, wastagePct: 3.0, subtotal: 22.00, supplier: "Apex Fasteners & Polymers", stockStatus: "In Stock (95 Pcs)" },
+      { sku: "SKU-RM-109", name: "Bluetooth 5.0 Wireless Transceiver Module", qty: 1, unit: "Pcs", unitCost: 18.00, wastagePct: 0.0, subtotal: 18.00, supplier: "Silicon Core Semiconductors", stockStatus: "In Stock (210 Pcs)" },
+      { sku: "SKU-RM-110", name: "High-Torque Stepper Motor Drive Gear", qty: 2, unit: "Pcs", unitCost: 6.50, wastagePct: 2.0, subtotal: 13.00, supplier: "Precision Machining Corp", stockStatus: "In Stock (160 Pcs)" },
+      { sku: "SKU-RM-105", name: "Thermal Test Receipt Roll Sample", qty: 1, unit: "roll", unitCost: 1.25, wastagePct: 0.0, subtotal: 1.25, supplier: "PrintEngine Global", stockStatus: "In Stock (500 rolls)" }
+    ],
+    linkedWorkOrders: [
+      { id: "WO-902", qty: 100, stage: "Pending", priority: "Medium", assignedTo: "Line B - Assembly", dueDate: "Aug 16, 2026", progress: 0 },
+      { id: "WO-882", qty: 60, stage: "Completed", priority: "Low", assignedTo: "Line B - Assembly", dueDate: "Jul 29, 2026", progress: 100 }
+    ],
+    versionHistory: [
+      { version: "v1.8", date: "2026-07-10", author: "Priya Sharma", notes: "Upgraded Bluetooth chip to 5.0 low-energy standard." },
+      { version: "v1.0", date: "2026-01-15", author: "Marcus Vance", notes: "Initial peripheral product BOM release." }
+    ]
+  },
+  {
+    id: "BOM-003",
+    finishedProduct: "Attendance Bio-Scanner Pro",
+    productSku: "SKU-HW-103",
+    category: "Security & Biometrics",
+    version: "v3.0",
+    status: "Active (Approved)",
+    outputQty: 1,
+    unitCost: "$285.00",
+    numericUnitCost: 285.00,
+    materialsCost: 215.00,
+    directLaborCost: 45.00,
+    overheadCost: 25.00,
+    laborHours: 1.8,
+    laborRatePerHour: 25.00,
+    avgWastagePct: 1.4,
+    targetMsrp: 549.00,
+    marginPct: "48.1%",
+    description: "Optical biometric fingerprint & facial recognition access terminal with encrypted cloud sync.",
+    materials: [
+      { sku: "SKU-RM-111", name: "Optical 500DPI Fingerprint Sensor Prism", qty: 1, unit: "Pcs", unitCost: 75.00, wastagePct: 0.5, subtotal: 75.00, supplier: "BioSensor Precision Ltd", stockStatus: "In Stock (78 Pcs)" },
+      { sku: "SKU-RM-112", name: "5-Inch TFT Color Touch Screen", qty: 1, unit: "Pcs", unitCost: 48.00, wastagePct: 1.0, subtotal: 48.00, supplier: "OptoTech Displays Ltd", stockStatus: "In Stock (110 Pcs)" },
+      { sku: "SKU-RM-103", name: "ARM Octa-Core Industrial Motherboard", qty: 1, unit: "Pcs", unitCost: 110.00, wastagePct: 0.5, subtotal: 110.00, supplier: "Silicon Core Semiconductors", stockStatus: "In Stock (64 Pcs)" },
+      { sku: "SKU-RM-106", name: "Polycarbonate Impact Housing", qty: 1, unit: "Pcs", unitCost: 28.00, wastagePct: 2.0, subtotal: 28.00, supplier: "Apex Fasteners & Polymers", stockStatus: "In Stock (88 Pcs)" }
+    ],
+    linkedWorkOrders: [
+      { id: "WO-895", qty: 40, stage: "Quality Check", priority: "High", assignedTo: "QC Team #1", dueDate: "Aug 05, 2026", progress: 90 }
+    ],
+    versionHistory: [
+      { version: "v3.0", date: "2026-07-20", author: "Marcus Vance", notes: "Integrated high-speed optical sensor with anti-spoofing algorithm." }
+    ]
+  },
+  {
+    id: "BOM-004",
+    finishedProduct: "Smart RFID Scanner Gun",
+    productSku: "SKU-HW-104",
+    category: "Warehouse Logistics",
+    version: "v1.2",
+    status: "Active (Approved)",
+    outputQty: 1,
+    unitCost: "$175.00",
+    numericUnitCost: 175.00,
+    materialsCost: 135.00,
+    directLaborCost: 25.00,
+    overheadCost: 15.00,
+    laborHours: 1.0,
+    laborRatePerHour: 25.00,
+    avgWastagePct: 1.2,
+    targetMsrp: 389.00,
+    marginPct: "55.0%",
+    description: "Long-range UHF RFID and 2D barcode handheld terminal with pistol grip and rugged drop resistance.",
+    materials: [
+      { sku: "SKU-RM-113", name: "UHF Long-Range RFID Reader Engine", qty: 1, unit: "Pcs", unitCost: 85.00, wastagePct: 0.5, subtotal: 85.00, supplier: "Silicon Core Semiconductors", stockStatus: "In Stock (92 Pcs)" },
+      { sku: "SKU-RM-114", name: "2D Imager Barcode Scan Engine", qty: 1, unit: "Pcs", unitCost: 32.00, wastagePct: 1.0, subtotal: 32.00, supplier: "OptoTech Displays Ltd", stockStatus: "In Stock (120 Pcs)" },
+      { sku: "SKU-RM-115", name: "Rugged Rubberized Grip Enclosure", qty: 1, unit: "Pcs", unitCost: 18.00, wastagePct: 2.5, subtotal: 18.00, supplier: "Apex Fasteners & Polymers", stockStatus: "In Stock (150 Pcs)" }
+    ],
+    linkedWorkOrders: [
+      { id: "WO-889", qty: 80, stage: "Completed", priority: "Medium", assignedTo: "Line C", dueDate: "Aug 02, 2026", progress: 100 }
+    ],
+    versionHistory: [
+      { version: "v1.2", date: "2026-06-01", author: "Elena Rostova", notes: "Reinforced rubber bumpers for 2.0m drop compliance." }
+    ]
   }
 ];
 
 export const WORK_ORDERS_KANBAN = {
   pending: [
-    { id: "WO-901", orderNo: "PO-2026-042", product: "POS Touchscreen Terminal X1", qty: 50, bomId: "BOM-001", assignedTo: "Line A - Electronics", dueDate: "Aug 12, 2026", priority: "High", stage: "Pending" },
-    { id: "WO-902", orderNo: "PO-2026-045", product: "Wireless Barcode Printer", qty: 100, bomId: "BOM-002", assignedTo: "Line B - Assembly", dueDate: "Aug 16, 2026", priority: "Medium", stage: "Pending" }
+    {
+      id: "WO-901",
+      orderNo: "PO-2026-042",
+      product: "POS Touchscreen Terminal X1",
+      productSku: "SKU-HW-101",
+      qty: 50,
+      completedQty: 0,
+      bomId: "BOM-001",
+      assignedTo: "Line A - Electronics",
+      workCenter: "SMT Line 1 & Assembly Station A",
+      supervisor: "Elena Rostova",
+      startDate: "Aug 10, 2026",
+      dueDate: "Aug 12, 2026",
+      priority: "High",
+      stage: "Pending",
+      progress: 0,
+      notes: "Queued for Monday morning production shift. All raw materials staged in Depot Bay 2.",
+      materialConsumption: [
+        { item: "15.6 Inch IPS Touch Display Panel", planned: 50, actual: 0, variance: "0.0%", status: "Staged" },
+        { item: "Aluminium CNC Terminal Casing", planned: 50, actual: 0, variance: "0.0%", status: "Staged" },
+        { item: "ARM Octa-Core Industrial Motherboard", planned: 50, actual: 0, variance: "0.0%", status: "Staged" },
+        { item: "Thermal Printer Module Sub-Assembly", planned: 50, actual: 0, variance: "0.0%", status: "Staged" }
+      ],
+      qcResults: null,
+      timeline: [
+        { step: "Work Order Created from Customer Demand", by: "Planning Engine", time: "Aug 04, 09:00 AM" },
+        { step: "BOM Recipe BOM-001 Locked & Verified", by: "Marcus Vance", time: "Aug 04, 10:15 AM" }
+      ]
+    },
+    {
+      id: "WO-902",
+      orderNo: "PO-2026-045",
+      product: "Wireless Thermal Barcode Printer",
+      productSku: "SKU-HW-102",
+      qty: 100,
+      completedQty: 0,
+      bomId: "BOM-002",
+      assignedTo: "Line B - Assembly",
+      workCenter: "Assembly Cell B-4",
+      supervisor: "Marcus Vance",
+      startDate: "Aug 14, 2026",
+      dueDate: "Aug 16, 2026",
+      priority: "Medium",
+      stage: "Pending",
+      progress: 0,
+      notes: "High volume peripheral batch for European distribution center.",
+      materialConsumption: [
+        { item: "Thermal Printhead Engine 80mm", planned: 100, actual: 0, variance: "0.0%", status: "Staged" },
+        { item: "ABS Plastic Enclosure Box", planned: 100, actual: 0, variance: "0.0%", status: "Staged" },
+        { item: "Bluetooth 5.0 Wireless Module", planned: 100, actual: 0, variance: "0.0%", status: "Staged" }
+      ],
+      qcResults: null,
+      timeline: [
+        { step: "Production Order Scheduled", by: "Production Planner", time: "Aug 04, 02:00 PM" }
+      ]
+    }
   ],
   inProduction: [
-    { id: "WO-898", orderNo: "PO-2026-038", product: "POS Touchscreen Terminal X1", qty: 25, bomId: "BOM-001", assignedTo: "Marcus Vance", dueDate: "Aug 06, 2026", priority: "Urgent", stage: "In Production", progress: 65 }
+    {
+      id: "WO-898",
+      orderNo: "PO-2026-038",
+      product: "POS Touchscreen Terminal X1",
+      productSku: "SKU-HW-101",
+      qty: 25,
+      completedQty: 16,
+      scrapQty: 1,
+      bomId: "BOM-001",
+      assignedTo: "Marcus Vance",
+      workCenter: "SMT Line 2 & Final Assembly Bay 4",
+      supervisor: "Marcus Vance",
+      startDate: "Aug 04, 2026",
+      dueDate: "Aug 06, 2026",
+      priority: "Urgent",
+      stage: "In Production",
+      progress: 65,
+      notes: "Priority expedited run for CyberDyne Systems flagship pilot store rollout.",
+      materialConsumption: [
+        { item: "15.6 Inch IPS Touch Display Panel", planned: 25, actual: 25, variance: "0.0%", status: "Optimal", scrapQty: 0 },
+        { item: "Aluminium CNC Terminal Casing", planned: 25, actual: 26, variance: "+4.0%", status: "Minor Scrap", scrapQty: 1 },
+        { item: "ARM Octa-Core Industrial Motherboard", planned: 25, actual: 25, variance: "0.0%", status: "Optimal", scrapQty: 0 },
+        { item: "Thermal Printer Module Sub-Assembly", planned: 25, actual: 25, variance: "0.0%", status: "Optimal", scrapQty: 0 }
+      ],
+      qcResults: {
+        testId: "QC-8802",
+        status: "In Testing",
+        inspector: "QC Team #1",
+        testDate: "Aug 05, 2026",
+        sampleSize: 3,
+        passRate: "99.2%",
+        defectCount: 0,
+        criteria: "Display Touch Deadzone & Thermal Burn-in (24h)",
+        notes: "12 hours into burn-in test, temperature 38°C normal. Zero optical defects."
+      },
+      timeline: [
+        { step: "Work Order Released & Scheduled", by: "Production Planner", time: "Aug 04, 08:30 AM" },
+        { step: "Raw Materials Picked & Issued (Batch A-12)", by: "Warehouse Team", time: "Aug 04, 09:15 AM" },
+        { step: "SMT Surface Mount Processing Complete (25/25)", by: "SMT Station 2", time: "Aug 04, 03:30 PM" },
+        { step: "Final Assembly & Touch Calibration 65% Completed", by: "Marcus Vance", time: "Aug 05, 11:00 AM" }
+      ]
+    }
   ],
   qualityCheck: [
-    { id: "WO-895", orderNo: "PO-2026-030", product: "Attendance Bio-Scanner", qty: 40, bomId: "BOM-003", assignedTo: "QC Team #1", dueDate: "Aug 05, 2026", priority: "High", stage: "Quality Check", progress: 90, qcStatus: "Passed" }
+    {
+      id: "WO-895",
+      orderNo: "PO-2026-030",
+      product: "Attendance Bio-Scanner Pro",
+      productSku: "SKU-HW-103",
+      qty: 40,
+      completedQty: 40,
+      scrapQty: 3,
+      bomId: "BOM-003",
+      assignedTo: "QC Team #1",
+      workCenter: "QC Cleanroom Chamber 1",
+      supervisor: "Elena Rostova",
+      startDate: "Aug 01, 2026",
+      dueDate: "Aug 05, 2026",
+      priority: "High",
+      stage: "Quality Check",
+      progress: 90,
+      qcStatus: "Passed",
+      notes: "Final stage batch testing for biometric sensor calibration and environmental drop test.",
+      materialConsumption: [
+        { item: "Optical 500DPI Fingerprint Sensor Prism", planned: 40, actual: 40, variance: "0.0%", status: "Optimal", scrapQty: 0 },
+        { item: "5-Inch TFT Color Touch Screen", planned: 40, actual: 40, variance: "0.0%", status: "Optimal", scrapQty: 0 },
+        { item: "ARM Octa-Core Industrial Motherboard", planned: 40, actual: 40, variance: "0.0%", status: "Optimal", scrapQty: 0 },
+        { item: "Polycarbonate Impact Housing", planned: 40, actual: 43, variance: "+7.5%", status: "High Scrap", scrapQty: 3 }
+      ],
+      qcResults: {
+        testId: "QC-8801",
+        status: "Passed",
+        inspector: "Marcus Vance",
+        testDate: "Aug 04, 2026",
+        sampleSize: 5,
+        passRate: "100.0%",
+        defectCount: 0,
+        criteria: "Optical Sensor Response < 200ms, Drop Test 1.5m",
+        notes: "All 5 sample units passed zero-error tolerance. ISO 9001 Certificate generated."
+      },
+      timeline: [
+        { step: "Assembly Completed (40/40 units)", by: "Line A", time: "Aug 03, 04:00 PM" },
+        { step: "Transferred to QC Cleanroom", by: "QC Team #1", time: "Aug 04, 08:30 AM" },
+        { step: "5-Unit Random Lot Sample Test Passed", by: "Marcus Vance", time: "Aug 04, 02:15 PM" }
+      ]
+    }
   ],
   completed: [
-    { id: "WO-889", orderNo: "PO-2026-022", product: "Smart RFID Scanner Gun", qty: 80, bomId: "BOM-004", assignedTo: "Line C", dueDate: "Aug 02, 2026", priority: "Medium", stage: "Completed", progress: 100, qcStatus: "Passed" }
+    {
+      id: "WO-889",
+      orderNo: "PO-2026-022",
+      product: "Smart RFID Scanner Gun",
+      productSku: "SKU-HW-104",
+      qty: 80,
+      completedQty: 80,
+      scrapQty: 0,
+      bomId: "BOM-004",
+      assignedTo: "Line C",
+      workCenter: "Assembly Cell C-2",
+      supervisor: "Elena Rostova",
+      startDate: "Jul 28, 2026",
+      dueDate: "Aug 02, 2026",
+      priority: "Medium",
+      stage: "Completed",
+      progress: 100,
+      qcStatus: "Passed",
+      notes: "Fully tested and signed off by QA. Stock transferred to Finished Goods Warehouse Hub.",
+      materialConsumption: [
+        { item: "UHF Long-Range RFID Reader Engine", planned: 80, actual: 80, variance: "0.0%", status: "Optimal", scrapQty: 0 },
+        { item: "2D Imager Barcode Scan Engine", planned: 80, actual: 80, variance: "0.0%", status: "Optimal", scrapQty: 0 },
+        { item: "Rugged Rubberized Grip Enclosure", planned: 80, actual: 80, variance: "0.0%", status: "Optimal", scrapQty: 0 }
+      ],
+      qcResults: {
+        testId: "QC-8798",
+        status: "Passed",
+        inspector: "Elena Rostova",
+        testDate: "Aug 02, 2026",
+        sampleSize: 8,
+        passRate: "100.0%",
+        defectCount: 0,
+        criteria: "UHF Tag Read Distance > 6m & Drop Shock",
+        notes: "Full batch cleared for dispatch. Palletized on Pallet #PLT-042."
+      },
+      timeline: [
+        { step: "Work Order Initiated", by: "Production Planner", time: "Jul 28, 08:00 AM" },
+        { step: "Assembly & Testing Complete (80/80)", by: "Line C", time: "Aug 01, 05:00 PM" },
+        { step: "Finished Goods Stock-in Verified", by: "Warehouse Team", time: "Aug 02, 10:30 AM" }
+      ]
+    }
   ]
 };
 
