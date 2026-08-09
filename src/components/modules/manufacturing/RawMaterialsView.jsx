@@ -399,85 +399,146 @@ const RawMaterialsView = () => {
       </div>
 
       {/* Search, Multi-Level Filters & Sort Toolbar */}
-      <div className="p-4 rounded-2xl border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-xs space-y-3">
-        <div className="flex flex-col xl:flex-row items-stretch xl:items-center justify-between gap-3">
-          {/* Instant Search with clean inline icon */}
-          <div className="relative flex-1 min-w-[260px] max-w-md">
-            <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
-              <Search className="h-4 w-4 text-slate-400" />
+      <div className="p-4 rounded-2xl border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-xs space-y-4">
+        {/* Responsive 4-Column Filter Grid */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          {/* 1. Search Filter */}
+          <div>
+            <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">
+              Search Material
+            </label>
+            <div className="relative w-full">
+              <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
+                <Search className="h-4 w-4 text-slate-400" />
+              </div>
+              <input
+                type="text"
+                placeholder="Search by name, SKU, or supplier..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full h-10 pl-10 pr-9 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-950 text-xs text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all"
+              />
+              {searchQuery && (
+                <button
+                  type="button"
+                  onClick={() => setSearchQuery('')}
+                  className="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-slate-600 dark:hover:text-white cursor-pointer"
+                >
+                  <X className="h-3.5 w-3.5" />
+                </button>
+              )}
             </div>
-            <input
-              type="text"
-              placeholder="Search raw materials by Name, SKU, Supplier, or Material..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full h-10 pl-10 pr-9 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-950 text-xs text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all"
-            />
-            {searchQuery && (
-              <button
-                type="button"
-                onClick={() => setSearchQuery('')}
-                className="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-slate-600 dark:hover:text-white cursor-pointer"
-              >
-                <X className="h-3.5 w-3.5" />
-              </button>
-            )}
           </div>
 
-          {/* Quick Filters - All on one consistent baseline */}
-          <div className="flex items-center gap-2.5 flex-wrap">
-            {/* Category Filter */}
-            <div className="flex items-center gap-1.5">
-              <span className="text-[11px] font-bold text-slate-500 whitespace-nowrap hidden sm:inline">Category:</span>
-              <select
-                value={categoryFilter}
-                onChange={(e) => setCategoryFilter(e.target.value)}
-                className="h-10 px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-950 text-xs font-semibold text-slate-700 dark:text-slate-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 cursor-pointer"
-              >
-                <option value="all">All Categories ({rawMaterials.length})</option>
-                {categories.filter(c => c !== 'all').map((cat) => (
-                  <option key={cat} value={cat}>{cat}</option>
-                ))}
-              </select>
-            </div>
+          {/* 2. Category Filter */}
+          <div>
+            <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">
+              Category
+            </label>
+            <select
+              value={categoryFilter}
+              onChange={(e) => setCategoryFilter(e.target.value)}
+              className="w-full h-10 px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-950 text-xs font-semibold text-slate-700 dark:text-slate-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 cursor-pointer"
+            >
+              <option value="all">All Categories ({rawMaterials.length})</option>
+              {categories.filter(c => c !== 'all').map((cat) => (
+                <option key={cat} value={cat}>{cat}</option>
+              ))}
+            </select>
+          </div>
 
-            {/* Status Filter */}
-            <div className="flex items-center gap-1.5">
-              <span className="text-[11px] font-bold text-slate-500 whitespace-nowrap hidden sm:inline">Stock Status:</span>
-              <select
-                value={statusFilter}
-                onChange={(e) => setStatusFilter(e.target.value)}
-                className="h-10 px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-950 text-xs font-semibold text-slate-700 dark:text-slate-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 cursor-pointer"
-              >
-                <option value="all">All Statuses</option>
-                <option value="in_stock">In Stock (Optimal)</option>
-                <option value="low_stock">Low Stock (Reorder Alert)</option>
-                <option value="out_of_stock">Out of Stock (Zero Units)</option>
-              </select>
-            </div>
+          {/* 3. Stock Status Filter */}
+          <div>
+            <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">
+              Stock Status
+            </label>
+            <select
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value)}
+              className="w-full h-10 px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-950 text-xs font-semibold text-slate-700 dark:text-slate-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 cursor-pointer"
+            >
+              <option value="all">All Statuses</option>
+              <option value="in_stock">In Stock (Optimal)</option>
+              <option value="low_stock">Low Stock (Reorder Alert)</option>
+              <option value="out_of_stock">Out of Stock (Zero Units)</option>
+            </select>
+          </div>
 
-            {/* Supplier Filter */}
-            <div className="flex items-center gap-1.5">
-              <span className="text-[11px] font-bold text-slate-500 whitespace-nowrap hidden md:inline">Supplier:</span>
-              <select
-                value={supplierFilter}
-                onChange={(e) => setSupplierFilter(e.target.value)}
-                className="h-10 px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-950 text-xs font-semibold text-slate-700 dark:text-slate-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 cursor-pointer"
-              >
-                <option value="all">All Suppliers</option>
-                {suppliers.filter(s => s !== 'all').map((sup) => (
-                  <option key={sup} value={sup}>{sup}</option>
-                ))}
-              </select>
-            </div>
+          {/* 4. Preferred Supplier Filter */}
+          <div>
+            <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">
+              Preferred Supplier
+            </label>
+            <select
+              value={supplierFilter}
+              onChange={(e) => setSupplierFilter(e.target.value)}
+              className="w-full h-10 px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-950 text-xs font-semibold text-slate-700 dark:text-slate-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 cursor-pointer"
+            >
+              <option value="all">All Suppliers</option>
+              {suppliers.filter(s => s !== 'all').map((sup) => (
+                <option key={sup} value={sup}>{sup}</option>
+              ))}
+            </select>
+          </div>
+        </div>
 
-            {/* Sort Dropdown */}
+        {/* Quick Stock Filter Pills & Sort Bar */}
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3 pt-3 border-t border-slate-100 dark:border-slate-800/80">
+          <div className="flex items-center gap-2 flex-wrap">
+            <span className="text-[11px] font-bold text-slate-500 mr-1">Quick Filters:</span>
+            <button
+              onClick={() => setStatusFilter('all')}
+              className={`px-2.5 py-1.5 rounded-lg text-[11px] font-bold transition-all cursor-pointer ${
+                statusFilter === 'all'
+                  ? 'bg-indigo-600 text-white shadow-2xs'
+                  : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'
+              }`}
+            >
+              All Items ({rawMaterials.length})
+            </button>
+            <button
+              onClick={() => setStatusFilter('low_stock')}
+              className={`px-2.5 py-1.5 rounded-lg text-[11px] font-bold transition-all cursor-pointer flex items-center gap-1 ${
+                statusFilter === 'low_stock'
+                  ? 'bg-amber-600 text-white shadow-2xs'
+                  : 'bg-amber-50 text-amber-700 dark:bg-amber-950/60 dark:text-amber-300 hover:bg-amber-100'
+              }`}
+            >
+              <AlertTriangle className="h-3 w-3" />
+              Low Stock ({kpiStats.lowStockCount})
+            </button>
+            <button
+              onClick={() => setStatusFilter('out_of_stock')}
+              className={`px-2.5 py-1.5 rounded-lg text-[11px] font-bold transition-all cursor-pointer flex items-center gap-1 ${
+                statusFilter === 'out_of_stock'
+                  ? 'bg-rose-600 text-white shadow-2xs'
+                  : 'bg-rose-50 text-rose-700 dark:bg-rose-950/60 dark:text-rose-300 hover:bg-rose-100'
+              }`}
+            >
+              <XCircle className="h-3 w-3" />
+              Out of Stock ({kpiStats.outOfStockCount})
+            </button>
+            <button
+              onClick={() => setStatusFilter('in_stock')}
+              className={`px-2.5 py-1.5 rounded-lg text-[11px] font-bold transition-all cursor-pointer flex items-center gap-1 ${
+                statusFilter === 'in_stock'
+                  ? 'bg-emerald-600 text-white shadow-2xs'
+                  : 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-300 hover:bg-emerald-100'
+              }`}
+            >
+              <CheckCircle2 className="h-3 w-3" />
+              Optimal Stock ({rawMaterials.length - kpiStats.lowStockCount - kpiStats.outOfStockCount})
+            </button>
+          </div>
+
+          <div className="flex items-center gap-3 self-start sm:self-auto flex-wrap">
             <div className="flex items-center gap-1.5">
-              <ArrowUpDown className="h-3.5 w-3.5 text-slate-400 hidden sm:inline shrink-0" />
+              <ArrowUpDown className="h-3.5 w-3.5 text-slate-400 shrink-0" />
+              <span className="text-[11px] font-bold text-slate-500 whitespace-nowrap">Sort:</span>
               <select
                 value={sortBy}
                 onChange={(e) => setSortBy(e.target.value)}
-                className="h-10 px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-950 text-xs font-semibold text-slate-700 dark:text-slate-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 cursor-pointer"
+                className="h-8 px-2.5 py-1 rounded-lg border border-slate-200 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-950 text-xs font-semibold text-slate-700 dark:text-slate-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 cursor-pointer"
               >
                 <option value="stock_asc">Stock: Lowest First (Urgent)</option>
                 <option value="stock_desc">Stock: Highest First</option>
@@ -487,79 +548,31 @@ const RawMaterialsView = () => {
                 <option value="min_stock_desc">Highest Reorder Level</option>
               </select>
             </div>
+
+            <span className="text-[11px] text-slate-500 dark:text-slate-400 whitespace-nowrap">
+              Showing <strong className="text-slate-800 dark:text-slate-200 font-bold">{filteredMaterials.length}</strong> of {rawMaterials.length}
+            </span>
           </div>
-        </div>
-
-        {/* Quick Stock Filter Pills */}
-        <div className="flex items-center gap-2 pt-2.5 border-t border-slate-100 dark:border-slate-800/80 flex-wrap">
-          <span className="text-[11px] font-bold text-slate-500 mr-1">Quick Filters:</span>
-          <button
-            onClick={() => setStatusFilter('all')}
-            className={`px-2.5 py-1 rounded-lg text-[11px] font-bold transition-all cursor-pointer ${
-              statusFilter === 'all'
-                ? 'bg-indigo-600 text-white'
-                : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'
-            }`}
-          >
-            All Items ({rawMaterials.length})
-          </button>
-          <button
-            onClick={() => setStatusFilter('low_stock')}
-            className={`px-2.5 py-1 rounded-lg text-[11px] font-bold transition-all cursor-pointer flex items-center gap-1 ${
-              statusFilter === 'low_stock'
-                ? 'bg-amber-600 text-white'
-                : 'bg-amber-50 text-amber-700 dark:bg-amber-950/60 dark:text-amber-300 hover:bg-amber-100'
-            }`}
-          >
-            <AlertTriangle className="h-3 w-3" />
-            Low Stock ({kpiStats.lowStockCount})
-          </button>
-          <button
-            onClick={() => setStatusFilter('out_of_stock')}
-            className={`px-2.5 py-1 rounded-lg text-[11px] font-bold transition-all cursor-pointer flex items-center gap-1 ${
-              statusFilter === 'out_of_stock'
-                ? 'bg-rose-600 text-white'
-                : 'bg-rose-50 text-rose-700 dark:bg-rose-950/60 dark:text-rose-300 hover:bg-rose-100'
-            }`}
-          >
-            <XCircle className="h-3 w-3" />
-            Out of Stock ({kpiStats.outOfStockCount})
-          </button>
-          <button
-            onClick={() => setStatusFilter('in_stock')}
-            className={`px-2.5 py-1 rounded-lg text-[11px] font-bold transition-all cursor-pointer flex items-center gap-1 ${
-              statusFilter === 'in_stock'
-                ? 'bg-emerald-600 text-white'
-                : 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-300 hover:bg-emerald-100'
-            }`}
-          >
-            <CheckCircle2 className="h-3 w-3" />
-            Optimal Stock ({rawMaterials.length - kpiStats.lowStockCount - kpiStats.outOfStockCount})
-          </button>
-
-          <span className="text-[11px] text-slate-400 ml-auto">
-            Showing <strong className="text-slate-700 dark:text-slate-200">{filteredMaterials.length}</strong> of {rawMaterials.length} raw materials
-          </span>
         </div>
       </div>
 
       {/* RAW MATERIALS DATA TABLE */}
       <div className="rounded-2xl border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-900 overflow-hidden shadow-xs">
         <div className="overflow-x-auto scrollbar-thin scrollbar-thumb-slate-200 dark:scrollbar-thumb-slate-800">
-          <table className="w-full text-left border-collapse min-w-[1150px]">
+          <table className="w-full text-left border-collapse min-w-[1320px]">
             <thead>
               <tr className="border-b border-slate-200 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-950/70 text-[11px] font-bold text-slate-500 uppercase tracking-wider">
                 {/* Sticky Material & SKU Header */}
-                <th className="sticky left-0 z-20 bg-slate-50 dark:bg-slate-950 pl-4 pr-3 py-3.5 whitespace-nowrap min-w-[210px] border-r border-slate-200/80 dark:border-slate-800 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.06)] dark:shadow-[2px_0_5px_-2px_rgba(0,0,0,0.4)]">
+                <th className="sticky left-0 z-20 bg-slate-50 dark:bg-slate-950 pl-4 pr-3 py-3.5 whitespace-nowrap min-w-[220px] border-r border-slate-200/80 dark:border-slate-800 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.06)] dark:shadow-[2px_0_5px_-2px_rgba(0,0,0,0.4)]">
                   Material & SKU
                 </th>
-                <th className="px-3 py-3.5 min-w-[150px] whitespace-nowrap">Category</th>
-                <th className="px-3 py-3.5 min-w-[130px] whitespace-nowrap">Current Stock</th>
-                <th className="px-3 py-3.5 min-w-[110px] whitespace-nowrap">Reorder Level</th>
-                <th className="px-3 py-3.5 min-w-[100px] whitespace-nowrap">Unit Cost</th>
-                <th className="px-3 py-3.5 min-w-[110px] whitespace-nowrap">Total Value</th>
-                <th className="px-3 py-3.5 min-w-[160px]">Preferred Supplier</th>
-                <th className="px-3 py-3.5 min-w-[110px] whitespace-nowrap">Status</th>
+                <th className="px-3 py-3.5 min-w-[160px] whitespace-nowrap">Category</th>
+                <th className="px-3 py-3.5 min-w-[140px] whitespace-nowrap">Current Stock</th>
+                <th className="px-3 py-3.5 min-w-[140px] whitespace-nowrap">Reorder Level</th>
+                <th className="px-3 py-3.5 min-w-[110px] whitespace-nowrap">Unit Cost</th>
+                <th className="px-3 py-3.5 min-w-[120px] whitespace-nowrap">Total Value</th>
+                <th className="px-3 py-3.5 min-w-[180px] whitespace-nowrap">Preferred Supplier</th>
+                <th className="px-3 py-3.5 min-w-[130px] whitespace-nowrap">Status</th>
                 <th className="pl-3 pr-4 py-3.5 text-right min-w-[180px] whitespace-nowrap">Actions</th>
               </tr>
             </thead>
@@ -584,11 +597,12 @@ const RawMaterialsView = () => {
                   return (
                     <tr key={item.id} className="group hover:bg-slate-50/80 dark:hover:bg-slate-800/40 transition-colors">
                       {/* Sticky Material Name & SKU Cell */}
-                      <td className="sticky left-0 z-10 bg-white dark:bg-slate-900 group-hover:bg-slate-50 dark:group-hover:bg-slate-850 pl-4 pr-3 py-3.5 whitespace-nowrap border-r border-slate-200/80 dark:border-slate-800 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.06)] dark:shadow-[2px_0_5px_-2px_rgba(0,0,0,0.4)] transition-colors">
+                      <td className="sticky left-0 z-10 bg-white dark:bg-slate-900 group-hover:bg-slate-50 dark:group-hover:bg-slate-850 pl-4 pr-3 py-3.5 whitespace-nowrap border-r border-slate-200/80 dark:border-slate-800 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.06)] dark:shadow-[2px_0_5px_-2px_rgba(0,0,0,0.4)] transition-colors min-w-[220px]">
                         <div className="flex flex-col">
                           <button
                             onClick={() => setViewItem(item)}
-                            className="font-bold text-slate-900 dark:text-white hover:text-indigo-600 dark:hover:text-indigo-400 text-left transition-colors cursor-pointer"
+                            title={item.name}
+                            className="font-bold text-slate-900 dark:text-white hover:text-indigo-600 dark:hover:text-indigo-400 text-left transition-colors cursor-pointer truncate max-w-[200px]"
                           >
                             {item.name}
                           </button>
@@ -597,20 +611,20 @@ const RawMaterialsView = () => {
                               {item.sku}
                             </span>
                             <span className="text-[10px] text-slate-400">•</span>
-                            <span className="text-[10px] text-slate-500">{item.warehouse}</span>
+                            <span className="text-[10px] text-slate-500 truncate max-w-[100px]" title={item.warehouse}>{item.warehouse}</span>
                           </div>
                         </div>
                       </td>
 
                       {/* Category */}
-                      <td className="px-3 py-3.5 whitespace-nowrap">
+                      <td className="px-3 py-3.5 whitespace-nowrap min-w-[160px]">
                         <span className="text-[11px] font-semibold px-2 py-0.5 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300">
                           {item.category}
                         </span>
                       </td>
 
                       {/* Current Stock */}
-                      <td className="px-3 py-3.5 whitespace-nowrap">
+                      <td className="px-3 py-3.5 whitespace-nowrap min-w-[140px]">
                         <div className="space-y-1">
                           <div className="flex items-center gap-1.5">
                             <span className={`font-bold text-xs ${
@@ -636,24 +650,24 @@ const RawMaterialsView = () => {
                       </td>
 
                       {/* Reorder Level */}
-                      <td className="px-3 py-3.5 text-slate-600 dark:text-slate-400 font-medium whitespace-nowrap">
+                      <td className="px-3 py-3.5 text-slate-600 dark:text-slate-400 font-medium whitespace-nowrap min-w-[140px]">
                         {item.minStock} {item.unit}
                       </td>
 
                       {/* Unit Cost */}
-                      <td className="px-3 py-3.5 font-bold text-slate-900 dark:text-white whitespace-nowrap">
+                      <td className="px-3 py-3.5 font-bold text-slate-900 dark:text-white whitespace-nowrap min-w-[110px]">
                         {item.unitCost}
                       </td>
 
                       {/* Total Inventory Value */}
-                      <td className="px-3 py-3.5 font-bold text-slate-900 dark:text-white whitespace-nowrap">
+                      <td className="px-3 py-3.5 font-bold text-slate-900 dark:text-white whitespace-nowrap min-w-[120px]">
                         ${itemValue.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                       </td>
 
                       {/* Preferred Supplier */}
-                      <td className="px-3 py-3.5">
+                      <td className="px-3 py-3.5 min-w-[180px]">
                         <div>
-                          <span className="font-semibold text-slate-800 dark:text-slate-200 block text-xs truncate max-w-[150px]">
+                          <span className="font-semibold text-slate-800 dark:text-slate-200 block text-xs truncate max-w-[170px]" title={item.preferredSupplier || 'Internal Depot'}>
                             {item.preferredSupplier || 'Internal Depot'}
                           </span>
                           <span className="text-[10px] text-slate-500">
@@ -663,7 +677,7 @@ const RawMaterialsView = () => {
                       </td>
 
                       {/* Status Badge */}
-                      <td className="px-3 py-3.5 whitespace-nowrap">
+                      <td className="px-3 py-3.5 whitespace-nowrap min-w-[130px]">
                         {isOut ? (
                           <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-rose-50 text-rose-700 dark:bg-rose-950 dark:text-rose-300 flex items-center gap-1 w-fit">
                             <XCircle className="h-3 w-3" /> Out of Stock
@@ -680,7 +694,7 @@ const RawMaterialsView = () => {
                       </td>
 
                       {/* Action Menu */}
-                      <td className="pl-3 pr-4 py-3.5 text-right whitespace-nowrap">
+                      <td className="pl-3 pr-4 py-3.5 text-right whitespace-nowrap min-w-[180px]">
                         <div className="flex items-center justify-end gap-1">
                           {/* View Profile Detail */}
                           <button
