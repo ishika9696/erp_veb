@@ -210,7 +210,7 @@ export const WORK_ORDERS_KANBAN = {
 // Raw Material & Unified Purchase Orders (PO)
 export const MANUFACTURING_PURCHASE_ORDERS = [
   {
-    id: "PO-RM-2026-01",
+    id: "PO-2026-001",
     supplier: "OptoTech Displays Ltd",
     item: "15.6 Inch IPS Touch Display Panel",
     type: "Raw Material",
@@ -236,7 +236,7 @@ export const MANUFACTURING_PURCHASE_ORDERS = [
     ]
   },
   {
-    id: "PO-RM-2026-02",
+    id: "PO-2026-002",
     supplier: "Precision Machining Corp",
     item: "Aluminium CNC Terminal Casing",
     type: "Raw Material",
@@ -261,7 +261,7 @@ export const MANUFACTURING_PURCHASE_ORDERS = [
     ]
   },
   {
-    id: "PO-RM-2026-03",
+    id: "PO-2026-003",
     supplier: "Silicon Core Semiconductors",
     item: "ARM Octa-Core Industrial Motherboard",
     type: "Raw Material",
@@ -286,7 +286,7 @@ export const MANUFACTURING_PURCHASE_ORDERS = [
     ]
   },
   {
-    id: "PO-RM-2026-04",
+    id: "PO-2026-004",
     supplier: "PrintEngine Global",
     item: "Thermal Printhead Engine 80mm",
     type: "Raw Material",
@@ -310,7 +310,7 @@ export const MANUFACTURING_PURCHASE_ORDERS = [
     ]
   },
   {
-    id: "PO-GEN-2026-05",
+    id: "PO-2026-005",
     supplier: "Dell Technologies",
     item: "Enterprise 2U Rack Servers R750",
     type: "General Purchase",
@@ -390,7 +390,7 @@ export const RAW_MATERIALS_INVENTORY = [
       { id: "BOM-001", product: "POS Touchscreen Terminal X1", qtyPerUnit: 1, unit: "Pcs" }
     ],
     stockMovements: [
-      { id: "MOV-101", type: "Stock-In (PO Receipt)", ref: "PO-RM-2026-01", qty: +200, date: "2026-08-02", user: "Marcus Vance", warehouse: "Main Assembly Depot" },
+      { id: "MOV-101", type: "Stock-In (PO Receipt)", ref: "PO-2026-001", qty: +200, date: "2026-08-02", user: "Marcus Vance", warehouse: "Main Assembly Depot" },
       { id: "MOV-102", type: "Production Consumption", ref: "WO-898", qty: -25, date: "2026-08-05", user: "Marcus Vance", warehouse: "Main Assembly Depot" },
       { id: "MOV-103", type: "Production Consumption", ref: "WO-901", qty: -35, date: "2026-08-07", user: "Marcus Vance", warehouse: "Main Assembly Depot" }
     ]
@@ -419,7 +419,7 @@ export const RAW_MATERIALS_INVENTORY = [
       { id: "BOM-001", product: "POS Touchscreen Terminal X1", qtyPerUnit: 1, unit: "Pcs" }
     ],
     stockMovements: [
-      { id: "MOV-201", type: "Stock-In (PO Receipt)", ref: "PO-RM-2026-02", qty: +75, date: "2026-08-03", user: "Marcus Vance", warehouse: "Main Assembly Depot" },
+      { id: "MOV-201", type: "Stock-In (PO Receipt)", ref: "PO-2026-002", qty: +75, date: "2026-08-03", user: "Marcus Vance", warehouse: "Main Assembly Depot" },
       { id: "MOV-202", type: "Production Consumption", ref: "WO-898", qty: -25, date: "2026-08-05", user: "Marcus Vance", warehouse: "Main Assembly Depot" },
       { id: "MOV-203", type: "Production Consumption", ref: "WO-901", qty: -38, date: "2026-08-07", user: "Marcus Vance", warehouse: "Main Assembly Depot" }
     ]
@@ -447,7 +447,7 @@ export const RAW_MATERIALS_INVENTORY = [
       { id: "BOM-001", product: "POS Touchscreen Terminal X1", qtyPerUnit: 1, unit: "Pcs" }
     ],
     stockMovements: [
-      { id: "MOV-301", type: "Stock-In (PO Receipt)", ref: "PO-RM-2026-03", qty: +100, date: "2026-07-28", user: "Sarah Jenkins", warehouse: "Component Vault" },
+      { id: "MOV-301", type: "Stock-In (PO Receipt)", ref: "PO-2026-003", qty: +100, date: "2026-07-28", user: "Sarah Jenkins", warehouse: "Component Vault" },
       { id: "MOV-302", type: "Stock Adjustment", ref: "ADJ-2026-02", qty: +2, date: "2026-08-02", user: "Sarah Jenkins", warehouse: "Component Vault" },
       { id: "MOV-303", type: "Production Consumption", ref: "WO-898", qty: -17, date: "2026-08-06", user: "Marcus Vance", warehouse: "Component Vault" }
     ]
@@ -1096,8 +1096,8 @@ export const FINANCE_CREDIT_NOTES = [
 ];
 
 export const FINANCE_PURCHASE_BILLS = [
-  { id: "BILL-2026-01", vendor: "OptoTech Displays Ltd", billDate: "2026-08-02", dueDate: "2026-08-20", amount: "$36,000.00", status: "Paid", poRef: "PO-RM-2026-01" },
-  { id: "BILL-2026-02", vendor: "Precision Machining Corp", billDate: "2026-08-03", dueDate: "2026-08-25", amount: "$12,750.00", status: "Unpaid", poRef: "PO-RM-2026-02" }
+  { id: "BILL-2026-01", vendor: "OptoTech Displays Ltd", billDate: "2026-08-02", dueDate: "2026-08-20", amount: "$36,000.00", status: "Paid", poRef: "PO-2026-001" },
+  { id: "BILL-2026-02", vendor: "Precision Machining Corp", billDate: "2026-08-03", dueDate: "2026-08-25", amount: "$12,750.00", status: "Unpaid", poRef: "PO-2026-002" }
 ];
 
 export const FINANCE_EXPENSES = [

@@ -18,8 +18,11 @@ import {
   Factory,
   Package,
   Receipt,
+  Truck,
+  Boxes,
   X
 } from 'lucide-react';
+import Badge from '../ui/Badge';
 
 const Navbar = () => {
   const {
@@ -34,6 +37,8 @@ const Navbar = () => {
     setNotifications,
     currentOrg,
     setCurrentOrg,
+    purchaseOrders,
+    viewPurchaseOrder,
     addToast
   } = useApp();
 
@@ -41,9 +46,11 @@ const Navbar = () => {
   const [showProfileMenu, setShowProfileMenu] = useState(false);
   const [showOrgMenu, setShowOrgMenu] = useState(false);
   const [showSearchDropdown, setShowSearchDropdown] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
 
   const notificationPanelRef = useRef(null);
   const bellButtonRef = useRef(null);
+  const searchContainerRef = useRef(null);
 
   const unreadCount = notifications.filter((n) => !n.read).length;
 
@@ -141,67 +148,161 @@ const Navbar = () => {
         </div>
 
         {/* Desktop Search Input Container (≥640px) */}
-        <div className="hidden sm:block relative flex-1 min-w-0 max-w-md">
-          <button
-            onClick={() => {
-              setShowSearchDropdown(!showSearchDropdown);
-              setShowNotifications(false);
-              setShowProfileMenu(false);
-              setShowOrgMenu(false);
-            }}
-            aria-label="Search BOMs, work orders, and invoices"
-            className="flex items-center gap-2.5 w-full h-10 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-950/70 px-3.5 text-xs text-slate-600 dark:text-slate-400 hover:border-slate-300 dark:hover:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 transition-all text-left group cursor-pointer"
-          >
-            <Search className="h-4 w-4 text-slate-500 group-hover:text-indigo-500 transition-colors shrink-0" aria-hidden="true" />
-            <span className="flex-1 truncate text-xs font-medium">Search BOMs, orders, invoices...</span>
-            <kbd className="hidden lg:inline-flex items-center gap-0.5 rounded border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 px-1.5 py-0.5 text-[10px] font-semibold text-slate-500 shrink-0">
-              ⌘K
-            </kbd>
-          </button>
-        </div>
-
-        {/* Anchored Quick Search Dropdown */}
-        {showSearchDropdown && (
-          <>
-            <div
-              className="fixed inset-0 z-40 bg-slate-900/10 dark:bg-slate-950/20 backdrop-blur-2xs"
-              onClick={() => setShowSearchDropdown(false)}
+        <div ref={searchContainerRef} className="hidden sm:block relative flex-1 min-w-0 max-w-md">
+          <div className="relative flex items-center w-full">
+            <Search className="h-4 w-4 absolute left-3.5 text-slate-400 shrink-0 pointer-events-none" aria-hidden="true" />
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => {
+                setSearchQuery(e.target.value);
+                if (!showSearchDropdown) setShowSearchDropdown(true);
+              }}
+              onFocus={() => {
+                setShowSearchDropdown(true);
+                setShowNotifications(false);
+                setShowProfileMenu(false);
+                setShowOrgMenu(false);
+              }}
+              placeholder="Search PO # (e.g. 2026-001), BOMs, invoices..."
+              aria-label="Search BOMs, work orders, invoices, and purchase orders"
+              className="w-full h-10 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-950/70 pl-9 pr-12 text-xs text-slate-900 dark:text-white placeholder-slate-500 dark:placeholder-slate-400 hover:border-slate-300 dark:hover:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-900 focus:bg-white dark:focus:bg-slate-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 transition-all cursor-text"
             />
-            <div className="fixed top-16 left-4 right-4 sm:absolute sm:top-full sm:left-0 sm:right-auto sm:mt-2 sm:w-full sm:min-w-[280px] sm:max-w-md z-50 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-2 shadow-2xl overflow-x-hidden animate-in fade-in zoom-in-95">
-              <div className="flex items-center justify-between px-3 py-2 text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 border-b border-slate-100 dark:border-slate-800 mb-1">
-                <span>Quick Module Jump</span>
-                <button
-                  onClick={() => {
-                    setShowSearchDropdown(false);
-                    setCommandPaletteOpen(true);
-                  }}
-                  className="text-indigo-600 dark:text-indigo-400 hover:underline focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-indigo-500 cursor-pointer"
-                >
-                  Open ⌘K
-                </button>
+            {searchQuery ? (
+              <button
+                onClick={() => setSearchQuery('')}
+                className="absolute right-3 p-1 rounded-md text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 cursor-pointer"
+              >
+                <X className="h-3.5 w-3.5" />
+              </button>
+            ) : (
+              <kbd
+                onClick={() => setCommandPaletteOpen(true)}
+                className="hidden lg:inline-flex items-center gap-0.5 absolute right-2.5 rounded border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 px-1.5 py-0.5 text-[10px] font-semibold text-slate-500 shrink-0 cursor-pointer hover:border-indigo-400"
+              >
+                ⌘K
+              </kbd>
+            )}
+          </div>
+
+          {/* Anchored Quick Search Dropdown */}
+          {showSearchDropdown && (
+            <>
+              <div
+                className="fixed inset-0 z-40 bg-slate-900/10 dark:bg-slate-950/20 backdrop-blur-2xs"
+                onClick={() => setShowSearchDropdown(false)}
+              />
+              <div className="fixed top-16 left-4 right-4 sm:absolute sm:top-full sm:left-0 sm:right-auto sm:mt-2 sm:w-full sm:min-w-[340px] sm:max-w-lg z-50 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-2 shadow-2xl overflow-x-hidden animate-in fade-in zoom-in-95">
+                
+                {/* Header with ⌘K jumper */}
+                <div className="flex items-center justify-between px-3 py-2 text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 border-b border-slate-100 dark:border-slate-800 mb-1">
+                  <span>{searchQuery ? `Search Results (${searchQuery})` : 'Quick Jump & Lookup'}</span>
+                  <button
+                    onClick={() => {
+                      setShowSearchDropdown(false);
+                      setCommandPaletteOpen(true);
+                    }}
+                    className="text-indigo-600 dark:text-indigo-400 hover:underline focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-indigo-500 cursor-pointer"
+                  >
+                    Open ⌘K
+                  </button>
+                </div>
+
+                <div className="max-h-80 overflow-y-auto space-y-1 divide-y divide-slate-100 dark:divide-slate-800/50">
+                  {/* PO Matches */}
+                  {searchQuery.trim() !== '' && (
+                    <div className="pb-1">
+                      <span className="px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-indigo-600 dark:text-indigo-400 block">
+                        Purchase Orders
+                      </span>
+                      {purchaseOrders.filter((po) =>
+                        po.id.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                        po.supplier.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                        (po.item && po.item.toLowerCase().includes(searchQuery.toLowerCase())) ||
+                        po.status.toLowerCase().includes(searchQuery.toLowerCase())
+                      ).length === 0 ? (
+                        <div className="px-3 py-3 text-xs text-slate-500">
+                          No purchase orders match "{searchQuery}".
+                        </div>
+                      ) : (
+                        purchaseOrders.filter((po) =>
+                          po.id.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                          po.supplier.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                          (po.item && po.item.toLowerCase().includes(searchQuery.toLowerCase())) ||
+                          po.status.toLowerCase().includes(searchQuery.toLowerCase())
+                        ).map((po) => (
+                          <button
+                            key={po.id}
+                            onClick={() => {
+                              setShowSearchDropdown(false);
+                              setSearchQuery('');
+                              viewPurchaseOrder(po);
+                            }}
+                            className="w-full flex items-center justify-between gap-3 p-2.5 rounded-xl text-left hover:bg-indigo-50 dark:hover:bg-indigo-950/60 transition-colors group cursor-pointer border border-transparent hover:border-indigo-100 dark:hover:border-indigo-900/40"
+                          >
+                            <div className="flex items-center gap-2.5 min-w-0">
+                              <div className="p-1.5 rounded-lg bg-indigo-100 dark:bg-indigo-900/80 text-indigo-600 dark:text-indigo-400 shrink-0">
+                                <Truck className="h-4 w-4" />
+                              </div>
+                              <div className="min-w-0">
+                                <div className="flex items-center gap-1.5">
+                                  <span className="font-bold text-xs font-mono text-indigo-600 dark:text-indigo-400">
+                                    {po.id}
+                                  </span>
+                                  <Badge variant={po.status === 'Received' ? 'success' : po.status === 'Draft' ? 'neutral' : 'warning'}>
+                                    {po.status}
+                                  </Badge>
+                                </div>
+                                <p className="text-[11px] text-slate-700 dark:text-slate-300 font-medium truncate mt-0.5">
+                                  {po.supplier} • <span className="text-slate-500">{po.item}</span>
+                                </p>
+                              </div>
+                            </div>
+                            <div className="text-right shrink-0">
+                              <span className="text-xs font-bold text-slate-900 dark:text-white font-mono block">
+                                {typeof po.numericTotal === 'number' ? `$${po.numericTotal.toLocaleString()}.00` : po.total}
+                              </span>
+                              <span className="text-[10px] text-slate-400">{po.expectedDate}</span>
+                            </div>
+                          </button>
+                        ))
+                      )}
+                    </div>
+                  )}
+
+                  {/* Navigation Module Shortcuts */}
+                  <div className="pt-1">
+                    <span className="px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-slate-500 block">
+                      Modules
+                    </span>
+                    {quickSearchShortcuts
+                      .filter((item) =>
+                        !searchQuery || item.label.toLowerCase().includes(searchQuery.toLowerCase())
+                      )
+                      .map((item, idx) => {
+                        const Icon = item.icon;
+                        return (
+                          <button
+                            key={idx}
+                            onClick={() => {
+                              setActiveModule(item.module);
+                              setShowSearchDropdown(false);
+                              setSearchQuery('');
+                              addToast(`Jumped to ${item.label}`, "info");
+                            }}
+                            className="w-full flex items-center gap-3 px-3 py-2 rounded-xl text-left text-xs font-medium text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-indigo-600 dark:hover:text-indigo-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 transition-colors min-w-0 cursor-pointer"
+                          >
+                            <Icon className="h-4 w-4 text-slate-500 shrink-0" aria-hidden="true" />
+                            <span className="truncate flex-1 min-w-0">{item.label}</span>
+                          </button>
+                        );
+                      })}
+                  </div>
+                </div>
               </div>
-              <div className="space-y-1">
-                {quickSearchShortcuts.map((item, idx) => {
-                  const Icon = item.icon;
-                  return (
-                    <button
-                      key={idx}
-                      onClick={() => {
-                        setActiveModule(item.module);
-                        setShowSearchDropdown(false);
-                        addToast(`Jumped to ${item.label}`, "info");
-                      }}
-                      className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-left text-xs font-medium text-slate-700 dark:text-slate-200 hover:bg-indigo-50 dark:hover:bg-indigo-950/60 hover:text-indigo-600 dark:hover:text-indigo-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 transition-colors min-w-0 cursor-pointer"
-                    >
-                      <Icon className="h-4 w-4 text-slate-500 shrink-0" aria-hidden="true" />
-                      <span className="truncate flex-1 min-w-0">{item.label}</span>
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-          </>
-        )}
+            </>
+          )}
+        </div>
       </div>
 
       {/* Right Controls Section - Evenly spaced flex layout */}

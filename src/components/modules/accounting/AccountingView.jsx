@@ -68,6 +68,8 @@ const AccountingView = () => {
     setPurchaseOrders,
     bills,
     setBills,
+    generateNextPoId,
+    viewPurchaseOrder,
     addPurchaseOrder,
     updatePurchaseOrder,
     deletePurchaseOrder,
@@ -385,8 +387,7 @@ const AccountingView = () => {
   const handleCreatePoSubmit = (e) => {
     e.preventDefault();
     const { grandTotal } = calculatePoTotals(newPoForm.items);
-    const prefix = newPoForm.type === 'Raw Material' ? 'PO-RM-2026' : 'PO-GEN-2026';
-    const newPoId = `${prefix}-0${purchaseOrders.length + 1}`;
+    const newPoId = generateNextPoId();
 
     const formattedItems = newPoForm.items.map(i => ({
       desc: i.desc,
@@ -405,7 +406,7 @@ const AccountingView = () => {
       type: newPoForm.type,
       qty: formattedItems.reduce((acc, c) => acc + c.qty, 0),
       unitCost: `$${formattedItems[0]?.unitCost || 0}.00`,
-      total: `$${grandTotal.toLocaleString()}.00`,
+      total: `$${grandTotal.toLocaleString('en-US', { minimumFractionDigits: 2 })}`,
       numericTotal: grandTotal,
       status: newPoForm.status || "Draft",
       orderDate: newPoForm.orderDate,
@@ -428,7 +429,7 @@ const AccountingView = () => {
 
   // Duplicate PO
   const handleDuplicatePo = (po) => {
-    const newPoId = `${po.id.replace(/-0\d+$/, '')}-0${purchaseOrders.length + 1}`;
+    const newPoId = generateNextPoId();
     const duplicated = {
       ...po,
       id: newPoId,
@@ -668,6 +669,7 @@ const AccountingView = () => {
     setEditPoModal(null);
     addToast(`Purchase Order ${po.id} updated successfully`, "success", "Record Updated");
   };
+
 
   // Currency Formatter guaranteeing two decimal places ($0.00)
   const formatCurrency = (val) => {
@@ -1108,8 +1110,14 @@ const AccountingView = () => {
                             />
                           </td>
                           {/* Sticky PO # Cell */}
-                          <td className="sticky left-0 z-10 bg-white dark:bg-slate-900 group-hover:bg-slate-50 dark:group-hover:bg-slate-850 pl-4 pr-3 py-3.5 font-bold text-indigo-600 dark:text-indigo-400 whitespace-nowrap border-r border-slate-200/80 dark:border-slate-800 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.06)] dark:shadow-[2px_0_5px_-2px_rgba(0,0,0,0.4)] transition-colors">
-                            {po.id}
+                          <td className="sticky left-0 z-10 bg-white dark:bg-slate-900 group-hover:bg-slate-50 dark:group-hover:bg-slate-850 pl-4 pr-3 py-3.5 font-bold text-indigo-600 dark:text-indigo-400 whitespace-nowrap border-r border-slate-200/80 dark:border-slate-800 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.06)] dark:shadow-[2px_0_5px_-2px_rgba(0,0,0,0.4)] transition-colors min-w-[140px]">
+                            <button
+                              onClick={() => setActiveDocView({ type: 'po', data: po })}
+                              title="Click to view Purchase Order details"
+                              className="font-mono font-bold hover:underline cursor-pointer text-indigo-600 dark:text-indigo-400"
+                            >
+                              {po.id}
+                            </button>
                             {po.convertedBillId && (
                               <span className="block text-[10px] text-emerald-600 font-medium mt-0.5">
                                 Bill: {po.convertedBillId}
@@ -1899,10 +1907,20 @@ const AccountingView = () => {
           <div className="relative w-full max-w-3xl max-h-[90vh] overflow-y-auto rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-2xl z-50 flex flex-col">
             {/* Sticky Action Header */}
             <div className="sticky top-0 z-10 flex items-center justify-between p-4 border-b border-slate-200 dark:border-slate-800 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md">
-              <div className="flex items-center gap-2">
-                <h3 className="text-sm font-bold text-slate-900 dark:text-white font-heading">
+              <div className="flex items-center gap-2 flex-wrap">
+                <h3 className="text-sm font-bold text-slate-900 dark:text-white font-heading font-mono">
                   {activeDocView.type === 'po' ? 'PURCHASE ORDER' : activeDocView.type.toUpperCase()}: {activeDocView.data.id}
                 </h3>
+                <button
+                  onClick={() => {
+                    navigator.clipboard.writeText(activeDocView.data.id);
+                    addToast(`Copied ${activeDocView.data.id} to clipboard`, "success", "ID Copied");
+                  }}
+                  title="Copy Document ID"
+                  className="p-1 rounded-md text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 dark:hover:bg-indigo-950/60 transition-colors cursor-pointer"
+                >
+                  <Copy className="h-3.5 w-3.5" />
+                </button>
                 <Badge variant={getBadgeVariant(activeDocView.data.status)}>{activeDocView.data.status}</Badge>
               </div>
               <div className="flex items-center gap-2 flex-wrap">
@@ -2833,6 +2851,162 @@ const AccountingView = () => {
               <div className="pt-2 flex justify-end gap-2">
                 <button type="button" onClick={() => setShowCreateInvoiceModal(false)} className="px-4 py-2 rounded-xl border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 font-semibold cursor-pointer">Cancel</button>
                 <button type="submit" className="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-semibold cursor-pointer">Issue Invoice</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* ========================================================= */}
+      {/* MODAL: CREATE PURCHASE ORDER */}
+      {/* ========================================================= */}
+      {showCreatePoModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-xs" onClick={() => setShowCreatePoModal(false)} />
+          <div className="relative w-full max-w-lg rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 shadow-2xl z-50 space-y-4 max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800">
+              <div>
+                <span className="text-[10px] font-bold uppercase tracking-wider text-indigo-600 dark:text-indigo-400">
+                  New Purchase Order
+                </span>
+                <h3 className="text-base font-bold text-slate-900 dark:text-white font-heading font-mono">
+                  {generateNextPoId()}
+                </h3>
+              </div>
+              <button onClick={() => setShowCreatePoModal(false)} className="text-slate-400 hover:text-slate-600 cursor-pointer">
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+
+            <form onSubmit={handleCreatePoSubmit} className="space-y-3 text-xs">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label className="block font-semibold mb-1">Supplier / Vendor</label>
+                  <select
+                    value={newPoForm.supplier}
+                    onChange={(e) => setNewPoForm({ ...newPoForm, supplier: e.target.value })}
+                    className="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-white"
+                  >
+                    <option>OptoTech Displays Ltd</option>
+                    <option>Precision Machining Corp</option>
+                    <option>Silicon Core Semiconductors</option>
+                    <option>PrintEngine Global</option>
+                    <option>Dell Technologies</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block font-semibold mb-1">PO Classification</label>
+                  <select
+                    value={newPoForm.type}
+                    onChange={(e) => setNewPoForm({ ...newPoForm, type: e.target.value })}
+                    className="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-white"
+                  >
+                    <option value="Raw Material">Raw Material (Manufacturing)</option>
+                    <option value="General Purchase">General Purchase</option>
+                  </select>
+                </div>
+              </div>
+
+              <div>
+                <label className="block font-semibold mb-1">Item Description</label>
+                <input
+                  type="text"
+                  value={newPoForm.items[0]?.desc || ''}
+                  onChange={(e) => {
+                    const newItems = [...newPoForm.items];
+                    newItems[0] = { ...newItems[0], desc: e.target.value };
+                    setNewPoForm({ ...newPoForm, items: newItems });
+                  }}
+                  className="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-white"
+                  required
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block font-semibold mb-1">Quantity</label>
+                  <input
+                    type="number"
+                    value={newPoForm.items[0]?.qty || 1}
+                    onChange={(e) => {
+                      const newItems = [...newPoForm.items];
+                      newItems[0] = { ...newItems[0], qty: Number(e.target.value) };
+                      setNewPoForm({ ...newPoForm, items: newItems });
+                    }}
+                    className="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-white"
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="block font-semibold mb-1">Unit Cost ($)</label>
+                  <input
+                    type="number"
+                    value={newPoForm.items[0]?.unitCost || 100}
+                    onChange={(e) => {
+                      const newItems = [...newPoForm.items];
+                      newItems[0] = { ...newItems[0], unitCost: Number(e.target.value) };
+                      setNewPoForm({ ...newPoForm, items: newItems });
+                    }}
+                    className="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-white"
+                    required
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block font-semibold mb-1">Order Date</label>
+                  <input
+                    type="date"
+                    value={newPoForm.orderDate}
+                    onChange={(e) => setNewPoForm({ ...newPoForm, orderDate: e.target.value })}
+                    className="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-white"
+                  />
+                </div>
+                <div>
+                  <label className="block font-semibold mb-1">Expected Delivery</label>
+                  <input
+                    type="date"
+                    value={newPoForm.expectedDate}
+                    onChange={(e) => setNewPoForm({ ...newPoForm, expectedDate: e.target.value })}
+                    className="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-white"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block font-semibold mb-1">Initial Status</label>
+                <select
+                  value={newPoForm.status}
+                  onChange={(e) => setNewPoForm({ ...newPoForm, status: e.target.value })}
+                  className="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-white"
+                >
+                  <option value="Draft">Draft (Editable)</option>
+                  <option value="Sent">Sent (Dispatched to Vendor)</option>
+                </select>
+              </div>
+
+              <div className="p-3 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200/70 dark:border-slate-800 flex justify-between items-center text-xs">
+                <span className="text-slate-500 font-medium">Estimated PO Total:</span>
+                <span className="font-bold text-sm text-slate-900 dark:text-white font-mono">
+                  ${(Number(newPoForm.items[0]?.qty || 1) * Number(newPoForm.items[0]?.unitCost || 0)).toLocaleString('en-US', { minimumFractionDigits: 2 })}
+                </span>
+              </div>
+
+              <div className="pt-2 flex justify-end gap-2 border-t border-slate-100 dark:border-slate-800">
+                <button
+                  type="button"
+                  onClick={() => setShowCreatePoModal(false)}
+                  className="px-4 py-2 rounded-xl border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 font-semibold cursor-pointer"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-semibold cursor-pointer"
+                >
+                  {newPoForm.status === 'Draft' ? 'Save as Draft PO' : 'Issue & Send PO'}
+                </button>
               </div>
             </form>
           </div>

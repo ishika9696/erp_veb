@@ -6,6 +6,7 @@ import Header from './components/layout/Header';
 import CommandPalette from './components/layout/CommandPalette';
 import QuickCreateDrawer from './components/layout/QuickCreateDrawer';
 import ToastContainer from './components/ui/ToastContainer';
+import PurchaseOrderDetailModal from './components/modules/manufacturing/PurchaseOrderDetailModal';
 
 // Core Enterprise Module Views
 import DashboardView from './components/modules/dashboard/DashboardView';
@@ -74,6 +75,7 @@ export default function App() {
         <CommandPalette />
         <QuickCreateDrawer />
         <ToastContainer />
+        <PurchaseOrderDetailModal />
       </div>
     </AppProvider>
   );

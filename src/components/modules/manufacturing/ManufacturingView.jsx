@@ -27,11 +27,12 @@ import {
   DollarSign,
   TrendingUp,
   XCircle,
-  FileCheck,
   Pencil,
   Eye,
   Trash2,
   Boxes,
+  Copy,
+  Check,
   X
 } from 'lucide-react';
 
@@ -39,6 +40,8 @@ const ManufacturingView = () => {
   const {
     addToast,
     purchaseOrders,
+    generateNextPoId,
+    viewPurchaseOrder,
     addPurchaseOrder,
     updatePurchaseOrder,
     deletePurchaseOrder
@@ -53,13 +56,19 @@ const ManufacturingView = () => {
   const [newWoProduct, setNewWoProduct] = useState('POS Touchscreen Terminal X1');
   const [newWoQty, setNewWoQty] = useState(50);
 
-  // PO Modals
+  // PO Filters & Modals
+  const [poSearchQuery, setPoSearchQuery] = useState('');
+  const [poStatusFilter, setPoStatusFilter] = useState('All');
   const [showPoModal, setShowPoModal] = useState(false);
   const [editPoModal, setEditPoModal] = useState(null);
   const [viewPoModal, setViewPoModal] = useState(null);
   const [poSupplier, setPoSupplier] = useState('OptoTech Displays Ltd');
   const [poMaterial, setPoMaterial] = useState('15.6 Inch IPS Touch Display Panel');
   const [poQty, setPoQty] = useState(100);
+  const [poUnitCost, setPoUnitCost] = useState(180);
+  const [poStatusChoice, setPoStatusChoice] = useState('Sent');
+  const [poExpectedDate, setPoExpectedDate] = useState('2026-08-15');
+  const [copiedPoId, setCopiedPoId] = useState(false);
 
   const tabs = [
     { id: 'bom_orders', label: 'BOM & Work Orders', icon: Factory },
@@ -95,29 +104,44 @@ const ManufacturingView = () => {
 
   const handleCreatePo = (e) => {
     e.preventDefault();
+    const nextId = generateNextPoId();
+    const unitCostNum = Number(poUnitCost) || 180;
+    const totalVal = Number(poQty) * unitCostNum;
+    const status = poStatusChoice || 'Sent';
+
     const newPo = {
-      id: `PO-RM-2026-0${purchaseOrders.length + 1}`,
+      id: nextId,
       supplier: poSupplier,
       item: poMaterial,
       type: "Raw Material",
       qty: Number(poQty),
-      unitCost: "$180.00",
-      total: `$${(Number(poQty) * 180).toLocaleString()}.00`,
-      numericTotal: Number(poQty) * 180,
-      status: "Sent",
+      unitCost: `$${unitCostNum.toFixed(2)}`,
+      total: `$${totalVal.toLocaleString('en-US', { minimumFractionDigits: 2 })}`,
+      numericTotal: totalVal,
+      status: status,
       orderDate: new Date().toISOString().split('T')[0],
-      expectedDate: "2026-08-14",
+      expectedDate: poExpectedDate || "2026-08-14",
       autoReorder: true,
       shippingAddress: "Plant 1 Assembly Dock, Sector 4",
       billingAddress: "Acme HQ, Accounts Payable",
-      items: [{ desc: poMaterial, qty: Number(poQty), unitCost: 180, amount: Number(poQty) * 180 }],
+      items: [{ desc: poMaterial, qty: Number(poQty), unitCost: unitCostNum, amount: totalVal }],
       auditTrail: [
-        { step: "PO Issued from Manufacturing", by: "Marcus Vance", time: new Date().toLocaleString() }
+        {
+          step: status === 'Draft' ? "PO Prepared as Draft" : "PO Issued & Dispatched from Manufacturing",
+          by: "Marcus Vance (Manufacturing)",
+          time: new Date().toLocaleString()
+        }
       ]
     };
     addPurchaseOrder(newPo);
     setShowPoModal(false);
-    addToast(`Purchase Order ${newPo.id} sent to ${poSupplier}`, "success");
+    addToast(
+      status === 'Draft'
+        ? `Purchase Order ${newPo.id} saved as Draft`
+        : `Purchase Order ${newPo.id} dispatched to ${poSupplier}`,
+      "success",
+      status === 'Draft' ? 'Draft Saved' : 'PO Dispatched'
+    );
   };
 
   const handleSaveEditPo = (e) => {
@@ -329,94 +353,149 @@ const ManufacturingView = () => {
             </div>
             <button
               onClick={() => setShowPoModal(true)}
-              className="flex items-center gap-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white px-3.5 py-2 text-xs font-semibold shadow-2xs"
+              className="flex items-center gap-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white px-3.5 py-2 text-xs font-semibold shadow-2xs cursor-pointer"
             >
               <Plus className="h-4 w-4" />
               <span>Issue New PO</span>
             </button>
           </div>
 
+          {/* Dedicated Filter & PO Search Bar */}
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-3 p-4 rounded-2xl border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-xs">
+            <div className="relative flex-1 w-full max-w-md">
+              <Search className="h-4 w-4 absolute left-3.5 top-3 text-slate-400" />
+              <input
+                type="text"
+                placeholder="Search PO # (e.g. PO-2026-001), supplier, or component..."
+                value={poSearchQuery}
+                onChange={(e) => setPoSearchQuery(e.target.value)}
+                className="w-full pl-9 pr-4 py-2 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 text-xs text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              />
+            </div>
+
+            <div className="flex items-center gap-2 w-full sm:w-auto">
+              <select
+                value={poStatusFilter}
+                onChange={(e) => setPoStatusFilter(e.target.value)}
+                className="px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 text-xs text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 cursor-pointer"
+              >
+                <option value="All">All Statuses</option>
+                <option value="Draft">Draft</option>
+                <option value="Sent">Sent</option>
+                <option value="Partially Received">Partially Received</option>
+                <option value="Received">Received</option>
+                <option value="Cancelled">Cancelled</option>
+              </select>
+            </div>
+          </div>
+
           <div className="rounded-2xl border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-900 overflow-hidden shadow-xs">
-            <div className="overflow-x-auto">
-              <table className="w-full text-left border-collapse">
+            <div className="overflow-x-auto scrollbar-thin">
+              <table className="w-full text-left border-collapse min-w-[1000px]">
                 <thead>
-                  <tr className="border-b border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-950/50 text-[11px] font-bold text-slate-500 uppercase tracking-wider">
-                    <th className="p-3.5">PO ID</th>
-                    <th className="p-3.5">Supplier</th>
-                    <th className="p-3.5">Material Component</th>
-                    <th className="p-3.5">Qty</th>
-                    <th className="p-3.5">Total Cost</th>
-                    <th className="p-3.5">Status</th>
-                    <th className="p-3.5">Expected Delivery</th>
-                    <th className="p-3.5 text-right">Actions</th>
+                  <tr className="border-b border-slate-200 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-950/70 text-[11px] font-bold text-slate-500 uppercase tracking-wider">
+                    {/* Sticky PO # Header */}
+                    <th className="sticky left-0 z-20 bg-slate-50 dark:bg-slate-950 pl-4 pr-3 py-3.5 whitespace-nowrap min-w-[140px] border-r border-slate-200/80 dark:border-slate-800 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.06)] dark:shadow-[2px_0_5px_-2px_rgba(0,0,0,0.4)]">
+                      PO #
+                    </th>
+                    <th className="px-3.5 py-3.5 min-w-[170px]">Supplier</th>
+                    <th className="px-3.5 py-3.5 min-w-[200px]">Material Component</th>
+                    <th className="px-3.5 py-3.5 min-w-[90px]">Qty</th>
+                    <th className="px-3.5 py-3.5 min-w-[110px]">Total Cost</th>
+                    <th className="px-3.5 py-3.5 min-w-[120px]">Status</th>
+                    <th className="px-3.5 py-3.5 min-w-[120px]">Expected Delivery</th>
+                    <th className="pl-3.5 pr-4 py-3.5 text-right min-w-[130px]">Actions</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100 dark:divide-slate-800/60 text-xs font-medium">
-                  {purchaseOrders.map((po) => {
-                    const isLocked = po.status === 'Received' || po.status === 'Closed';
-                    return (
-                      <tr key={po.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/40 transition-colors">
-                        <td className="p-3.5 font-bold text-indigo-600 dark:text-indigo-400">{po.id}</td>
-                        <td className="p-3.5 font-semibold text-slate-900 dark:text-white">{po.supplier}</td>
-                        <td className="p-3.5 text-slate-700 dark:text-slate-300">{po.item || (po.items && po.items[0]?.desc) || 'Procurement Item'}</td>
-                        <td className="p-3.5 text-slate-900 dark:text-white font-bold">{po.qty || (po.items && po.items[0]?.qty) || 1} Pcs</td>
-                        <td className="p-3.5 font-bold text-slate-900 dark:text-white">{po.total}</td>
-                        <td className="p-3.5">
-                          <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
-                            po.status === 'Received' ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300' :
-                            po.status === 'Partially Received' ? 'bg-amber-50 text-amber-700 dark:bg-amber-950 dark:text-amber-300' :
-                            po.status === 'Sent' ? 'bg-indigo-50 text-indigo-700 dark:bg-indigo-950 dark:text-indigo-300' :
-                            po.status === 'Draft' ? 'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300' :
-                            'bg-rose-50 text-rose-700 dark:bg-rose-950 dark:text-rose-300'
-                          }`}>
-                            {po.status}
-                          </span>
-                        </td>
-                        <td className="p-3.5 text-slate-500">{po.expectedDate}</td>
-                        <td className="p-3.5 text-right">
-                          <div className="flex items-center justify-end gap-1">
+                  {purchaseOrders
+                    .filter((po) => {
+                      const matchSearch =
+                        po.id.toLowerCase().includes(poSearchQuery.toLowerCase()) ||
+                        po.supplier.toLowerCase().includes(poSearchQuery.toLowerCase()) ||
+                        (po.item && po.item.toLowerCase().includes(poSearchQuery.toLowerCase()));
+                      const matchStatus = poStatusFilter === 'All' || po.status === poStatusFilter;
+                      return matchSearch && matchStatus;
+                    })
+                    .map((po) => {
+                      const isLocked = po.status === 'Received' || po.status === 'Closed';
+                      return (
+                        <tr key={po.id} className="group hover:bg-slate-50/80 dark:hover:bg-slate-800/40 transition-colors">
+                          {/* Sticky PO # Cell */}
+                          <td className="sticky left-0 z-10 bg-white dark:bg-slate-900 group-hover:bg-slate-50 dark:group-hover:bg-slate-850 pl-4 pr-3 py-3.5 font-bold text-indigo-600 dark:text-indigo-400 whitespace-nowrap border-r border-slate-200/80 dark:border-slate-800 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.06)] dark:shadow-[2px_0_5px_-2px_rgba(0,0,0,0.4)] transition-colors min-w-[140px]">
                             <button
                               onClick={() => setViewPoModal(po)}
-                              title="View PO Details"
-                              className="p-1.5 rounded-lg text-slate-500 hover:text-indigo-600 hover:bg-indigo-50 dark:hover:bg-indigo-950/50 transition-colors"
+                              title="Click to view PO details"
+                              className="font-mono font-bold hover:underline cursor-pointer text-indigo-600 dark:text-indigo-400"
                             >
-                              <Eye className="w-3.5 h-3.5" />
+                              {po.id}
                             </button>
+                            {po.convertedBillId && (
+                              <span className="block text-[10px] text-emerald-600 font-medium mt-0.5">
+                                Bill: {po.convertedBillId}
+                              </span>
+                            )}
+                          </td>
+                          <td className="px-3.5 py-3.5 font-semibold text-slate-900 dark:text-white min-w-[170px]">{po.supplier}</td>
+                          <td className="px-3.5 py-3.5 text-slate-700 dark:text-slate-300 min-w-[200px]">{po.item || (po.items && po.items[0]?.desc) || 'Procurement Item'}</td>
+                          <td className="px-3.5 py-3.5 text-slate-900 dark:text-white font-bold whitespace-nowrap">{po.qty || (po.items && po.items[0]?.qty) || 1} Pcs</td>
+                          <td className="px-3.5 py-3.5 font-bold text-slate-900 dark:text-white whitespace-nowrap">{po.total}</td>
+                          <td className="px-3.5 py-3.5 whitespace-nowrap">
+                            <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
+                              po.status === 'Received' ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300' :
+                              po.status === 'Partially Received' ? 'bg-amber-50 text-amber-700 dark:bg-amber-950 dark:text-amber-300' :
+                              po.status === 'Sent' ? 'bg-indigo-50 text-indigo-700 dark:bg-indigo-950 dark:text-indigo-300' :
+                              po.status === 'Draft' ? 'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300' :
+                              'bg-rose-50 text-rose-700 dark:bg-rose-950 dark:text-rose-300'
+                            }`}>
+                              {po.status}
+                            </span>
+                          </td>
+                          <td className="px-3.5 py-3.5 text-slate-500 whitespace-nowrap">{po.expectedDate}</td>
+                          <td className="pl-3.5 pr-4 py-3.5 text-right whitespace-nowrap">
+                            <div className="flex items-center justify-end gap-1">
+                              <button
+                                onClick={() => setViewPoModal(po)}
+                                title="View PO Details"
+                                className="p-1.5 rounded-lg text-slate-500 hover:text-indigo-600 hover:bg-indigo-50 dark:hover:bg-indigo-950/50 transition-colors cursor-pointer"
+                              >
+                                <Eye className="w-3.5 h-3.5" />
+                              </button>
 
-                            {isLocked ? (
-                              <div className="relative group inline-block">
+                              {isLocked ? (
+                                <div className="relative group inline-block">
+                                  <button
+                                    disabled
+                                    className="p-1.5 rounded-lg text-slate-400 dark:text-slate-600 cursor-not-allowed opacity-40"
+                                  >
+                                    <Pencil className="w-3.5 h-3.5" />
+                                  </button>
+                                  <div className="hidden group-hover:block absolute right-0 bottom-full mb-1.5 w-48 p-2 bg-slate-900 dark:bg-slate-800 text-white text-[11px] rounded-lg shadow-xl z-50 pointer-events-none text-left">
+                                    Received / Closed POs cannot be edited — records are locked for accounting integrity.
+                                  </div>
+                                </div>
+                              ) : (
                                 <button
-                                  disabled
-                                  className="p-1.5 rounded-lg text-slate-400 dark:text-slate-600 cursor-not-allowed opacity-40"
+                                  onClick={() => setEditPoModal({ ...po })}
+                                  title="Edit PO"
+                                  className="p-1.5 rounded-lg text-slate-500 hover:text-amber-600 hover:bg-amber-50 dark:hover:bg-amber-950/50 transition-colors cursor-pointer"
                                 >
                                   <Pencil className="w-3.5 h-3.5" />
                                 </button>
-                                <div className="hidden group-hover:block absolute right-0 bottom-full mb-1.5 w-48 p-2 bg-slate-900 dark:bg-slate-800 text-white text-[11px] rounded-lg shadow-xl z-50 pointer-events-none text-left">
-                                  Received / Closed POs cannot be edited — records are locked for accounting integrity.
-                                </div>
-                              </div>
-                            ) : (
-                              <button
-                                onClick={() => setEditPoModal({ ...po })}
-                                title="Edit PO"
-                                className="p-1.5 rounded-lg text-slate-500 hover:text-amber-600 hover:bg-amber-50 dark:hover:bg-amber-950/50 transition-colors"
-                              >
-                                <Pencil className="w-3.5 h-3.5" />
-                              </button>
-                            )}
+                              )}
 
-                            <button
-                              onClick={() => deletePurchaseOrder(po.id)}
-                              title="Delete PO"
-                              className="p-1.5 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/50 transition-colors"
-                            >
-                              <Trash2 className="w-3.5 h-3.5" />
-                            </button>
-                          </div>
-                        </td>
-                      </tr>
-                    );
-                  })}
+                              <button
+                                onClick={() => deletePurchaseOrder(po.id)}
+                                title="Delete PO"
+                                className="p-1.5 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/50 transition-colors cursor-pointer"
+                              >
+                                <Trash2 className="w-3.5 h-3.5" />
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      );
+                    })}
                 </tbody>
               </table>
             </div>
@@ -602,27 +681,114 @@ const ManufacturingView = () => {
       {showPoModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs">
           <div className="w-full max-w-md rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 shadow-2xl space-y-4">
-            <h3 className="text-base font-bold text-slate-900 dark:text-white font-heading">Issue Supplier Purchase Order</h3>
+            <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3">
+              <div>
+                <span className="text-[10px] font-bold uppercase tracking-wider text-indigo-600 dark:text-indigo-400">
+                  New Purchase Order
+                </span>
+                <h3 className="text-base font-bold text-slate-900 dark:text-white font-heading font-mono">
+                  {generateNextPoId()}
+                </h3>
+              </div>
+              <button onClick={() => setShowPoModal(false)} className="p-1 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-400">
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
             <form onSubmit={handleCreatePo} className="space-y-3 text-xs">
               <div>
                 <label className="block font-semibold mb-1">Supplier</label>
-                <select value={poSupplier} onChange={(e) => setPoSupplier(e.target.value)} className="w-full p-2.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950">
+                <select
+                  value={poSupplier}
+                  onChange={(e) => setPoSupplier(e.target.value)}
+                  className="w-full p-2.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-white"
+                >
                   <option>OptoTech Displays Ltd</option>
                   <option>Precision Machining Corp</option>
                   <option>Silicon Core Semiconductors</option>
+                  <option>PrintEngine Global</option>
                 </select>
               </div>
+
               <div>
                 <label className="block font-semibold mb-1">Raw Material Item</label>
-                <input type="text" value={poMaterial} onChange={(e) => setPoMaterial(e.target.value)} className="w-full p-2.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950" required />
+                <input
+                  type="text"
+                  value={poMaterial}
+                  onChange={(e) => setPoMaterial(e.target.value)}
+                  className="w-full p-2.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-white"
+                  required
+                />
               </div>
-              <div>
-                <label className="block font-semibold mb-1">Quantity</label>
-                <input type="number" value={poQty} onChange={(e) => setPoQty(e.target.value)} className="w-full p-2.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950" required />
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block font-semibold mb-1">Quantity</label>
+                  <input
+                    type="number"
+                    value={poQty}
+                    onChange={(e) => setPoQty(e.target.value)}
+                    className="w-full p-2.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-white"
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="block font-semibold mb-1">Unit Cost ($)</label>
+                  <input
+                    type="number"
+                    value={poUnitCost}
+                    onChange={(e) => setPoUnitCost(e.target.value)}
+                    className="w-full p-2.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-white"
+                    required
+                  />
+                </div>
               </div>
-              <div className="flex items-center justify-end gap-2 pt-2">
-                <button type="button" onClick={() => setShowPoModal(false)} className="px-4 py-2 rounded-xl border text-slate-600">Cancel</button>
-                <button type="submit" className="px-4 py-2 rounded-xl bg-indigo-600 text-white font-bold">Send Purchase Order</button>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block font-semibold mb-1">Expected Delivery</label>
+                  <input
+                    type="date"
+                    value={poExpectedDate}
+                    onChange={(e) => setPoExpectedDate(e.target.value)}
+                    className="w-full p-2.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-white"
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="block font-semibold mb-1">Initial Status</label>
+                  <select
+                    value={poStatusChoice}
+                    onChange={(e) => setPoStatusChoice(e.target.value)}
+                    className="w-full p-2.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-white"
+                  >
+                    <option value="Draft">Draft (Editable)</option>
+                    <option value="Sent">Sent (Dispatched)</option>
+                  </select>
+                </div>
+              </div>
+
+              <div className="p-3 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200/70 dark:border-slate-800 flex justify-between items-center text-xs">
+                <span className="text-slate-500 font-medium">Estimated PO Total:</span>
+                <span className="font-bold text-sm text-slate-900 dark:text-white font-mono">
+                  ${(Number(poQty || 0) * Number(poUnitCost || 0)).toLocaleString('en-US', { minimumFractionDigits: 2 })}
+                </span>
+              </div>
+
+              <div className="flex items-center justify-end gap-2 pt-2 border-t border-slate-100 dark:border-slate-800">
+                <button
+                  type="button"
+                  onClick={() => setShowPoModal(false)}
+                  className="px-4 py-2 rounded-xl border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 cursor-pointer"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold cursor-pointer"
+                >
+                  {poStatusChoice === 'Draft' ? 'Save as Draft PO' : 'Send Purchase Order'}
+                </button>
               </div>
             </form>
           </div>
@@ -634,7 +800,10 @@ const ManufacturingView = () => {
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs">
           <div className="w-full max-w-md rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 shadow-2xl space-y-4">
             <div className="flex items-center justify-between">
-              <h3 className="text-base font-bold text-slate-900 dark:text-white font-heading">Edit Purchase Order ({editPoModal.id})</h3>
+              <div>
+                <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500">Edit Record</span>
+                <h3 className="text-base font-bold text-slate-900 dark:text-white font-heading font-mono">{editPoModal.id}</h3>
+              </div>
               <button onClick={() => setEditPoModal(null)} className="p-1 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-400">
                 <X className="w-4 h-4" />
               </button>
@@ -646,7 +815,7 @@ const ManufacturingView = () => {
                   type="text"
                   value={editPoModal.supplier || ''}
                   onChange={(e) => setEditPoModal({ ...editPoModal, supplier: e.target.value })}
-                  className="w-full p-2.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950"
+                  className="w-full p-2.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-white"
                   required
                 />
               </div>
@@ -656,7 +825,7 @@ const ManufacturingView = () => {
                   type="text"
                   value={editPoModal.item || (editPoModal.items && editPoModal.items[0]?.desc) || ''}
                   onChange={(e) => setEditPoModal({ ...editPoModal, item: e.target.value })}
-                  className="w-full p-2.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950"
+                  className="w-full p-2.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-white"
                   required
                 />
               </div>
@@ -667,7 +836,7 @@ const ManufacturingView = () => {
                     type="number"
                     value={editPoModal.qty || (editPoModal.items && editPoModal.items[0]?.qty) || 1}
                     onChange={(e) => setEditPoModal({ ...editPoModal, qty: e.target.value })}
-                    className="w-full p-2.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950"
+                    className="w-full p-2.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-white"
                     required
                   />
                 </div>
@@ -677,7 +846,7 @@ const ManufacturingView = () => {
                     type="date"
                     value={editPoModal.expectedDate || ''}
                     onChange={(e) => setEditPoModal({ ...editPoModal, expectedDate: e.target.value })}
-                    className="w-full p-2.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950"
+                    className="w-full p-2.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-white"
                   />
                 </div>
               </div>
@@ -686,7 +855,7 @@ const ManufacturingView = () => {
                 <select
                   value={editPoModal.status || 'Draft'}
                   onChange={(e) => setEditPoModal({ ...editPoModal, status: e.target.value })}
-                  className="w-full p-2.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950"
+                  className="w-full p-2.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-white"
                 >
                   <option value="Draft">Draft</option>
                   <option value="Sent">Sent</option>
@@ -696,8 +865,8 @@ const ManufacturingView = () => {
                 </select>
               </div>
               <div className="flex items-center justify-end gap-2 pt-3 border-t border-slate-200 dark:border-slate-800">
-                <button type="button" onClick={() => setEditPoModal(null)} className="px-4 py-2 rounded-xl border text-slate-600 dark:text-slate-400">Cancel</button>
-                <button type="submit" className="px-4 py-2 rounded-xl bg-indigo-600 text-white font-bold">Save Changes</button>
+                <button type="button" onClick={() => setEditPoModal(null)} className="px-4 py-2 rounded-xl border text-slate-600 dark:text-slate-400 cursor-pointer">Cancel</button>
+                <button type="submit" className="px-4 py-2 rounded-xl bg-indigo-600 text-white font-bold cursor-pointer">Save Changes</button>
               </div>
             </form>
           </div>
@@ -710,10 +879,33 @@ const ManufacturingView = () => {
           <div className="w-full max-w-lg rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 shadow-2xl space-y-4">
             <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3">
               <div>
-                <span className="text-[11px] font-bold uppercase text-indigo-600 dark:text-indigo-400 tracking-wider">Purchase Order Detail</span>
-                <h3 className="text-base font-bold text-slate-900 dark:text-white font-heading">{viewPoModal.id}</h3>
+                <span className="text-[10px] font-bold uppercase text-indigo-600 dark:text-indigo-400 tracking-wider">Purchase Order Detail</span>
+                <div className="flex items-center gap-2 mt-0.5">
+                  <h3 className="text-lg font-bold text-slate-900 dark:text-white font-heading font-mono">{viewPoModal.id}</h3>
+                  <button
+                    onClick={() => {
+                      navigator.clipboard.writeText(viewPoModal.id);
+                      setCopiedPoId(true);
+                      addToast(`Copied ${viewPoModal.id} to clipboard`, 'success', 'PO ID Copied');
+                      setTimeout(() => setCopiedPoId(false), 2000);
+                    }}
+                    title="Copy PO ID"
+                    className="p-1 rounded-md text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 dark:hover:bg-indigo-950/60 transition-colors cursor-pointer"
+                  >
+                    {copiedPoId ? <Check className="w-3.5 h-3.5 text-emerald-500" /> : <Copy className="w-3.5 h-3.5" />}
+                  </button>
+                  <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
+                    viewPoModal.status === 'Received' ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300' :
+                    viewPoModal.status === 'Partially Received' ? 'bg-amber-50 text-amber-700 dark:bg-amber-950 dark:text-amber-300' :
+                    viewPoModal.status === 'Sent' ? 'bg-indigo-50 text-indigo-700 dark:bg-indigo-950 dark:text-indigo-300' :
+                    viewPoModal.status === 'Draft' ? 'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300' :
+                    'bg-rose-50 text-rose-700 dark:bg-rose-950 dark:text-rose-300'
+                  }`}>
+                    {viewPoModal.status}
+                  </span>
+                </div>
               </div>
-              <button onClick={() => setViewPoModal(null)} className="p-1 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-400">
+              <button onClick={() => setViewPoModal(null)} className="p-1 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-400 cursor-pointer">
                 <X className="w-4 h-4" />
               </button>
             </div>
@@ -732,7 +924,7 @@ const ManufacturingView = () => {
               </div>
               <div className="p-3 bg-slate-50 dark:bg-slate-950 rounded-xl">
                 <span className="text-[10px] text-slate-400 font-bold block">Total Amount</span>
-                <span className="font-bold text-slate-900 dark:text-white">{viewPoModal.total}</span>
+                <span className="font-bold text-slate-900 dark:text-white font-mono">{viewPoModal.total}</span>
               </div>
               <div className="p-3 bg-slate-50 dark:bg-slate-950 rounded-xl">
                 <span className="text-[10px] text-slate-400 font-bold block">Order Date</span>
@@ -751,7 +943,7 @@ const ManufacturingView = () => {
                   {viewPoModal.auditTrail.map((log, idx) => (
                     <div key={idx} className="text-[11px] flex items-center justify-between text-slate-600 dark:text-slate-400 bg-slate-50 dark:bg-slate-950 p-2 rounded-lg">
                       <span className="font-medium">{log.step} ({log.by})</span>
-                      <span className="text-[10px] text-slate-400">{log.time}</span>
+                      <span className="text-[10px] font-mono text-slate-400">{log.time}</span>
                     </div>
                   ))}
                 </div>
@@ -759,7 +951,7 @@ const ManufacturingView = () => {
             )}
 
             <div className="flex items-center justify-end pt-3 border-t border-slate-100 dark:border-slate-800">
-              <button onClick={() => setViewPoModal(null)} className="px-4 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 text-xs font-semibold">
+              <button onClick={() => setViewPoModal(null)} className="px-4 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 text-xs font-semibold cursor-pointer">
                 Close
               </button>
             </div>

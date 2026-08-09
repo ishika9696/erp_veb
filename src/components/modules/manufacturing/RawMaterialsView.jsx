@@ -39,6 +39,8 @@ const RawMaterialsView = () => {
     deleteInventoryItem,
     addStockToItem,
     addPurchaseOrder,
+    generateNextPoId,
+    viewPurchaseOrder,
     rawMaterialFilter,
     setRawMaterialFilter,
     setActiveModule,
@@ -271,9 +273,10 @@ const RawMaterialsView = () => {
     const cost = poModalItem.numericCost || Number(poModalItem.unitCost?.toString().replace(/[^0-9.-]+/g, '')) || 0;
     const totalVal = Number(poQty) * cost;
     const poSupplierName = poSupplier || poModalItem.preferredSupplier || 'OptoTech Displays Ltd';
+    const nextPoId = generateNextPoId();
 
     const newPo = {
-      id: `PO-RM-2026-${Math.floor(10 + Math.random() * 90)}`,
+      id: nextPoId,
       supplier: poSupplierName,
       item: poModalItem.name,
       type: "Raw Material",
@@ -283,7 +286,7 @@ const RawMaterialsView = () => {
       numericTotal: totalVal,
       status: "Sent",
       orderDate: new Date().toISOString().split('T')[0],
-      expectedDate: poExpectedDate,
+      expectedDate: poExpectedDate || "2026-08-18",
       shippingAddress: "Plant 1 Receiving Dock, Sector 4",
       billingAddress: "Acme HQ, Accounts Payable",
       items: [
@@ -915,7 +918,18 @@ const RawMaterialsView = () => {
                       <div className="space-y-0.5">
                         <div className="flex items-center gap-2">
                           <span className="font-bold text-slate-900 dark:text-white">{mov.type}</span>
-                          <span className="text-[10px] font-mono text-slate-400">({mov.ref})</span>
+                          {mov.ref?.startsWith('PO-') ? (
+                            <button
+                              onClick={() => viewPurchaseOrder(mov.ref)}
+                              className="text-[10px] font-mono font-bold text-indigo-600 dark:text-indigo-400 hover:underline cursor-pointer inline-flex items-center gap-0.5"
+                              title="Click to view Purchase Order Details"
+                            >
+                              {mov.ref}
+                              <ExternalLink className="h-2.5 w-2.5" />
+                            </button>
+                          ) : (
+                            <span className="text-[10px] font-mono text-slate-400">({mov.ref})</span>
+                          )}
                         </div>
                         <div className="text-[10px] text-slate-500">
                           By <strong className="text-slate-700 dark:text-slate-300">{mov.user}</strong> • {mov.date} • {mov.warehouse}

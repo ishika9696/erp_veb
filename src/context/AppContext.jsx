@@ -74,9 +74,50 @@ export const AppProvider = ({ children }) => {
     setToasts((prev) => prev.filter((t) => t.id !== id));
   };
 
+  // Active Purchase Order View Modal (Global Preview)
+  const [activePoView, setActivePoView] = useState(null);
+
+  // Sequential, unique PO ID generator: PO-YYYY-### (e.g. PO-2026-001)
+  const generateNextPoId = () => {
+    const currentYear = new Date().getFullYear();
+    const poNumbers = purchaseOrders
+      .map((po) => {
+        const match = po.id?.match(/PO-(\d{4})-(\d+)/);
+        if (match && parseInt(match[1], 10) === currentYear) {
+          return parseInt(match[2], 10);
+        }
+        return 0;
+      })
+      .filter((n) => !isNaN(n));
+
+    const maxNum = poNumbers.length > 0 ? Math.max(...poNumbers) : 0;
+    const nextNum = String(maxNum + 1).padStart(3, '0');
+    return `PO-${currentYear}-${nextNum}`;
+  };
+
   // PO & Bill Sync Helpers
   const addPurchaseOrder = (newPo) => {
-    setPurchaseOrders((prev) => [newPo, ...prev]);
+    const id = newPo.id && newPo.id.startsWith('PO-') ? newPo.id : generateNextPoId();
+    const poWithId = {
+      ...newPo,
+      id
+    };
+    setPurchaseOrders((prev) => [poWithId, ...prev]);
+    return poWithId;
+  };
+
+  const viewPurchaseOrder = (poOrId) => {
+    if (!poOrId) return;
+    if (typeof poOrId === 'object') {
+      setActivePoView(poOrId);
+    } else {
+      const found = purchaseOrders.find((p) => p.id === poOrId);
+      if (found) {
+        setActivePoView(found);
+      } else {
+        addToast(`Purchase Order ${poOrId} not found`, "warning");
+      }
+    }
   };
 
   const updatePurchaseOrder = (id, updatedPo) => {
@@ -302,6 +343,10 @@ export const AppProvider = ({ children }) => {
         setPurchaseOrders,
         bills,
         setBills,
+        generateNextPoId,
+        activePoView,
+        setActivePoView,
+        viewPurchaseOrder,
         addPurchaseOrder,
         updatePurchaseOrder,
         deletePurchaseOrder,
